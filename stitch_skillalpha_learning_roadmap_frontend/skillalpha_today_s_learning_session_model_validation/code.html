@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"surface-container-lowest":"#ffffff","outline-variant":"#c0c9c1","on-secondary-fixed-variant":"#852400","on-secondary-container":"#521300","on-primary":"#ffffff","secondary":"#ae3200","surface-tint":"#31694f","secondary-fixed-dim":"#ffb59e","surface-container-low":"#f0f5ef","tertiary":"#39413d","on-primary-fixed-variant":"#165038","outline":"#707973","primary-fixed-dim":"#99d3b4","inverse-on-surface":"#edf2ec","error":"#ba1a1a","primary":"#0a4831","primary-container":"#286047","on-tertiary-container":"#c6cec9","on-primary-container":"#9ed8b9","on-error":"#ffffff","surface-dim":"#d6dbd6","on-surface":"#181d1a","surface-container-highest":"#dfe4de","tertiary-fixed":"#dce4df","error-container":"#ffdad6","on-background":"#181d1a","tertiary-fixed-dim":"#c0c8c4","on-tertiary":"#ffffff","on-tertiary-fixed-variant":"#414845","on-tertiary-fixed":"#161d1a","background":"#f6fbf5","surface-container":"#eaefea","on-secondary-fixed":"#3a0b00","on-primary-fixed":"#002113","secondary-fixed":"#ffdbd0","surface":"#f6fbf5","inverse-surface":"#2c322e","surface-container-high":"#e5e9e4","secondary-container":"#fd5920","primary-fixed":"#b4f0cf","on-surface-variant":"#404943","surface-variant":"#dfe4de","surface-bright":"#f6fbf5","on-secondary":"#ffffff","inverse-primary":"#99d3b4","on-error-container":"#93000a","tertiary-container":"#505854"},borderRadius:{DEFAULT:"0.25rem",lg:"0.5rem",xl:"0.75rem",full:"9999px"},spacing:{"margin":"2.5rem","space-xs":"0.25rem","space-sm":"0.5rem","gutter":"1.5rem","space-md":"1rem","space-lg":"1.5rem","gutter-mobile":"1rem","margin-mobile":"1.25rem","space-xl":"2.5rem"},fontFamily:{"body-md":["Plus Jakarta Sans"],"headline-lg-mobile":["Plus Jakarta Sans"],"label-md":["Plus Jakarta Sans"],"body-sm":["Plus Jakarta Sans"],"headline-md":["Plus Jakarta Sans"],"title-lg":["Plus Jakarta Sans"],"label-sm":["Plus Jakarta Sans"],"display-lg":["Plus Jakarta Sans"],"headline-lg":["Plus Jakarta Sans"],"body-lg":["Plus Jakarta Sans"],"display-lg-mobile":["Plus Jakarta Sans"]},fontSize:{"body-md":["14px",{lineHeight:"22px",letterSpacing:"0em",fontWeight:"400"}],"headline-lg-mobile":["26px",{lineHeight:"34px",letterSpacing:"-0.02em",fontWeight:"600"}],"label-md":["12px",{lineHeight:"16px",letterSpacing:"0.02em",fontWeight:"600"}],"body-sm":["13px",{lineHeight:"18px",letterSpacing:"0em",fontWeight:"400"}],"headline-md":["22px",{lineHeight:"30px",letterSpacing:"-0.015em",fontWeight:"600"}],"title-lg":["18px",{lineHeight:"26px",letterSpacing:"-0.01em",fontWeight:"600"}],"label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.04em",fontWeight:"700"}],"display-lg":["48px",{lineHeight:"56px",letterSpacing:"-0.03em",fontWeight:"700"}],"headline-lg":["32px",{lineHeight:"40px",letterSpacing:"-0.02em",fontWeight:"600"}],"body-lg":["16px",{lineHeight:"26px",letterSpacing:"-0.005em",fontWeight:"400"}],"display-lg-mobile":["36px",{lineHeight:"44px",letterSpacing:"-0.025em",fontWeight:"700"}]}}}</script></head><body class="bg-surface font-body-md text-body-md text-on-surface min-h-screen flex flex-col"><header class="fixed top-0 left-0 right-0 z-50 bg-surface-container-lowest border-b border-surface-variant"><div class="h-16 max-w-7xl mx-auto px-6 flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-md shrink-0"><a class="flex items-center gap-space-sm group" data-path="roadmap" href="#"><div class="w-8 h-8 rounded-lg bg-primary-container flex items-center justify-center text-on-primary shrink-0 transition-transform group-hover:scale-95"><span class="material-symbols-outlined text-[20px]">north_east</span></div><span class="font-title-lg text-title-lg text-on-surface tracking-tight font-bold">SkillAlpha</span></a><span class="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full bg-primary-fixed text-primary-container font-label-sm text-label-sm uppercase tracking-wider">adaptive learning</span></div><nav class="hidden lg:flex items-center gap-space-lg h-full" data-active-classes="text-primary font-bold border-b-2 border-primary"><a class="inline-flex items-center h-full text-on-surface-variant font-body-md text-body-md hover:text-on-surface transition-colors pb-0.5" data-path="roadmap" href="#">Roadmap</a><a aria-current="page" class="inline-flex items-center h-full transition-colors pb-0.5 text-primary font-bold border-b-2 border-primary" data-path="learn" href="#">Learn</a><a class="inline-flex items-center h-full text-on-surface-variant font-body-md text-body-md hover:text-on-surface transition-colors pb-0.5" data-path="resources" href="#">Resources</a><a class="inline-flex items-center h-full text-on-surface-variant font-body-md text-body-md hover:text-on-surface transition-colors pb-0.5" data-path="progress" href="#">Progress</a><a class="inline-flex items-center h-full text-on-surface-variant font-body-md text-body-md hover:text-on-surface transition-colors pb-0.5" data-path="saved" href="#">Saved</a></nav><div class="flex items-center gap-space-md shrink-0"><div class="hidden md:flex items-center h-9 px-space-sm bg-surface-container-low border border-outline-variant rounded-lg w-56 lg:w-64 text-on-surface-variant transition-colors hover:border-outline"><span class="material-symbols-outlined text-[18px] text-outline mr-2">search</span><span class="font-body-sm text-body-sm text-outline truncate flex-1">Search resources, skills...</span><kbd class="px-1.5 py-0.5 font-label-sm text-label-sm bg-surface-container-lowest border border-outline-variant rounded text-outline shadow-xs">/</kbd></div><button aria-label="Notifications" class="relative p-1.5 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low rounded-lg transition-colors" type="button"><span class="material-symbols-outlined text-[22px]">notifications</span><span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-secondary-container ring-2 ring-surface-container-lowest"></span></button><div class="flex items-center gap-1.5 pl-1 cursor-pointer group"><div class="relative"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div><span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-primary-container ring-2 ring-surface-container-lowest"></span></div><span class="material-symbols-outlined text-[18px] text-outline transition-transform group-hover:translate-y-0.5">expand_more</span></div></div></div></header><main class="w-full pt-16 bg-surface flex-1"><div class="max-w-7xl mx-auto px-6 py-8"><div class="flex flex-col w-full">
+<!-- Breadcrumb & Session Track Header -->
+<nav aria-label="Curriculum Breadcrumbs" class="flex flex-wrap items-center gap-space-xs font-label-md text-label-md text-on-surface-variant pb-6">
+<a class="hover:text-primary transition-colors" href="#">Roadmap</a>
+<span class="material-symbols-outlined text-[16px] text-outline">chevron_right</span>
+<a class="hover:text-primary transition-colors" href="#">Machine Learning Engineer</a>
+<span class="material-symbols-outlined text-[16px] text-outline">chevron_right</span>
+<a class="hover:text-primary transition-colors" href="#">Week 02: Model Validation</a>
+<span class="material-symbols-outlined text-[16px] text-outline">chevron_right</span>
+<span class="text-on-surface font-semibold bg-surface-container-low px-2 py-0.5 rounded-full">Today's Session</span>
+</nav>
+<!-- Hero Greeting Banner -->
+<header class="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-8">
+<div class="flex flex-col gap-2 max-w-2xl">
+<div class="flex items-center gap-3">
+<span class="font-label-sm text-label-sm tracking-widest uppercase text-outline">
+          Wednesday Sprint • Estimated 32 Min
+        </span>
+<span class="w-1.5 h-1.5 rounded-full bg-secondary-container"></span>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-medium">Cohort Pacing: Top 8%</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface font-bold tracking-tight">
+        Good morning, Alex. Here's what to work on today.
+      </h1>
+</div>
+<div class="flex items-center gap-2 self-start md:self-end shrink-0">
+<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-secondary-container text-on-primary font-label-sm text-label-sm uppercase tracking-wider shadow-sm">
+<span class="w-2 h-2 rounded-full bg-white animate-pulse"></span>
+        Current Priority Objective
+      </span>
+</div>
+</header>
+<!-- Main Focus Hero Card -->
+<section class="relative bg-surface-container-lowest rounded-xl p-6 lg:p-8 shadow-sm transition-all mb-10 overflow-hidden">
+<!-- Subtle Ambient Accent -->
+<div class="absolute -right-20 -top-20 w-80 h-80 bg-primary-fixed/30 rounded-full blur-3xl pointer-events-none"></div>
+<div class="flex flex-col lg:flex-row lg:items-start justify-between gap-8 relative z-10">
+<div class="flex flex-col gap-5 max-w-3xl">
+<!-- Metadata Pill Strip -->
+<div class="flex flex-wrap items-center gap-2 font-label-md text-label-md">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-surface-container-low text-primary-container font-semibold">
+<span class="material-symbols-outlined text-[16px]">timer</span>
+            32 min planned
+          </span>
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-surface-container-low text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px]">shield_lock</span>
+            Model Validation &amp; Leakage Prevention
+          </span>
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-surface-container-high text-on-surface-variant font-medium">
+            Gap Priority: Critical
+          </span>
+</div>
+<div>
+<h2 class="font-headline-md text-headline-md text-on-surface font-bold tracking-tight">
+            Build a Train / Validation Split from Scratch
+          </h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant mt-2">
+            Implement stratified partitioning, index slicing, and target leakage guards in pure NumPy before comparing to scikit-learn standard utilities.
+          </p>
+</div>
+<!-- Why This Matters Callout (Light Sage / Primary Green) -->
+<div class="bg-primary-fixed/20 rounded-lg p-4 sm:p-5 flex items-start gap-3.5">
+<div class="w-8 h-8 rounded-md bg-primary-container text-on-primary flex items-center justify-center shrink-0 mt-0.5">
+<span class="material-symbols-outlined text-[20px]">insights</span>
+</div>
+<div class="flex flex-col gap-1">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-primary font-bold">
+              Pedagogical Diagnostic • Why this matters
+            </span>
+<p class="font-body-md text-body-md text-primary leading-relaxed">
+              Validation is currently one of the largest gaps between your current skills and your target role as a <strong class="font-semibold">Senior ML Engineer</strong>. Your prior GitHub audit showed direct train-test evaluation without out-of-fold holdouts, exposing models to subtle target contamination during feature scaling.
+            </p>
+</div>
+</div>
+</div>
+<!-- Quick Launch CTA Column -->
+<div class="flex flex-col sm:flex-row lg:flex-col gap-3 shrink-0 lg:w-64 pt-2">
+<button class="w-full inline-flex items-center justify-center gap-2 py-3 px-5 rounded-lg bg-secondary-container text-on-primary font-title-lg text-title-lg font-bold shadow-md hover:opacity-95 active:scale-[0.99] transition-all" type="button">
+<span class="material-symbols-outlined text-[20px]">terminal</span>
+          Launch Sandbox
+        </button>
+<button class="w-full inline-flex items-center justify-center gap-2 py-3 px-5 rounded-lg bg-surface-container-low text-on-surface font-body-md text-body-md hover:bg-surface-container-high transition-colors" type="button">
+<span class="material-symbols-outlined text-[20px] text-outline">description</span>
+          View Concept Notes
+        </button>
+<!-- Sprint telemetry inline box -->
+<div class="mt-2 p-3 bg-surface-container-low rounded-lg flex items-center justify-between font-label-md text-label-md text-on-surface-variant">
+<span class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-secondary-container">local_fire_department</span>
+            Day 14 Streak
+          </span>
+<span class="font-bold text-on-surface">+120 XP today</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Recommended Execution Order Strip -->
+<section class="mb-12">
+<div class="flex items-center justify-between mb-4">
+<h3 class="font-title-lg text-title-lg font-bold text-on-surface">
+        Suggested Execution Path
+      </h3>
+<span class="font-label-md text-label-md text-outline">Linear order recommended for optimal retention</span>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+<!-- Step 1 -->
+<div class="bg-surface-container-lowest p-4 rounded-xl shadow-sm flex flex-col justify-between group hover:bg-surface-container-low transition-colors">
+<div class="flex items-center justify-between mb-3">
+<span class="font-label-sm text-label-sm font-bold text-secondary-container tracking-wider">STEP 01</span>
+<span class="w-6 h-6 rounded-full bg-secondary-fixed text-on-secondary-fixed flex items-center justify-center font-label-sm text-label-sm font-bold">14m</span>
+</div>
+<div>
+<div class="font-title-lg text-title-lg font-semibold text-on-surface group-hover:text-primary transition-colors">Understand</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Watch 14m deep-dive on failure modes of naive holdouts.</p>
+</div>
+<div class="mt-4 pt-3 flex items-center gap-1.5 font-label-md text-label-md text-primary font-medium">
+<span class="material-symbols-outlined text-[16px]">play_circle</span>
+          StatQuest Video
+        </div>
+</div>
+<!-- Step 2 -->
+<div class="bg-surface-container-lowest p-4 rounded-xl shadow-sm flex flex-col justify-between group hover:bg-surface-container-low transition-colors">
+<div class="flex items-center justify-between mb-3">
+<span class="font-label-sm text-label-sm font-bold text-outline tracking-wider">STEP 02</span>
+<span class="w-6 h-6 rounded-full bg-surface-container-high text-on-surface-variant flex items-center justify-center font-label-sm text-label-sm font-bold">8m</span>
+</div>
+<div>
+<div class="font-title-lg text-title-lg font-semibold text-on-surface group-hover:text-primary transition-colors">Read Docs</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Scikit-Learn documentation on stratified sampling seeds.</p>
+</div>
+<div class="mt-4 pt-3 flex items-center gap-1.5 font-label-md text-label-md text-outline font-medium">
+<span class="material-symbols-outlined text-[16px]">menu_book</span>
+          Official API Ref
+        </div>
+</div>
+<!-- Step 3 -->
+<div class="bg-surface-container-lowest p-4 rounded-xl shadow-sm flex flex-col justify-between group hover:bg-surface-container-low transition-colors">
+<div class="flex items-center justify-between mb-3">
+<span class="font-label-sm text-label-sm font-bold text-outline tracking-wider">STEP 03</span>
+<span class="w-6 h-6 rounded-full bg-surface-container-high text-on-surface-variant flex items-center justify-center font-label-sm text-label-sm font-bold">25m</span>
+</div>
+<div>
+<div class="font-title-lg text-title-lg font-semibold text-on-surface group-hover:text-primary transition-colors">Build Lab</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">NumPy split algorithm with zero external abstractions.</p>
+</div>
+<div class="mt-4 pt-3 flex items-center gap-1.5 font-label-md text-label-md text-outline font-medium">
+<span class="material-symbols-outlined text-[16px]">code</span>
+          Interactive REPL
+        </div>
+</div>
+<!-- Step 4 -->
+<div class="bg-surface-container-lowest p-4 rounded-xl shadow-sm flex flex-col justify-between group hover:bg-surface-container-low transition-colors">
+<div class="flex items-center justify-between mb-3">
+<span class="font-label-sm text-label-sm font-bold text-outline tracking-wider">STEP 04</span>
+<span class="w-6 h-6 rounded-full bg-surface-container-high text-on-surface-variant flex items-center justify-center font-label-sm text-label-sm font-bold">10m</span>
+</div>
+<div>
+<div class="font-title-lg text-title-lg font-semibold text-on-surface group-hover:text-primary transition-colors">Checkpoint</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Self-test verification suite &amp; adaptive confidence rating.</p>
+</div>
+<div class="mt-4 pt-3 flex items-center gap-1.5 font-label-md text-label-md text-outline font-medium">
+<span class="material-symbols-outlined text-[16px]">fact_check</span>
+          Sync State
+        </div>
+</div>
+</div>
+</section>
+<!-- Curated Learning Resources Grid -->
+<section class="mb-14">
+<div class="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2 mb-6">
+<div>
+<h3 class="font-headline-md text-headline-md font-bold text-on-surface">
+          Curated Resources for Today's Objective
+        </h3>
+<p class="font-body-md text-body-md text-on-surface-variant">
+          Synthesized from 12+ industry sources. Ranked specifically for your demonstrated gap.
+        </p>
+</div>
+<div class="flex items-center gap-2 shrink-0">
+<span class="font-label-sm text-label-sm text-outline">Engine: AlphaRank v2.4</span>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<!-- Resource Card 1: Video -->
+<div class="bg-surface-container-lowest rounded-xl overflow-hidden shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+<div class="relative h-44 bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="A focused minimalist studio setup showing a teacher explaining machine learning cross-validation matrices with soft green and amber accent graphics on digital screens, ambient laboratory atmosphere" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBvjV7eDqrRZdHX103VpIMrjtfS4KgRB4fllbRgsq3UPc3Fl_DxQ0JiTJyEtm7BTqFMdM2mfhEt-Xxb-aTJfwhbg_PABLVndCTZJUeRGElt2QOyVJs-96PsRmvaKf9LoLyJyzploUKtXWQNoAX6xhy0Vy0BKak_WYIt7QnUVmJNpJsTAtER0A96WJPYus7DWHQimbWOrUnSR8TyblljC2B1a_6-KPD72HbRbgJU6CBACAbdZc2N_56zVw"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+<div class="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded bg-black/60 backdrop-blur-sm text-white font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[15px] text-secondary-container">play_arrow</span>
+            VIDEO • 14 MIN
+          </div>
+<div class="absolute top-3 right-3 px-2.5 py-1 rounded bg-primary-container text-on-primary font-label-sm text-label-sm font-semibold shadow-xs">
+            96% Curriculum Match
+          </div>
+<div class="absolute bottom-3 left-3 right-3 text-white font-label-md text-label-md flex items-center justify-between">
+<span class="opacity-90">StatQuest / Josh Starmer</span>
+<span class="text-xs bg-white/20 px-2 py-0.5 rounded">High Clarity</span>
+</div>
+</div>
+<div class="p-5 flex-1 flex flex-col justify-between">
+<div>
+<h4 class="font-title-lg text-title-lg font-bold text-on-surface mb-2 leading-snug">
+              Cross-validation explained: Why standard train-test fails
+            </h4>
+<div class="bg-surface-container-low p-3 rounded-lg text-on-surface-variant font-body-sm text-body-sm leading-relaxed mb-4">
+<span class="font-semibold text-on-surface">Why recommended:</span> Recommended because your baseline diagnostic revealed uncertainty around stratified sampling in imbalanced targets.
+            </div>
+</div>
+<a class="inline-flex items-center gap-2 font-label-md text-label-md text-secondary-container font-bold hover:text-secondary group pt-2" href="#">
+            Open Video Player
+            <span class="material-symbols-outlined text-[18px] transition-transform group-hover:translate-x-1">arrow_forward</span>
+</a>
+</div>
+</div>
+<!-- Resource Card 2: Documentation -->
+<div class="bg-surface-container-lowest rounded-xl overflow-hidden shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+<div class="relative h-44 bg-surface-container flex flex-col justify-between p-5 bg-gradient-to-br from-surface-container-high to-surface-container-low">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5 px-2.5 py-1 rounded bg-surface-container-lowest text-on-surface-variant font-label-sm text-label-sm shadow-xs">
+<span class="material-symbols-outlined text-[15px] text-primary">menu_book</span>
+              OFFICIAL DOCS • 8 MIN READ
+            </div>
+<span class="px-2.5 py-1 rounded bg-primary-container text-on-primary font-label-sm text-label-sm font-semibold">
+              92% Precision Match
+            </span>
+</div>
+<!-- Code Snippet Visual Preview -->
+<div class="bg-surface-container-lowest/90 backdrop-blur-xs p-3 rounded font-mono text-[11px] leading-tight text-on-surface-variant">
+<span class="text-secondary-container">from</span> sklearn.model_selection <span class="text-secondary-container">import</span> StratifiedKFold<br/>
+            skf = StratifiedKFold(n_splits=<span class="text-primary font-bold">5</span>, shuffle=<span class="text-primary font-bold">True</span>, random_state=<span class="text-primary font-bold">42</span>)
+          </div>
+<div class="text-on-surface font-label-md text-label-md flex items-center justify-between">
+<span class="font-semibold">Scikit-Learn Official v1.4</span>
+<span class="text-xs text-outline">API Reference</span>
+</div>
+</div>
+<div class="p-5 flex-1 flex flex-col justify-between">
+<div>
+<h4 class="font-title-lg text-title-lg font-bold text-on-surface mb-2 leading-snug">
+              model_selection.train_test_split and StratifiedKFold
+            </h4>
+<div class="bg-surface-container-low p-3 rounded-lg text-on-surface-variant font-body-sm text-body-sm leading-relaxed mb-4">
+<span class="font-semibold text-on-surface">Why recommended:</span> Essential reference for proper random_state seeding, stratify parameters, and shuffle ergonomics to avoid recurring test split leakage.
+            </div>
+</div>
+<a class="inline-flex items-center gap-2 font-label-md text-label-md text-secondary-container font-bold hover:text-secondary group pt-2" href="#">
+            Read Interactive Excerpt
+            <span class="material-symbols-outlined text-[18px] transition-transform group-hover:translate-x-1">arrow_forward</span>
+</a>
+</div>
+</div>
+<!-- Resource Card 3: Hands-on Practice -->
+<div class="bg-surface-container-lowest rounded-xl overflow-hidden shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow">
+<div class="relative h-44 bg-surface-container">
+<img class="w-full h-full object-cover" data-alt="High contrast clean dark code editor displaying mathematical array indexing algorithms for partitioned data matrices, illuminated by a warm amber monitor backlight in a serene workspace" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAsaHIDnWNiyKIPw5Lkvi3AyBu9Dp1hf5Z2wiOkmtbxtgg4jw_oPhIiUANM_J1iDkMHSuaH1K3nuIuhsbrkl70YmO7Pa80Z0TNFsDGR4GJbsTpJTAZ7ib0XtJ8zaEtI8iVeBPiaPxSGSgOqoYtVKkKLEU6PBYW7VCPn63QhPPjs-6KkQMttVghfqR5FgPqNVB3tR2epgwtREJ7nagkwqWtIjJjxS0Za8gaQUdR6XlaIeIe2YF-yKv3j5Q"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent"></div>
+<div class="absolute top-3 left-3 flex items-center gap-1.5 px-2.5 py-1 rounded bg-black/60 backdrop-blur-sm text-white font-label-sm text-label-sm">
+<span class="material-symbols-outlined text-[15px] text-primary-fixed">terminal</span>
+            HANDS-ON PRACTICE • 25 MIN
+          </div>
+<div class="absolute top-3 right-3 px-2.5 py-1 rounded bg-secondary-container text-on-primary font-label-sm text-label-sm font-semibold shadow-xs">
+            98% Practical Match
+          </div>
+<div class="absolute bottom-3 left-3 right-3 text-white font-label-md text-label-md flex items-center justify-between">
+<span class="opacity-90">SkillAlpha Interactive Lab</span>
+<span class="text-xs bg-secondary-container/80 px-2 py-0.5 rounded">Core Task</span>
+</div>
+</div>
+<div class="p-5 flex-1 flex flex-col justify-between">
+<div>
+<h4 class="font-title-lg text-title-lg font-bold text-on-surface mb-2 leading-snug">
+              Implementing Stratified K-Fold from Scratch in NumPy
+            </h4>
+<div class="bg-surface-container-low p-3 rounded-lg text-on-surface-variant font-body-sm text-body-sm leading-relaxed mb-4">
+<span class="font-semibold text-on-surface">Why recommended:</span> Directly builds mental models for fold indexing and test isolation without relying on third-party abstraction magic.
+            </div>
+</div>
+<a class="inline-flex items-center gap-2 font-label-md text-label-md text-secondary-container font-bold hover:text-secondary group pt-2" href="#">
+            Launch Jupyter Environment
+            <span class="material-symbols-outlined text-[18px] transition-transform group-hover:translate-x-1">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+</section>
+<!-- Visual Diagnostic Inline Widget: Split Architecture -->
+<section class="bg-surface-container-lowest rounded-xl p-6 mb-12 shadow-sm">
+<div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6">
+<div>
+<div class="flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+<h4 class="font-title-lg text-title-lg font-bold text-on-surface">Conceptual Verification: Stratification Architecture</h4>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Live validation layout expected from your scratch implementation.</p>
+</div>
+<div class="flex items-center gap-4 text-xs font-mono text-outline">
+<span>N=10,000</span>
+<span>Ratio: 70 / 15 / 15</span>
+<span class="text-primary font-semibold">Zero Label Shift</span>
+</div>
+</div>
+<!-- Inline Diagram SVG -->
+<div class="w-full overflow-x-auto">
+<svg class="w-full min-w-[620px] h-28 text-on-surface" fill="none" viewbox="0 0 760 100" xmlns="http://www.w3.org/2000/svg">
+<!-- Full dataset bar -->
+<rect fill="#EAEEE9" height="24" rx="4" width="760" x="0" y="8"></rect>
+<rect fill="#286047" height="24" rx="4" width="532" x="0" y="8"></rect>
+<rect fill="#B4F0CF" height="24" rx="4" width="110" x="536" y="8"></rect>
+<rect fill="#FD5920" height="24" rx="4" width="110" x="650" y="8"></rect>
+<!-- Legend / Labels -->
+<text fill="#FFFFFF" font-family="Plus Jakarta Sans" font-size="11" font-weight="600" x="6" y="24">Training Set (70% - 7,000 samples)</text>
+<text fill="#0A4831" font-family="Plus Jakarta Sans" font-size="11" font-weight="600" x="542" y="24">Val (15%)</text>
+<text fill="#FFFFFF" font-family="Plus Jakarta Sans" font-size="11" font-weight="600" x="658" y="24">Test (15%)</text>
+<!-- Dynamic Partition markers -->
+<line stroke="#707973" stroke-dasharray="2 2" x1="532" x2="532" y1="36" y2="58"></line>
+<line stroke="#707973" stroke-dasharray="2 2" x1="646" x2="646" y1="36" y2="58"></line>
+<!-- Annotations -->
+<text fill="#707973" font-family="Plus Jakarta Sans" font-size="11" x="0" y="68">Fold Index 0</text>
+<text fill="#181D1A" font-family="Plus Jakarta Sans" font-size="11" font-weight="600" x="495" y="76">Feature Scaling Fitted Exclusively Here</text>
+<path d="M 530 64 L 545 64" marker-end="url(#arrow)" stroke="#286047" stroke-width="1.5"></path>
+<text fill="#707973" font-family="Plus Jakarta Sans" font-size="11" text-anchor="middle" x="646" y="68">Strict Holdout</text>
+</svg>
+</div>
+</section>
+<!-- Post-Session Calibration & Confidence Evaluation Panel -->
+<section class="bg-surface-container-lowest rounded-xl p-6 lg:p-8 shadow-sm mb-8" id="evaluation-panel">
+<div class="max-w-2xl mb-6">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary text-[20px]">psychology</span>
+<h3 class="font-headline-md text-headline-md font-bold text-on-surface">
+          How confident do you feel about this concept right now?
+        </h3>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant">
+        Your feedback directly updates your retention curve and adapts future roadmap pacing. This is not a graded exam.
+      </p>
+</div>
+<!-- 3 Interactive Confidence Option Buttons -->
+<div aria-label="Self-assessed confidence level" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8" id="confidence-options" role="radiogroup">
+<!-- Option 1: Got it -->
+<div aria-checked="false" class="confidence-card cursor-pointer p-5 rounded-xl bg-surface-container-low hover:bg-surface-container transition-all flex flex-col justify-between gap-4 select-none" data-level="got-it" role="radio" tabindex="0">
+<div class="flex items-center justify-between">
+<div class="w-10 h-10 rounded-lg bg-surface-container-lowest flex items-center justify-center text-primary shadow-xs">
+<span class="material-symbols-outlined text-[24px]">check_circle</span>
+</div>
+<span class="confidence-indicator w-4 h-4 rounded-full bg-surface-container-highest"></span>
+</div>
+<div>
+<span class="font-title-lg text-title-lg font-bold text-on-surface block">Got it</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">
+            Clear understanding. Ready for advanced hyperparameter tuning and out-of-fold blending.
+          </p>
+</div>
+</div>
+<!-- Option 2: Shaky (Selected Demo State) -->
+<div aria-checked="true" class="confidence-card cursor-pointer p-5 rounded-xl bg-surface-container-low transition-all flex flex-col justify-between gap-4 select-none shadow-xs" data-level="shaky" role="radio" tabindex="0">
+<div class="flex items-center justify-between">
+<div class="w-10 h-10 rounded-lg bg-secondary-fixed text-on-secondary-fixed flex items-center justify-center shadow-xs">
+<span class="material-symbols-outlined text-[24px]">hourglass_top</span>
+</div>
+<span class="confidence-indicator w-4 h-4 rounded-full bg-secondary-container"></span>
+</div>
+<div>
+<span class="font-title-lg text-title-lg font-bold text-on-surface block">Shaky</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">
+            Understood basics, but want 1 additional concrete code example before Week 3 unlocks.
+          </p>
+</div>
+</div>
+<!-- Option 3: Lost -->
+<div aria-checked="false" class="confidence-card cursor-pointer p-5 rounded-xl bg-surface-container-low hover:bg-surface-container transition-all flex flex-col justify-between gap-4 select-none" data-level="lost" role="radio" tabindex="0">
+<div class="flex items-center justify-between">
+<div class="w-10 h-10 rounded-lg bg-surface-container-lowest flex items-center justify-center text-outline shadow-xs">
+<span class="material-symbols-outlined text-[24px]">replay</span>
+</div>
+<span class="confidence-indicator w-4 h-4 rounded-full bg-surface-container-highest"></span>
+</div>
+<div>
+<span class="font-title-lg text-title-lg font-bold text-on-surface block">Lost</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">
+            Needs fundamental review of indexing logic and bias-variance tradeoff before proceeding.
+          </p>
+</div>
+</div>
+</div>
+<!-- Checkpoint Footer Action Row -->
+<div class="bg-surface-container-low rounded-xl p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+<label class="flex items-start sm:items-center gap-3 cursor-pointer select-none">
+<input checked="" class="w-5 h-5 rounded text-primary-container focus:ring-0 cursor-pointer accent-[#286047]" type="checkbox"/>
+<span class="font-body-sm text-body-sm text-on-surface">
+          Commit completed exercise code to connected repository <code class="font-mono text-xs px-1.5 py-0.5 rounded bg-surface-container-lowest font-medium text-primary">github.com/alex-dev/ml-sandbox</code>
+</span>
+</label>
+<div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 shrink-0">
+<div class="text-right sm:text-right">
+<span class="font-label-sm text-label-sm block uppercase tracking-wider text-outline">Up Next Tomorrow</span>
+<span class="font-body-sm text-body-sm font-semibold text-on-surface">Feature Engineering Pipelines</span>
+</div>
+<button class="inline-flex items-center justify-center gap-2 py-3 px-6 rounded-lg bg-secondary-container text-on-primary font-title-lg text-title-lg font-bold shadow-sm hover:opacity-95 active:scale-95 transition-all" id="complete-session-btn" type="button">
+<span>Complete Checkpoint &amp; Sync Roadmap</span>
+<span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</section>
+<!-- Interactive Logic for Confidence Selector & Sync Notification -->
+<script>
+    (() => {
+      const cards = document.querySelectorAll('.confidence-card');
+      cards.forEach(card => {
+        card.addEventListener('click', () => {
+          cards.forEach(c => {
+            c.setAttribute('aria-checked', 'false');
+            c.classList.remove('bg-surface-container-high', 'shadow-xs');
+            c.classList.add('bg-surface-container-low');
+            const ind = c.querySelector('.confidence-indicator');
+            if (ind) {
+              ind.classList.remove('bg-secondary-container', 'bg-primary-container');
+              ind.classList.add('bg-surface-container-highest');
+            }
+          });
+
+          card.setAttribute('aria-checked', 'true');
+          card.classList.remove('bg-surface-container-low');
+          card.classList.add('bg-surface-container-high', 'shadow-xs');
+          const activeInd = card.querySelector('.confidence-indicator');
+          if (activeInd) {
+            activeInd.classList.remove('bg-surface-container-highest');
+            activeInd.classList.add('bg-secondary-container');
+          }
+        });
+
+        card.addEventListener('keydown', (e) => {
+          if (e.key === ' ' || e.key === 'Enter') {
+            e.preventDefault();
+            card.click();
+          }
+        });
+      });
+
+      const btn = document.getElementById('complete-session-btn');
+      if (btn) {
+        btn.addEventListener('click', () => {
+          btn.innerHTML = `<span class="material-symbols-outlined animate-spin text-[20px]">sync</span><span>Syncing with Roadmap...</span>`;
+          setTimeout(() => {
+            btn.innerHTML = `<span class="material-symbols-outlined text-[20px]">check</span><span>Checkpoint Verified!</span>`;
+            btn.classList.remove('bg-secondary-container');
+            btn.classList.add('bg-primary-container');
+          }, 700);
+        });
+      }
+    })();
+  </script>
+</div></div></main><footer class="w-full bg-surface-container-lowest border-t border-surface-variant py-8"><div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-space-md font-body-sm text-body-sm text-on-surface-variant"><div class="flex items-center gap-space-sm"><div class="w-5 h-5 rounded bg-primary-container flex items-center justify-center text-on-primary"><span class="material-symbols-outlined text-[14px]">north_east</span></div><span>SkillAlpha © 2025 SkillAlpha Intelligence Inc.</span></div><div class="flex flex-wrap items-center justify-center gap-space-lg"><a class="hover:text-on-surface transition-colors" data-path="product" href="#">Product</a><a class="hover:text-on-surface transition-colors" data-path="resources" href="#">Resources</a><a class="hover:text-on-surface transition-colors" data-path="about" href="#">About</a><a class="hover:text-on-surface transition-colors" data-path="github" href="#">GitHub</a><a class="hover:text-on-surface transition-colors" data-path="privacy" href="#">Privacy</a><a class="hover:text-on-surface transition-colors" data-path="terms" href="#">Terms</a></div></div></footer></body></html>

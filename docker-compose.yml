@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: skillalpha_postgres
+    environment:
+      POSTGRES_DB: skillalpha
+      POSTGRES_USER: skillalpha_user
+      POSTGRES_PASSWORD: skillalpha_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    container_name: skillalpha_redis
+    ports:
+      - "6379:6379"
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: skillalpha_backend
+    environment:
+      DATABASE_URL: postgresql://skillalpha_user:skillalpha_password@postgres:5432/skillalpha
+      JWT_SECRET: production_jwt_secret_key_skillalpha_2026
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+      - redis
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: skillalpha_frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

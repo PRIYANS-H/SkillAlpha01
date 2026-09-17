@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base { html, body { margin: 0; padding: 0; } body { overscroll-behavior: none; } main > :first-child { margin-top: 0 !important; } main > :last-child { margin-bottom: 0 !important; } } ::-webkit-scrollbar { display: none; }</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "tertiary-fixed-dim": "#c0c8c4", "surface-container-highest": "#dfe4de", "primary-fixed": "#b4f0cf", "on-primary": "#ffffff", "on-error": "#ffffff", "surface": "#f6fbf5", "surface-bright": "#f6fbf5", "primary": "#0a4831", "outline": "#707973", "on-tertiary-fixed": "#161d1a", "inverse-surface": "#2c322e", "tertiary": "#39413d", "on-tertiary-fixed-variant": "#414845", "tertiary-container": "#505854", "primary-fixed-dim": "#99d3b4", "surface-container-low": "#f0f5ef", "on-primary-fixed": "#002113", "on-secondary-fixed": "#3a0b00", "inverse-primary": "#99d3b4", "on-surface": "#181d1a", "secondary-fixed-dim": "#ffb59e", "error": "#ba1a1a", "primary-container": "#286047", "on-surface-variant": "#404943", "surface-container-high": "#e5e9e4", "secondary": "#ae3200", "surface-container-lowest": "#ffffff", "on-background": "#181d1a", "surface-container": "#eaefea", "on-secondary-fixed-variant": "#852400", "outline-variant": "#c0c9c1", "surface-tint": "#31694f", "inverse-on-surface": "#edf2ec", "on-tertiary": "#ffffff", "on-secondary": "#ffffff", "error-container": "#ffdad6", "on-tertiary-container": "#c6cec9", "on-error-container": "#93000a", "background": "#f6fbf5", "on-primary-fixed-variant": "#165038", "secondary-container": "#fd5920", "surface-dim": "#d6dbd6", "on-secondary-container": "#521300", "on-primary-container": "#9ed8b9", "surface-variant": "#dfe4de", "secondary-fixed": "#ffdbd0", "tertiary-fixed": "#dce4df" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "space-xs": "0.25rem", "space-sm": "0.5rem", "gutter-mobile": "1rem", "space-md": "1rem", "margin-mobile": "1.25rem", "margin": "2.5rem", "space-lg": "1.5rem", "gutter": "1.5rem", "space-xl": "2.5rem" }, "fontFamily": { "headline-lg-mobile": ["Plus Jakarta Sans"], "body-lg": ["Plus Jakarta Sans"], "display-lg": ["Plus Jakarta Sans"], "body-sm": ["Plus Jakarta Sans"], "body-md": ["Plus Jakarta Sans"], "headline-md": ["Plus Jakarta Sans"], "title-lg": ["Plus Jakarta Sans"], "headline-lg": ["Plus Jakarta Sans"], "label-sm": ["Plus Jakarta Sans"], "display-lg-mobile": ["Plus Jakarta Sans"], "label-md": ["Plus Jakarta Sans"] }, "fontSize": { "headline-lg-mobile": ["26px", { "lineHeight": "34px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "body-lg": ["16px", { "lineHeight": "26px", "letterSpacing": "-0.005em", "fontWeight": "400" }], "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.03em", "fontWeight": "700" }], "body-sm": ["13px", { "lineHeight": "18px", "letterSpacing": "0em", "fontWeight": "400" }], "body-md": ["14px", { "lineHeight": "22px", "letterSpacing": "0em", "fontWeight": "400" }], "headline-md": ["22px", { "lineHeight": "30px", "letterSpacing": "-0.015em", "fontWeight": "600" }], "title-lg": ["18px", { "lineHeight": "26px", "letterSpacing": "-0.01em", "fontWeight": "600" }], "headline-lg": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }], "label-sm": ["11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "700" }], "display-lg-mobile": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.025em", "fontWeight": "700" }], "label-md": ["12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600" }] } } } };</script></head><body class="bg-surface font-body-md text-body-md text-on-surface antialiased"><header class="fixed top-0 left-0 right-0 z-50 bg-surface-container-lowest/90 backdrop-blur-md border-b border-outline-variant/50"><div class="h-16 max-w-7xl mx-auto px-margin-mobile lg:px-margin flex items-center justify-between gap-gutter"><div class="flex items-center gap-space-md"><a class="flex items-center gap-space-sm group" data-path="roadmap" href="#"><div class="w-8 h-8 rounded-lg bg-primary-container flex items-center justify-center text-on-primary font-headline-md text-headline-md"><span class="material-symbols-outlined text-[20px] text-on-primary">school</span></div><span class="font-title-lg text-title-lg text-on-surface tracking-tight font-bold">SkillAlpha</span></a><span class="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm border border-outline-variant/40">adaptive learning</span></div><nav class="hidden md:flex items-center gap-space-xs font-body-md text-body-md" data-active-classes="text-primary font-semibold bg-surface-container-low rounded-lg"><a aria-current="page" class="px-3 py-1.5 transition-colors text-primary font-semibold bg-surface-container-low rounded-lg" data-path="roadmap" href="#">Roadmap</a><a class="px-3 py-1.5 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-colors rounded-lg" data-path="learn" href="#">Learn</a><a class="px-3 py-1.5 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-colors rounded-lg" data-path="resources" href="#">Resources</a><a class="px-3 py-1.5 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-colors rounded-lg" data-path="progress" href="#">Progress</a><a class="px-3 py-1.5 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-colors rounded-lg" data-path="saved" href="#">Saved</a></nav><div class="flex items-center gap-space-sm"><button class="hidden lg:flex items-center gap-space-sm px-3 py-1.5 rounded-lg bg-surface-container-low border border-outline-variant/60 text-on-surface-variant hover:text-on-surface hover:border-outline transition-colors text-left w-52" type="button"><span class="material-symbols-outlined text-[18px]">search</span><span class="font-body-sm text-body-sm truncate">Search resources, topics...</span><kbd class="ml-auto font-label-sm text-label-sm text-on-surface-variant bg-surface-container-highest px-1.5 py-0.5 rounded border border-outline-variant/40">/</kbd></button><button aria-label="Search" class="lg:hidden p-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-colors" type="button"><span class="material-symbols-outlined text-[20px]">search</span></button><div class="relative"><button aria-label="Notifications" class="p-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-colors relative flex items-center justify-center" type="button"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-secondary-container ring-2 ring-surface-container-lowest"></span></button></div><a class="hidden sm:inline-flex px-2.5 py-1 rounded-md text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low font-label-md text-label-md transition-colors" data-path="admin-portal" href="#">Admin</a><div class="h-5 w-[1px] bg-outline-variant/60 hidden sm:block"></div><div class="flex items-center gap-space-xs cursor-pointer pl-1"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div><span class="material-symbols-outlined text-on-surface-variant text-[18px]">expand_more</span></div></div></div></header><main class="w-full pt-16 bg-surface min-h-screen"><div class="flex flex-col w-full">
+<!-- Top Subtle Ambient Light Strip -->
+<div class="relative w-full overflow-hidden">
+<div class="absolute -top-32 left-1/2 -translate-x-1/2 w-[840px] h-[340px] bg-gradient-to-b from-primary-fixed/25 via-surface-container-low/40 to-transparent blur-3xl pointer-events-none rounded-full"></div>
+<!-- Hero Section -->
+<section class="relative max-w-7xl mx-auto px-margin-mobile lg:px-margin pt-12 pb-20 lg:pt-16 lg:pb-28 w-full">
+<div class="flex flex-col items-center text-center max-w-3xl mx-auto">
+<!-- Eyebrow Pill -->
+<div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-surface-container-low shadow-sm mb-6">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container animate-pulse"></span>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-primary-container font-semibold">
+            Personalized Learning Intelligence
+          </span>
+</div>
+<!-- Main Headline -->
+<h1 class="font-display-lg text-display-lg-mobile sm:text-display-lg text-on-surface font-bold tracking-tight mb-6 leading-tight">
+          Everything you need to learn.<br class="hidden sm:inline"/>
+<span class="text-primary-container">In the right order.</span>
+</h1>
+<!-- Supporting Copy -->
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl mx-auto mb-10 leading-relaxed">
+          SkillAlpha finds the resources you need, skips what you already know, and gives you a clear next step toward your goal.
+        </p>
+<!-- CTA Cluster -->
+<div class="flex flex-col sm:flex-row items-center justify-center gap-3.5 w-full sm:w-auto mb-16">
+<a class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl bg-secondary-container text-on-primary font-body-md text-body-md font-semibold shadow-sm hover:brightness-105 active:scale-[0.99] transition-all" data-path="roadmap" href="#">
+<span>Build my learning path</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</a>
+<a class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-surface-container-lowest text-on-surface font-body-md text-body-md font-semibold shadow-sm hover:bg-surface-container-low transition-colors" href="#how-it-works">
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">play_circle</span>
+<span>Explore how it works</span>
+</a>
+</div>
+</div>
+<!-- Hero Visual: Product Interface Mockup -->
+<div class="relative max-w-5xl mx-auto">
+<div class="rounded-2xl bg-surface-container-lowest shadow-xl p-5 sm:p-8 relative z-10">
+<!-- Mock Header Bar -->
+<div class="flex flex-wrap items-center justify-between gap-4 pb-6 mb-6">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-xl bg-primary-container/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary-container text-[20px]">flag</span>
+</div>
+<div>
+<div class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Target Goal</div>
+<div class="font-title-lg text-title-lg text-on-surface font-bold">Become a Machine Learning Engineer</div>
+</div>
+</div>
+<!-- Pace & Trajectory Chip -->
+<div class="flex items-center gap-3">
+<div class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container text-on-surface font-label-md text-label-md">
+<span class="material-symbols-outlined text-[16px] text-primary">schedule</span>
+<span>12-Week Pace • Week 2</span>
+</div>
+<div class="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-container-low text-primary font-label-md text-label-md font-semibold">
+<span class="material-symbols-outlined text-[16px]">trending_up</span>
+<span>On Track (8.5 hrs/wk)</span>
+</div>
+</div>
+</div>
+<!-- Dashboard Grid: Skills Baseline + Focus Next Step -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+<!-- Baseline Meter (5 Cols) -->
+<div class="lg:col-span-5 bg-surface-container-low/70 rounded-xl p-5 flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-4">
+<span class="font-label-md text-label-md uppercase tracking-wider text-on-surface-variant font-semibold">Verified Baseline</span>
+<span class="font-label-sm text-label-sm text-primary font-medium bg-primary-fixed/40 px-2 py-0.5 rounded">4 skills mapped</span>
+</div>
+<div class="space-y-4">
+<div>
+<div class="flex justify-between items-center mb-1.5">
+<span class="font-body-sm text-body-sm font-medium text-on-surface">Python Architecture</span>
+<span class="font-label-sm text-label-sm text-primary font-semibold">88% • Proficient</span>
+</div>
+<div class="h-2 w-full rounded-full bg-surface-container-highest overflow-hidden">
+<div class="h-full bg-primary-container rounded-full" style="width: 88%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-center mb-1.5">
+<span class="font-body-sm text-body-sm font-medium text-on-surface">SQL &amp; Analytical Queries</span>
+<span class="font-label-sm text-label-sm text-primary font-semibold">71% • Solid</span>
+</div>
+<div class="h-2 w-full rounded-full bg-surface-container-highest overflow-hidden">
+<div class="h-full bg-primary-container rounded-full" style="width: 71%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-center mb-1.5">
+<span class="font-body-sm text-body-sm font-medium text-on-surface">Applied Statistics</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-semibold">63% • Intermediate</span>
+</div>
+<div class="h-2 w-full rounded-full bg-surface-container-highest overflow-hidden">
+<div class="h-full bg-primary-container/80 rounded-full" style="width: 63%"></div>
+</div>
+</div>
+<div>
+<div class="flex justify-between items-center mb-1.5">
+<span class="font-body-sm text-body-sm font-medium text-on-surface">Machine Learning Foundations</span>
+<span class="font-label-sm text-label-sm text-secondary-container font-semibold">41% • Developing</span>
+</div>
+<div class="h-2 w-full rounded-full bg-surface-container-highest overflow-hidden">
+<div class="h-full bg-secondary-container rounded-full" style="width: 41%"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="pt-5 mt-5 flex items-center justify-between text-on-surface-variant">
+<span class="font-body-sm text-body-sm">Bypassed 34 basic lessons</span>
+<span class="font-label-sm text-label-sm text-primary font-semibold flex items-center gap-1">
+                  Saved ~18 hours <span class="material-symbols-outlined text-[15px]">verified</span>
+</span>
+</div>
+</div>
+<!-- Prominent Next Action Card (7 Cols) -->
+<div class="lg:col-span-7 bg-surface-container-lowest rounded-xl p-6 shadow-sm relative overflow-hidden flex flex-col justify-between">
+<!-- Subtle Accent Top Edge -->
+<div class="absolute top-0 left-0 right-0 h-1.5 bg-secondary-container"></div>
+<div>
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-2">
+<span class="px-2.5 py-1 rounded bg-secondary-fixed text-on-secondary-container font-label-sm text-label-sm font-semibold uppercase tracking-wider">
+                      Recommended Next Step • Week 2
+                    </span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px]">timer</span> 32 min
+                  </span>
+</div>
+<h2 class="font-headline-md text-headline-md font-bold text-on-surface mb-2">
+                  Model Validation &amp; Split Hygiene
+                </h2>
+<p class="font-body-md text-body-md text-on-surface-variant mb-5 leading-relaxed">
+                  Avoid data leakage across cross-validation folds. Essential prerequisite before starting gradient boosted trees.
+                </p>
+<!-- Curated Resource Stack preview -->
+<div class="space-y-2 mb-6">
+<div class="flex items-center justify-between p-2.5 rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors">
+<div class="flex items-center gap-2.5">
+<span class="w-6 h-6 rounded bg-primary/10 text-primary flex items-center justify-center font-label-sm text-label-sm font-bold">1</span>
+<span class="font-body-sm text-body-sm font-medium text-on-surface">Target Leakage in Time-Series Features</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant bg-surface-container px-2 py-0.5 rounded">Scikit-Learn Guide</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">11m read</span>
+</div>
+<div class="flex items-center justify-between p-2.5 rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors">
+<div class="flex items-center gap-2.5">
+<span class="w-6 h-6 rounded bg-primary/10 text-primary flex items-center justify-center font-label-sm text-label-sm font-bold">2</span>
+<span class="font-body-sm text-body-sm font-medium text-on-surface">Interactive Notebook: Leak-Free Pipeline</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant bg-surface-container px-2 py-0.5 rounded">Jupyter Executable</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">15m lab</span>
+</div>
+<div class="flex items-center justify-between p-2.5 rounded-lg bg-surface-container-low hover:bg-surface-container transition-colors">
+<div class="flex items-center gap-2.5">
+<span class="w-6 h-6 rounded bg-primary/10 text-primary flex items-center justify-center font-label-sm text-label-sm font-bold">3</span>
+<span class="font-body-sm text-body-sm font-medium text-on-surface">Quick Concept Check: 3 Validation Traps</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant bg-surface-container px-2 py-0.5 rounded">Interactive Quiz</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">6m check</span>
+</div>
+</div>
+</div>
+<!-- Action Row -->
+<div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-3">
+<span class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-primary">filter_alt</span>
+                  3 resources curated from 4 sources
+                </span>
+<a class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-secondary-container text-on-primary font-body-sm text-body-sm font-semibold hover:brightness-105 transition-all" data-path="learn" href="#">
+<span>Start learning</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</a>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Consolidation Section: 20 Tabs vs SkillAlpha -->
+<section class="py-20 lg:py-28 bg-surface-container-low/50">
+<div class="max-w-7xl mx-auto px-margin-mobile lg:px-margin">
+<div class="text-center max-w-2xl mx-auto mb-16">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-semibold mb-2 block">
+          Cognitive Calm
+        </span>
+<h2 class="font-headline-lg text-headline-lg font-bold text-on-surface tracking-tight mb-4">
+          Learning shouldn't require 20 tabs.
+        </h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">
+          Engineers spend half their study time curating, filtering fluff, and re-reading the same beginner tutorials. SkillAlpha collapses the noise into a linear, purposeful flow.
+        </p>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
+<!-- The Fragmented Reality -->
+<div class="rounded-2xl bg-surface-container-lowest p-8 shadow-sm flex flex-col justify-between">
+<div>
+<div class="flex items-center justify-between mb-6">
+<span class="font-label-sm text-label-sm font-bold uppercase tracking-wider text-error bg-error-container/40 text-on-error-container px-3 py-1 rounded-full">
+                The Disorganized Reality
+              </span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Average ~4.5 hrs lost/week</span>
+</div>
+<h3 class="font-headline-md text-headline-md font-bold text-on-surface mb-3">
+              Information sprawl &amp; duplicate basics
+            </h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-8">
+              Jumping across disparate channels without verified benchmarks leaves you re-learning "What is a Variable?" across three different video courses.
+            </p>
+<!-- Scattered badges visual representation -->
+<div class="p-6 rounded-xl bg-surface-container-low relative overflow-hidden min-h-[220px] flex flex-wrap gap-2.5 items-center justify-center content-center">
+<div class="px-3 py-1.5 rounded-lg bg-surface-container-lowest text-on-surface-variant shadow-sm text-body-sm font-medium flex items-center gap-1.5 -rotate-2">
+<span class="material-symbols-outlined text-[16px] text-error">tabs</span> 14 open Chrome tabs
+              </div>
+<div class="px-3.5 py-1.5 rounded-lg bg-surface-container-lowest text-on-surface-variant shadow-sm text-body-sm font-medium flex items-center gap-1.5 rotate-3">
+<span class="material-symbols-outlined text-[16px] text-secondary">play_circle</span> 3-hour YouTube playlist
+              </div>
+<div class="px-3 py-1.5 rounded-lg bg-surface-container-lowest text-on-surface-variant shadow-sm text-body-sm font-medium flex items-center gap-1.5 -rotate-1">
+<span class="material-symbols-outlined text-[16px] text-on-surface">code</span> Starred GitHub repos (forgotten)
+              </div>
+<div class="px-4 py-2 rounded-lg bg-surface-container-lowest text-on-surface shadow-sm text-body-sm font-medium flex items-center gap-2 rotate-2">
+<span class="material-symbols-outlined text-[16px] text-primary">forum</span> ChatGPT prompt rabbit-hole
+              </div>
+<div class="px-3 py-1.5 rounded-lg bg-surface-container-lowest text-on-surface-variant shadow-sm text-body-sm font-medium flex items-center gap-1.5 -rotate-3">
+<span class="material-symbols-outlined text-[16px]">menu_book</span> Dense 800-page PDF
+              </div>
+<div class="px-3.5 py-1.5 rounded-lg bg-surface-container-highest text-error font-label-md text-label-md font-semibold rotate-1">
+                Tab fatigue &amp; redundant basics
+              </div>
+</div>
+</div>
+<div class="pt-6 mt-6 flex items-center gap-2 text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[18px] text-error">close</span>
+<span>Result: Fragmented recall, abandonment after 3 weeks.</span>
+</div>
+</div>
+<!-- The SkillAlpha Unified Stream -->
+<div class="rounded-2xl bg-surface-container-lowest p-8 shadow-sm flex flex-col justify-between relative overflow-hidden">
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary-fixed/30 rounded-bl-full pointer-events-none"></div>
+<div>
+<div class="flex items-center justify-between mb-6">
+<span class="font-label-sm text-label-sm font-bold uppercase tracking-wider text-primary bg-primary-fixed text-on-primary-fixed px-3 py-1 rounded-full">
+                The SkillAlpha Stream
+              </span>
+<span class="font-body-sm text-body-sm text-primary font-semibold">100% Signal</span>
+</div>
+<h3 class="font-headline-md text-headline-md font-bold text-on-surface mb-3">
+              One unified, sequenced workspace
+            </h3>
+<p class="font-body-md text-body-md text-on-surface-variant mb-8">
+              A dynamic learning pipeline that parses documentation, repos, and industry papers into a clean, singular queue calibrated to your exact knowledge gaps.
+            </p>
+<!-- Unified Stream Visualization -->
+<div class="p-6 rounded-xl bg-surface-container-low flex flex-col gap-3">
+<div class="flex items-center gap-3 p-3 rounded-lg bg-surface-container-lowest shadow-sm">
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary flex items-center justify-center font-bold text-label-md">
+<span class="material-symbols-outlined text-[16px]">done</span>
+</div>
+<div class="min-w-0 flex-1">
+<div class="font-body-sm text-body-sm font-semibold text-on-surface truncate">Evaluated baseline: Skipped basic syntax</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant">Bypassed modules 1-3 automatically</div>
+</div>
+<span class="text-primary font-label-sm text-label-sm font-bold">Verified</span>
+</div>
+<div class="flex items-center gap-3 p-3 rounded-lg bg-surface-container-lowest shadow-sm">
+<div class="w-8 h-8 rounded-full bg-secondary-container text-on-primary flex items-center justify-center font-bold text-label-md">
+<span class="material-symbols-outlined text-[16px]">play_arrow</span>
+</div>
+<div class="min-w-0 flex-1">
+<div class="font-body-sm text-body-sm font-semibold text-on-surface truncate">Active Task: Cross-Validation Leakage Prevention</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant">Curated from Scikit doc + repo code sample</div>
+</div>
+<span class="text-secondary-container font-label-sm text-label-sm font-bold">In Progress</span>
+</div>
+<div class="flex items-center gap-3 p-3 rounded-lg bg-surface-container-lowest/60 text-on-surface-variant">
+<div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center font-bold text-label-md text-on-surface-variant">
+                  3
+                </div>
+<div class="min-w-0 flex-1">
+<div class="font-body-sm text-body-sm font-medium truncate">Next: Hyperparameter Optimization with Optuna</div>
+<div class="font-label-sm text-label-sm text-on-surface-variant">Queued for Wednesday evening</div>
+</div>
+<span class="material-symbols-outlined text-[18px] text-on-surface-variant">lock_clock</span>
+</div>
+</div>
+</div>
+<div class="pt-6 mt-6 flex items-center gap-2 text-primary font-body-sm text-body-sm font-medium">
+<span class="material-symbols-outlined text-[18px] text-primary">check_circle</span>
+<span>Result: Frictionless progression. You sit down and learn immediately.</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Visual Workflow Section -->
+<section class="py-20 lg:py-28 max-w-7xl mx-auto px-margin-mobile lg:px-margin w-full" id="how-it-works">
+<div class="flex flex-col sm:flex-row sm:items-end justify-between mb-16 gap-4">
+<div>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-primary font-semibold mb-2 block">
+          Methodology
+        </span>
+<h2 class="font-headline-lg text-headline-lg font-bold text-on-surface tracking-tight">
+          From goal to next action
+        </h2>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-md">
+        Five algorithmic checkpoints that transform ambition into an actionable, daily curriculum.
+      </p>
+</div>
+<!-- 5-Step Flow Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+<!-- Step 01 -->
+<div class="rounded-xl bg-surface-container-lowest p-6 shadow-sm flex flex-col justify-between group hover:shadow-md transition-all">
+<div>
+<div class="font-headline-md text-headline-md font-bold text-outline-variant group-hover:text-primary transition-colors mb-4">
+            01
+          </div>
+<h3 class="font-title-lg text-title-lg font-bold text-on-surface mb-2">Tell us your goal</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+            Specify a target job role, research paper, framework, or full-stack capstone project.
+          </p>
+</div>
+<div class="mt-6 pt-4 flex items-center gap-2 text-primary">
+<span class="material-symbols-outlined text-[18px]">target</span>
+<span class="font-label-sm text-label-sm font-semibold uppercase">Outcome-first</span>
+</div>
+</div>
+<!-- Step 02 -->
+<div class="rounded-xl bg-surface-container-lowest p-6 shadow-sm flex flex-col justify-between group hover:shadow-md transition-all">
+<div>
+<div class="font-headline-md text-headline-md font-bold text-outline-variant group-hover:text-primary transition-colors mb-4">
+            02
+          </div>
+<h3 class="font-title-lg text-title-lg font-bold text-on-surface mb-2">Understand baseline</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+            Link your GitHub, past courses, or take a 6-minute adaptive code assessment.
+          </p>
+</div>
+<div class="mt-6 pt-4 flex items-center gap-2 text-primary">
+<span class="material-symbols-outlined text-[18px]">rule</span>
+<span class="font-label-sm text-label-sm font-semibold uppercase">No redundancy</span>
+</div>
+</div>
+<!-- Step 03 -->
+<div class="rounded-xl bg-surface-container-lowest p-6 shadow-sm flex flex-col justify-between group hover:shadow-md transition-all">
+<div>
+<div class="font-headline-md text-headline-md font-bold text-outline-variant group-hover:text-secondary-container transition-colors mb-4">
+            03
+          </div>
+<h3 class="font-title-lg text-title-lg font-bold text-on-surface mb-2">Find your gaps</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+            Pinpoint precise conceptual blind spots instead of forcing whole chapters you already understand.
+          </p>
+</div>
+<div class="mt-6 pt-4 flex items-center gap-2 text-secondary-container">
+<span class="material-symbols-outlined text-[18px]">analytics</span>
+<span class="font-label-sm text-label-sm font-semibold uppercase">Precision mapping</span>
+</div>
+</div>
+<!-- Step 04 -->
+<div class="rounded-xl bg-surface-container-lowest p-6 shadow-sm flex flex-col justify-between group hover:shadow-md transition-all">
+<div>
+<div class="font-headline-md text-headline-md font-bold text-outline-variant group-hover:text-primary transition-colors mb-4">
+            04
+          </div>
+<h3 class="font-title-lg text-title-lg font-bold text-on-surface mb-2">Curate resources</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+            Synthesizes top documentation, vetted repo walkthroughs, and peer-reviewed deep-dives.
+          </p>
+</div>
+<div class="mt-6 pt-4 flex items-center gap-2 text-primary">
+<span class="material-symbols-outlined text-[18px]">auto_stories</span>
+<span class="font-label-sm text-label-sm font-semibold uppercase">Noise filtered</span>
+</div>
+</div>
+<!-- Step 05 -->
+<div class="rounded-xl bg-surface-container-lowest p-6 shadow-sm flex flex-col justify-between group hover:shadow-md transition-all">
+<div>
+<div class="font-headline-md text-headline-md font-bold text-outline-variant group-hover:text-primary transition-colors mb-4">
+            05
+          </div>
+<h3 class="font-title-lg text-title-lg font-bold text-on-surface mb-2">Learn and adapt</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+            Miss a day or breeze through a concept? The roadmap continuously repaces automatically.
+          </p>
+</div>
+<div class="mt-6 pt-4 flex items-center gap-2 text-primary">
+<span class="material-symbols-outlined text-[18px]">sync</span>
+<span class="font-label-sm text-label-sm font-semibold uppercase">Adaptive pacing</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Editorial Value Pillars ("Built around you") -->
+<section class="py-20 lg:py-28 bg-surface-container-low/40">
+<div class="max-w-7xl mx-auto px-margin-mobile lg:px-margin">
+<div class="max-w-2xl mb-16">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-primary font-semibold mb-2 block">
+          Principles
+        </span>
+<h2 class="font-headline-lg text-headline-lg font-bold text-on-surface tracking-tight">
+          Built around you. Not generic cohorts.
+        </h2>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<!-- Pillar 1 -->
+<div class="rounded-2xl bg-surface-container-lowest p-8 shadow-sm flex flex-col justify-between">
+<div>
+<div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-primary mb-6">
+<span class="material-symbols-outlined text-[24px]">fast_forward</span>
+</div>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-bold block mb-2">
+              Skip What You Know
+            </span>
+<h3 class="font-headline-md text-headline-md font-bold text-on-surface mb-4">
+              Never re-learn the basics.
+            </h3>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+              Don't waste four hours relearning Python basics or database setup. We benchmark your existing code and past projects to bypass what's already mastered.
+            </p>
+</div>
+<div class="mt-8 pt-6">
+<div class="text-on-surface-variant font-label-md text-label-md bg-surface-container-low p-3 rounded-lg flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-primary">check</span>
+<span>Learners save avg. 24% syllabus time</span>
+</div>
+</div>
+</div>
+<!-- Pillar 2 -->
+<div class="rounded-2xl bg-surface-container-lowest p-8 shadow-sm flex flex-col justify-between">
+<div>
+<div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-secondary-container mb-6">
+<span class="material-symbols-outlined text-[24px]">filter_center_focus</span>
+</div>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-bold block mb-2">
+              Find What Matters
+            </span>
+<h3 class="font-headline-md text-headline-md font-bold text-on-surface mb-4">
+              Laser-targeted materials.
+            </h3>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+              Get resources matched to your exact learning gap — curated papers, targeted docs, and exact code walkthroughs without 40 minutes of video intro chatter.
+            </p>
+</div>
+<div class="mt-8 pt-6">
+<div class="text-on-surface-variant font-label-md text-label-md bg-surface-container-low p-3 rounded-lg flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-primary">check</span>
+<span>Zero sponsored course promotions</span>
+</div>
+</div>
+</div>
+<!-- Pillar 3 -->
+<div class="rounded-2xl bg-surface-container-lowest p-8 shadow-sm flex flex-col justify-between">
+<div>
+<div class="w-12 h-12 rounded-xl bg-surface-container flex items-center justify-center text-primary mb-6">
+<span class="material-symbols-outlined text-[24px]">compass_calibration</span>
+</div>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-secondary font-bold block mb-2">
+              Always Know What's Next
+            </span>
+<h3 class="font-headline-md text-headline-md font-bold text-on-surface mb-4">
+              Momentum without friction.
+            </h3>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+              Your next action is clear, even when life happens and your roadmap needs to re-pace. Eliminate decision fatigue so study time stays focused on practice.
+            </p>
+</div>
+<div class="mt-8 pt-6">
+<div class="text-on-surface-variant font-label-md text-label-md bg-surface-container-low p-3 rounded-lg flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-primary">check</span>
+<span>Daily queue always ready in 1 click</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Photo / Workspace Showcase Section -->
+<section class="py-20 max-w-7xl mx-auto px-margin-mobile lg:px-margin w-full">
+<div class="rounded-3xl bg-surface-container-lowest p-8 lg:p-14 shadow-lg overflow-hidden">
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+<div class="lg:col-span-5">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-primary font-semibold mb-2 block">
+            Focus Environment
+          </span>
+<h2 class="font-headline-lg text-headline-lg font-bold text-on-surface tracking-tight mb-4">
+            One goal. One learning workspace.
+          </h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant mb-8">
+            Engineered for high-cognition sessions. Notes, active exercises, curated citations, and progress tracking all stay linked directly to your active skill node.
+          </p>
+<div class="space-y-4 mb-8">
+<div class="flex items-start gap-3">
+<div class="w-6 h-6 rounded-full bg-primary-fixed flex items-center justify-center text-on-primary-fixed mt-0.5">
+<span class="material-symbols-outlined text-[15px]">check</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface">
+<strong class="font-semibold">Markdown &amp; LaTeX native:</strong> Take notes right next to the documentation snippets.
+              </p>
+</div>
+<div class="flex items-start gap-3">
+<div class="w-6 h-6 rounded-full bg-primary-fixed flex items-center justify-center text-on-primary-fixed mt-0.5">
+<span class="material-symbols-outlined text-[15px]">check</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface">
+<strong class="font-semibold">Context-aware flashcards:</strong> Spaced repetition cards generated automatically from your missed quiz questions.
+              </p>
+</div>
+<div class="flex items-start gap-3">
+<div class="w-6 h-6 rounded-full bg-primary-fixed flex items-center justify-center text-on-primary-fixed mt-0.5">
+<span class="material-symbols-outlined text-[15px]">check</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface">
+<strong class="font-semibold">GitHub synchronization:</strong> Push completed coding projects directly to your repository.
+              </p>
+</div>
+</div>
+<a class="inline-flex items-center gap-2 font-title-lg text-title-lg text-primary font-semibold hover:text-primary-container transition-colors" data-path="roadmap" href="#">
+<span>Explore the interactive demo</span>
+<span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+</a>
+</div>
+<!-- Rich Photo Container -->
+<div class="lg:col-span-7 relative">
+<div class="rounded-2xl overflow-hidden shadow-md aspect-video relative">
+<img class="w-full h-full object-cover" data-alt="An organized, minimalist developer study desk setup bathed in gentle morning window light. On the wooden desk rests an ultra-thin laptop showing a clean code editor and learning roadmap with green and orange progress metrics. A ceramic mug, notebook with handwritten diagrams, and a small potted plant complete the quiet, focused study atmosphere with a refined, tactile aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDV1oGqn178cV040sxUIrzj4XvMPXPFH5CZ3APMSlpWOwoih8U5R8HdnqunMpVrg10LB9H6Ji92mYJLMoyEtWgI_2g9Jv9zpNZstbEpWAnXiA_pAnipiR3Lu1UwKIgZL_OFLvVBtekqkhwTYZg4itBwt6zKULjxor5swkh376ETHfUwqEbDYwZ0IygECwGVlzVcImKk2UAm27qaXwWGuF0tqituoqfPXBXN4vEMURMscw2InPg3c9sJKA"/>
+<div class="absolute inset-0 bg-gradient-to-t from-inverse-surface/60 via-transparent to-transparent"></div>
+<div class="absolute bottom-5 left-5 right-5 text-on-primary flex items-center justify-between">
+<div class="font-body-md text-body-md font-semibold drop-shadow-sm">
+                SkillAlpha Study Mode • Clean distraction-free view
+              </div>
+<span class="px-2.5 py-1 rounded bg-surface-container-lowest/90 text-on-surface font-label-sm text-label-sm font-semibold backdrop-blur-sm">
+                4.9/5 satisfaction
+              </span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Final Call to Action Banner -->
+<section class="py-20 lg:py-28 max-w-7xl mx-auto px-margin-mobile lg:px-margin w-full">
+<div class="rounded-3xl bg-primary text-on-primary p-8 sm:p-14 lg:p-20 shadow-xl relative overflow-hidden flex flex-col items-center text-center">
+<!-- Decorative Backdrop Circles -->
+<div class="absolute -right-20 -top-20 w-96 h-96 rounded-full bg-primary-container/40 blur-2xl pointer-events-none"></div>
+<div class="absolute -left-20 -bottom-20 w-96 h-96 rounded-full bg-secondary-container/20 blur-3xl pointer-events-none"></div>
+<div class="relative z-10 max-w-2xl">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-primary-fixed font-bold mb-3 block">
+          Get Started in 2 Minutes
+        </span>
+<h2 class="font-display-lg text-display-lg-mobile sm:text-headline-lg lg:text-display-lg font-bold text-on-primary tracking-tight mb-6">
+          Ready to learn with total clarity?
+        </h2>
+<p class="font-body-lg text-body-lg text-primary-fixed-dim mb-10 leading-relaxed">
+          Tell us your ambition. We'll benchmark what you know and generate your day-by-day learning roadmap immediately.
+        </p>
+<div class="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto">
+<a class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-secondary-container text-on-primary font-body-md text-body-md font-bold shadow-md hover:brightness-105 active:scale-[0.99] transition-all" data-path="roadmap" href="#">
+<span>Build your personalized path</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</a>
+<a class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-4 rounded-xl bg-primary-container/60 text-on-primary font-body-md text-body-md font-medium hover:bg-primary-container transition-colors" data-path="resources" href="#">
+<span class="material-symbols-outlined text-[18px]">menu_book</span>
+<span>Browse public roadmaps</span>
+</a>
+</div>
+<div class="mt-8 flex items-center justify-center gap-6 text-primary-fixed-dim font-label-md text-label-md">
+<span class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-primary-fixed">check_circle</span>
+            Free baseline assessment
+          </span>
+<span class="flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-primary-fixed">check_circle</span>
+            No credit card required
+          </span>
+</div>
+</div>
+</div>
+</section>
+</div>
+<script>
+  // Micro-interaction for smooth link clicks
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      const targetId = this.getAttribute('href');
+      if (targetId && targetId !== '#') {
+        const targetElement = document.querySelector(targetId);
+        if (targetElement) {
+          e.preventDefault();
+          targetElement.scrollIntoView({
+            behavior: 'smooth'
+          });
+        }
+      }
+    });
+  });
+</script></main><footer class="w-full bg-surface-container-lowest border-t border-outline-variant/40 py-space-xl"><div class="max-w-7xl mx-auto px-margin-mobile lg:px-margin flex flex-col md:flex-row items-center justify-between gap-space-lg"><div class="flex items-center gap-space-sm"><div class="w-6 h-6 rounded bg-primary-container flex items-center justify-center text-on-primary"><span class="material-symbols-outlined text-[15px]">school</span></div><span class="font-title-lg text-title-lg text-on-surface font-bold">SkillAlpha</span><span class="text-on-surface-variant font-body-sm text-body-sm ml-2">© 2025 SkillAlpha Intelligence Inc.</span></div><div class="flex flex-wrap items-center gap-space-lg font-body-sm text-body-sm text-on-surface-variant"><a class="hover:text-on-surface transition-colors" data-path="roadmap" href="#">Product</a><a class="hover:text-on-surface transition-colors" data-path="resources" href="#">Resources</a><a class="hover:text-on-surface transition-colors" data-path="about" href="#">About</a><a class="hover:text-on-surface transition-colors" data-path="github" href="#">GitHub</a><a class="hover:text-on-surface transition-colors" data-path="privacy" href="#">Privacy</a><a class="hover:text-on-surface transition-colors" data-path="terms" href="#">Terms</a></div></div></footer></body></html>

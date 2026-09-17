@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"surface-container-lowest":"#ffffff","outline-variant":"#c0c9c1","on-secondary-fixed-variant":"#852400","on-secondary-container":"#521300","on-primary":"#ffffff","secondary":"#ae3200","surface-tint":"#31694f","secondary-fixed-dim":"#ffb59e","surface-container-low":"#f0f5ef","tertiary":"#39413d","on-primary-fixed-variant":"#165038","outline":"#707973","primary-fixed-dim":"#99d3b4","inverse-on-surface":"#edf2ec","error":"#ba1a1a","primary":"#0a4831","primary-container":"#286047","on-tertiary-container":"#c6cec9","on-primary-container":"#9ed8b9","on-error":"#ffffff","surface-dim":"#d6dbd6","on-surface":"#181d1a","surface-container-highest":"#dfe4de","tertiary-fixed":"#dce4df","error-container":"#ffdad6","on-background":"#181d1a","tertiary-fixed-dim":"#c0c8c4","on-tertiary":"#ffffff","on-tertiary-fixed-variant":"#414845","on-tertiary-fixed":"#161d1a","background":"#f6fbf5","surface-container":"#eaefea","on-secondary-fixed":"#3a0b00","on-primary-fixed":"#002113","secondary-fixed":"#ffdbd0","surface":"#f6fbf5","inverse-surface":"#2c322e","surface-container-high":"#e5e9e4","secondary-container":"#fd5920","primary-fixed":"#b4f0cf","on-surface-variant":"#404943","surface-variant":"#dfe4de","surface-bright":"#f6fbf5","on-secondary":"#ffffff","inverse-primary":"#99d3b4","on-error-container":"#93000a","tertiary-container":"#505854"},borderRadius:{DEFAULT:"0.25rem",lg:"0.5rem",xl:"0.75rem",full:"9999px"},spacing:{"margin":"2.5rem","space-xs":"0.25rem","space-sm":"0.5rem","gutter":"1.5rem","space-md":"1rem","space-lg":"1.5rem","gutter-mobile":"1rem","margin-mobile":"1.25rem","space-xl":"2.5rem"},fontFamily:{"body-md":["Plus Jakarta Sans"],"headline-lg-mobile":["Plus Jakarta Sans"],"label-md":["Plus Jakarta Sans"],"body-sm":["Plus Jakarta Sans"],"headline-md":["Plus Jakarta Sans"],"title-lg":["Plus Jakarta Sans"],"label-sm":["Plus Jakarta Sans"],"display-lg":["Plus Jakarta Sans"],"headline-lg":["Plus Jakarta Sans"],"body-lg":["Plus Jakarta Sans"],"display-lg-mobile":["Plus Jakarta Sans"]},fontSize:{"body-md":["14px",{lineHeight:"22px",letterSpacing:"0em",fontWeight:"400"}],"headline-lg-mobile":["26px",{lineHeight:"34px",letterSpacing:"-0.02em",fontWeight:"600"}],"label-md":["12px",{lineHeight:"16px",letterSpacing:"0.02em",fontWeight:"600"}],"body-sm":["13px",{lineHeight:"18px",letterSpacing:"0em",fontWeight:"400"}],"headline-md":["22px",{lineHeight:"30px",letterSpacing:"-0.015em",fontWeight:"600"}],"title-lg":["18px",{lineHeight:"26px",letterSpacing:"-0.01em",fontWeight:"600"}],"label-sm":["11px",{lineHeight:"14px",letterSpacing:"0.04em",fontWeight:"700"}],"display-lg":["48px",{lineHeight:"56px",letterSpacing:"-0.03em",fontWeight:"700"}],"headline-lg":["32px",{lineHeight:"40px",letterSpacing:"-0.02em",fontWeight:"600"}],"body-lg":["16px",{lineHeight:"26px",letterSpacing:"-0.005em",fontWeight:"400"}],"display-lg-mobile":["36px",{lineHeight:"44px",letterSpacing:"-0.025em",fontWeight:"700"}]}}}</script></head><body class="bg-surface font-body-md text-body-md text-on-surface min-h-screen flex flex-col"><header class="fixed top-0 left-0 right-0 z-50 bg-surface-container-lowest border-b border-surface-variant"><div class="h-16 max-w-7xl mx-auto px-6 flex items-center justify-between gap-space-md"><div class="flex items-center gap-space-md shrink-0"><a class="flex items-center gap-space-sm group" data-path="roadmap" href="#"><div class="w-8 h-8 rounded-lg bg-primary-container flex items-center justify-center text-on-primary shrink-0 transition-transform group-hover:scale-95"><span class="material-symbols-outlined text-[20px]">north_east</span></div><span class="font-title-lg text-title-lg text-on-surface tracking-tight font-bold">SkillAlpha</span></a><span class="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full bg-primary-fixed text-primary-container font-label-sm text-label-sm uppercase tracking-wider">adaptive learning</span></div><nav class="hidden lg:flex items-center gap-space-lg h-full" data-active-classes="text-primary font-bold border-b-2 border-primary"><a aria-current="page" class="inline-flex items-center h-full transition-colors pb-0.5 text-primary font-bold border-b-2 border-primary" data-path="roadmap" href="#">Roadmap</a><a class="inline-flex items-center h-full text-on-surface-variant font-body-md text-body-md hover:text-on-surface transition-colors pb-0.5" data-path="learn" href="#">Learn</a><a class="inline-flex items-center h-full text-on-surface-variant font-body-md text-body-md hover:text-on-surface transition-colors pb-0.5" data-path="resources" href="#">Resources</a><a class="inline-flex items-center h-full text-on-surface-variant font-body-md text-body-md hover:text-on-surface transition-colors pb-0.5" data-path="progress" href="#">Progress</a><a class="inline-flex items-center h-full text-on-surface-variant font-body-md text-body-md hover:text-on-surface transition-colors pb-0.5" data-path="saved" href="#">Saved</a></nav><div class="flex items-center gap-space-md shrink-0"><div class="hidden md:flex items-center h-9 px-space-sm bg-surface-container-low border border-outline-variant rounded-lg w-56 lg:w-64 text-on-surface-variant transition-colors hover:border-outline"><span class="material-symbols-outlined text-[18px] text-outline mr-2">search</span><span class="font-body-sm text-body-sm text-outline truncate flex-1">Search resources, skills...</span><kbd class="px-1.5 py-0.5 font-label-sm text-label-sm bg-surface-container-lowest border border-outline-variant rounded text-outline shadow-xs">/</kbd></div><button aria-label="Notifications" class="relative p-1.5 text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low rounded-lg transition-colors" type="button"><span class="material-symbols-outlined text-[22px]">notifications</span><span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-secondary-container ring-2 ring-surface-container-lowest"></span></button><div class="flex items-center gap-1.5 pl-1 cursor-pointer group"><div class="relative"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div><span class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-primary-container ring-2 ring-surface-container-lowest"></span></div><span class="material-symbols-outlined text-[18px] text-outline transition-transform group-hover:translate-y-0.5">expand_more</span></div></div></div></header><main class="w-full pt-16 bg-surface flex-1"><div class="max-w-7xl mx-auto px-6 py-8"><div class="flex flex-col w-full">
+<!-- Top Navigation Sub-Header / Breadcrumb Context -->
+<div class="w-full flex flex-col md:flex-row md:items-center justify-between pb-6 gap-space-md">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-2">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-primary-fixed text-primary-container font-label-sm text-label-sm uppercase tracking-wider">
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container animate-pulse"></span>
+          My Learning Path
+        </span>
+<span class="text-outline font-label-sm text-label-sm">•</span>
+<span class="text-on-surface-variant font-label-sm text-label-sm font-semibold tracking-wide uppercase">Week 2 of 12</span>
+<span class="text-outline font-label-sm text-label-sm">•</span>
+<span class="text-on-surface-variant font-label-sm text-label-sm tracking-wide">15h / week pace</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface tracking-tight font-bold">Become a Machine Learning Engineer</h1>
+</div>
+<!-- Action Toolbar -->
+<div class="flex items-center flex-wrap gap-2.5 shrink-0">
+<button class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-surface-container-lowest text-on-surface hover:bg-surface-container transition-colors shadow-sm font-label-md text-label-md" type="button">
+<span class="material-symbols-outlined text-[18px] text-outline">picture_as_pdf</span>
+<span>Field Guide</span>
+</button>
+<button class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-surface-container-lowest text-on-surface hover:bg-surface-container transition-colors shadow-sm font-label-md text-label-md" type="button">
+<span class="material-symbols-outlined text-[18px] text-outline">tune</span>
+<span>Re-pace route</span>
+</button>
+<button class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-secondary-container text-on-primary hover:opacity-95 active:scale-95 transition-all shadow-md font-label-md text-label-md font-bold" type="button">
+<span>Continue learning</span>
+<span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- KPI Cards Metric Row (4 columns) -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md mb-8">
+<!-- Card 1: Overall Progress -->
+<div class="bg-surface-container-lowest rounded-xl p-5 shadow-sm flex flex-col justify-between group hover:shadow-md transition-shadow">
+<div class="flex items-center justify-between text-outline mb-2">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Overall Progress</span>
+<span class="material-symbols-outlined text-[20px] text-primary">donut_large</span>
+</div>
+<div class="flex items-baseline gap-2 mb-3">
+<span class="font-display-lg text-display-lg leading-none font-bold text-on-surface">34%</span>
+<span class="inline-flex items-center px-1.5 py-0.5 rounded-full bg-primary-fixed text-primary-container font-label-sm text-label-sm font-semibold">
+          +6% this week
+        </span>
+</div>
+<div>
+<div class="w-full h-1.5 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary-container rounded-full transition-all duration-700" style="width: 34%"></div>
+</div>
+</div>
+</div>
+<!-- Card 2: Milestones Completed -->
+<div class="bg-surface-container-lowest rounded-xl p-5 shadow-sm flex flex-col justify-between group hover:shadow-md transition-shadow">
+<div class="flex items-center justify-between text-outline mb-2">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Milestones Completed</span>
+<span class="material-symbols-outlined text-[20px] text-secondary">verified</span>
+</div>
+<div class="flex items-baseline gap-2 mb-3">
+<span class="font-display-lg text-display-lg leading-none font-bold text-on-surface">12</span>
+<span class="font-title-lg text-title-lg text-outline">/ 35 total</span>
+</div>
+<div class="flex items-center gap-1.5 text-on-surface-variant font-label-sm text-label-sm">
+<span class="inline-flex items-center px-2 py-0.5 rounded bg-surface-container-low text-primary-container font-medium">
+          2 pruned automatically
+        </span>
+</div>
+</div>
+<!-- Card 3: Active Pace -->
+<div class="bg-surface-container-lowest rounded-xl p-5 shadow-sm flex flex-col justify-between group hover:shadow-md transition-shadow">
+<div class="flex items-center justify-between text-outline mb-2">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Active Pace</span>
+<span class="material-symbols-outlined text-[20px] text-secondary-container" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+</div>
+<div class="flex items-baseline gap-2 mb-3">
+<span class="font-display-lg text-display-lg leading-none font-bold text-on-surface">4.2h</span>
+<span class="font-title-lg text-title-lg text-outline">/ 15h logged</span>
+</div>
+<div class="flex items-center gap-1.5 font-label-sm text-label-sm text-secondary-container font-semibold">
+<span class="material-symbols-outlined text-[16px]">trending_up</span>
+<span>3-day target on track</span>
+</div>
+</div>
+<!-- Card 4: Estimated Finish -->
+<div class="bg-surface-container-lowest rounded-xl p-5 shadow-sm flex flex-col justify-between group hover:shadow-md transition-shadow">
+<div class="flex items-center justify-between text-outline mb-2">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">Estimated Finish</span>
+<span class="material-symbols-outlined text-[20px] text-primary">event_available</span>
+</div>
+<div class="flex items-baseline gap-2 mb-3">
+<span class="font-title-lg text-title-lg font-bold text-on-surface">May 28, 2025</span>
+</div>
+<div class="flex items-center gap-1.5 font-label-sm text-label-sm">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+<span class="text-primary-container font-semibold uppercase tracking-wider">On schedule (0.98x drift)</span>
+</div>
+</div>
+</div>
+<!-- Horizontal Phase Milestones Bar -->
+<div class="w-full bg-surface-container-lowest rounded-xl p-4 md:p-5 shadow-sm mb-8">
+<div class="flex items-center justify-between pb-3 mb-3 border-b border-surface-container">
+<span class="font-label-sm text-label-sm uppercase font-bold text-on-surface-variant tracking-wider">Curriculum Phases &amp; Trajectory</span>
+<span class="font-body-sm text-body-sm text-outline">Adaptive calibration synced 12m ago</span>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+<!-- Phase 01 -->
+<div class="p-3.5 rounded-lg bg-surface-container-low flex flex-col justify-between">
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-sm text-label-sm uppercase font-bold text-primary-container">Phase 01</span>
+<span class="material-symbols-outlined text-[18px] text-primary-container" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<div class="font-title-lg text-title-lg font-bold text-on-surface mb-1">Foundations</div>
+<div class="flex items-center justify-between font-label-sm text-label-sm text-outline">
+<span>100% Completed</span>
+<span class="text-primary-container font-semibold">2 Skipped</span>
+</div>
+</div>
+<!-- Phase 02 (Active) -->
+<div class="p-3.5 rounded-lg bg-primary-fixed/25 shadow-sm flex flex-col justify-between">
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-sm text-label-sm uppercase font-bold text-primary-container">Phase 02 • In Progress</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full bg-primary-container text-on-primary font-label-sm text-label-sm font-bold">Active</span>
+</div>
+<div class="font-title-lg text-title-lg font-bold text-primary-container mb-1">Core ML Skills</div>
+<div class="flex items-center justify-between font-label-sm text-label-sm text-on-surface-variant">
+<span>Sprint: 45% in progress</span>
+<span class="font-bold text-primary">Wk 2-5</span>
+</div>
+</div>
+<!-- Phase 03 -->
+<div class="p-3.5 rounded-lg bg-surface-container-low opacity-75 flex flex-col justify-between">
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-sm text-label-sm uppercase font-bold text-outline">Phase 03</span>
+<span class="material-symbols-outlined text-[18px] text-outline">lock</span>
+</div>
+<div class="font-title-lg text-title-lg font-bold text-on-surface mb-1">Applied Projects</div>
+<div class="flex items-center justify-between font-label-sm text-label-sm text-outline">
+<span>Locked</span>
+<span>Unlocks Wk 6</span>
+</div>
+</div>
+<!-- Phase 04 -->
+<div class="p-3.5 rounded-lg bg-surface-container-low opacity-60 flex flex-col justify-between">
+<div class="flex items-center justify-between mb-2">
+<span class="font-label-sm text-label-sm uppercase font-bold text-outline">Phase 04</span>
+<span class="material-symbols-outlined text-[18px] text-outline">lock</span>
+</div>
+<div class="font-title-lg text-title-lg font-bold text-on-surface mb-1">Production &amp; Scale</div>
+<div class="flex items-center justify-between font-label-sm text-label-sm text-outline">
+<span>Capstones</span>
+<span>Interviews</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Main Content 2-Column Grid (8 cols left, 4 cols right) -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+<!-- LEFT COLUMN (8 cols) -->
+<div class="lg:col-span-8 flex flex-col gap-8">
+<!-- Crucial Card: Why your route looks like this -->
+<div class="bg-gradient-to-br from-surface-container-lowest via-surface-container-low/40 to-surface-container-lowest rounded-xl p-6 shadow-sm">
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-2">
+<div class="w-8 h-8 rounded-lg bg-primary-fixed flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+</div>
+<div>
+<h2 class="font-title-lg text-title-lg font-bold text-on-surface">Why your route looks like this</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Continuous heuristic synthesis based on diagnostic tests &amp; codebase ingest</p>
+</div>
+</div>
+<span class="px-2.5 py-1 rounded-full bg-surface-container-lowest shadow-xs text-primary-container font-label-sm text-label-sm font-semibold flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+            Dynamic Prune Active
+          </span>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+<!-- Explanation 1 -->
+<div class="bg-surface-container-lowest rounded-lg p-4 shadow-xs">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-[18px] text-primary-container">code_blocks</span>
+<h3 class="font-label-md text-label-md font-bold text-on-surface">Repository Audit Matched</h3>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+              You already demonstrated strong Python and SQL fundamentals in your background repo, so SkillAlpha pruned 2 foundation modules and saved ~7 hours of redundant tutorials.
+            </p>
+</div>
+<!-- Explanation 2 -->
+<div class="bg-surface-container-lowest rounded-lg p-4 shadow-xs">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-[18px] text-secondary-container">psychology</span>
+<h3 class="font-label-md text-label-md font-bold text-on-surface">Calibrated Retention Check</h3>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+              Your last self-check indicated uncertainty with k-fold cross-validation, so we scheduled an extra hands-on practical benchmark before moving to hyperparameter tuning.
+            </p>
+</div>
+</div>
+</div>
+<!-- Your Current Route (Timeline) -->
+<div class="bg-surface-container-lowest rounded-xl p-6 shadow-sm flex flex-col gap-6">
+<div class="flex items-center justify-between">
+<div>
+<h2 class="font-headline-md text-headline-md font-bold text-on-surface">Your Current Route</h2>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Sequential milestone execution with pruned skips &amp; active sprint focus</p>
+</div>
+<div class="flex items-center gap-2 text-outline font-label-sm text-label-sm">
+<span class="w-2.5 h-2.5 rounded-full bg-secondary-container"></span>
+<span>Current target</span>
+</div>
+</div>
+<!-- Vertical Timeline Stack -->
+<div class="relative pl-6 flex flex-col gap-6 before:content-[''] before:absolute before:left-3 before:top-4 before:bottom-4 before:w-0.5 before:bg-surface-container">
+<!-- Milestone 01: Skipped -->
+<div class="relative flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl bg-surface-container-low shadow-xs gap-3">
+<div class="absolute -left-6 top-5 -translate-x-1/2 w-6 h-6 rounded-full bg-primary-container text-on-primary flex items-center justify-center ring-4 ring-surface-container-lowest">
+<span class="material-symbols-outlined text-[14px]">check</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2 mb-1">
+<span class="font-label-sm text-label-sm uppercase font-bold text-outline">Milestone 01</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container font-label-sm text-label-sm font-semibold text-on-surface-variant">
+                  SKIPPED — Already demonstrated
+                </span>
+</div>
+<span class="font-title-lg text-title-lg font-bold text-on-surface line-through opacity-70">Python Fundamentals for Numerical Systems</span>
+</div>
+<div class="shrink-0">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-primary-fixed text-primary-container font-label-sm text-label-sm font-bold">
+<span class="material-symbols-outlined text-[16px]">bolt</span>
+                Saved 4.0 hours
+              </span>
+</div>
+</div>
+<!-- Milestone 02: Skipped -->
+<div class="relative flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl bg-surface-container-low shadow-xs gap-3">
+<div class="absolute -left-6 top-5 -translate-x-1/2 w-6 h-6 rounded-full bg-primary-container text-on-primary flex items-center justify-center ring-4 ring-surface-container-lowest">
+<span class="material-symbols-outlined text-[14px]">check</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2 mb-1">
+<span class="font-label-sm text-label-sm uppercase font-bold text-outline">Milestone 02</span>
+<span class="px-2 py-0.5 rounded-full bg-surface-container font-label-sm text-label-sm font-semibold text-on-surface-variant">
+                  SKIPPED — Already demonstrated
+                </span>
+</div>
+<span class="font-title-lg text-title-lg font-bold text-on-surface line-through opacity-70">Pandas &amp; Data Wrangling Pipelines</span>
+</div>
+<div class="shrink-0">
+<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded bg-primary-fixed text-primary-container font-label-sm text-label-sm font-bold">
+<span class="material-symbols-outlined text-[16px]">bolt</span>
+                Saved 3.0 hours
+              </span>
+</div>
+</div>
+<!-- Milestone 03: Current Focus -->
+<div class="relative p-6 rounded-xl bg-surface-container-lowest shadow-md flex flex-col gap-4">
+<div class="absolute -left-6 top-7 -translate-x-1/2 w-6 h-6 rounded-full bg-secondary-container text-on-primary flex items-center justify-center ring-4 ring-surface-container-lowest animate-pulse">
+<span class="w-2.5 h-2.5 rounded-full bg-surface-container-lowest"></span>
+</div>
+<div class="flex flex-wrap items-center justify-between gap-2">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-bold tracking-wide">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary-container animate-ping"></span>
+                CURRENT FOCUS • MILESTONE 03 • WEEK 02
+              </span>
+<span class="text-on-surface-variant font-label-sm text-label-sm font-semibold">Priority Module</span>
+</div>
+<div>
+<h3 class="font-headline-md text-headline-md font-bold text-on-surface mb-2">Model Validation &amp; Train/Test Splits</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">
+                Mastering data leakage prevention, stratified split strategies, nested k-fold cross validation, and empirical error distribution analysis.
+              </p>
+</div>
+<!-- Metadata Chips -->
+<div class="flex flex-wrap items-center gap-3 text-on-surface-variant font-body-sm text-body-sm">
+<span class="inline-flex items-center gap-1 bg-surface-container-low px-2.5 py-1 rounded-md">
+<span class="material-symbols-outlined text-[16px] text-outline">schedule</span>
+                Estimated: 2.5 hours
+              </span>
+<span class="inline-flex items-center gap-1 bg-surface-container-low px-2.5 py-1 rounded-md">
+<span class="material-symbols-outlined text-[16px] text-outline">menu_book</span>
+                3 curated resources
+              </span>
+<span class="inline-flex items-center gap-1 bg-surface-container-low px-2.5 py-1 rounded-md">
+<span class="material-symbols-outlined text-[16px] text-primary">terminal</span>
+                Code workspace ready
+              </span>
+</div>
+<!-- Progress & CTA -->
+<div class="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+<div class="flex-1 max-w-sm">
+<div class="flex justify-between font-label-sm text-label-sm mb-1.5 font-semibold">
+<span class="text-on-surface">Sprint active: 1 of 4 tasks finished</span>
+<span class="text-secondary-container">25%</span>
+</div>
+<div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-secondary-container rounded-full" style="width: 25%"></div>
+</div>
+</div>
+<button class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-secondary-container text-on-primary hover:opacity-95 shadow-sm font-label-md text-label-md font-bold shrink-0" type="button">
+<span>Resume Module</span>
+<span class="material-symbols-outlined text-[18px]">north_east</span>
+</button>
+</div>
+</div>
+<!-- Milestone 04: Next -->
+<div class="relative flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl bg-surface-container-lowest shadow-xs gap-3">
+<div class="absolute -left-6 top-5 -translate-x-1/2 w-6 h-6 rounded-full bg-surface-container-highest text-outline flex items-center justify-center ring-4 ring-surface-container-lowest">
+<span class="material-symbols-outlined text-[14px]">arrow_downward</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2 mb-1">
+<span class="font-label-sm text-label-sm uppercase font-bold text-primary-container">Milestone 04</span>
+<span class="px-2 py-0.5 rounded-full bg-primary-fixed/50 font-label-sm text-label-sm font-semibold text-primary-container">
+                  NEXT QUEUED
+                </span>
+</div>
+<span class="font-title-lg text-title-lg font-bold text-on-surface">Feature Engineering &amp; Preprocessing</span>
+</div>
+<div class="flex items-center gap-3 text-outline font-label-sm text-label-sm shrink-0">
+<span>3.5 hours</span>
+<span>•</span>
+<span>4 resources</span>
+</div>
+</div>
+<!-- Milestone 05: Upcoming Locked -->
+<div class="relative flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl bg-surface-container-low opacity-60 gap-3">
+<div class="absolute -left-6 top-5 -translate-x-1/2 w-6 h-6 rounded-full bg-surface-container-highest text-outline flex items-center justify-center ring-4 ring-surface-container-lowest">
+<span class="material-symbols-outlined text-[14px]">lock</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2 mb-1">
+<span class="font-label-sm text-label-sm uppercase font-bold text-outline">Milestone 05</span>
+<span class="px-2 py-0.5 rounded font-label-sm text-label-sm font-medium text-outline">
+                  UPCOMING
+                </span>
+</div>
+<span class="font-title-lg text-title-lg font-bold text-on-surface">Loss Functions &amp; Optimization</span>
+</div>
+<div class="flex items-center gap-2 text-outline font-label-sm text-label-sm shrink-0">
+<span class="material-symbols-outlined text-[16px]">schedule</span>
+<span>4.0 hours • Locked</span>
+</div>
+</div>
+<!-- Milestone 06: Upcoming Locked -->
+<div class="relative flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-xl bg-surface-container-low opacity-50 gap-3">
+<div class="absolute -left-6 top-5 -translate-x-1/2 w-6 h-6 rounded-full bg-surface-container-highest text-outline flex items-center justify-center ring-4 ring-surface-container-lowest">
+<span class="material-symbols-outlined text-[14px]">lock</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2 mb-1">
+<span class="font-label-sm text-label-sm uppercase font-bold text-outline">Milestone 06</span>
+<span class="px-2 py-0.5 rounded font-label-sm text-label-sm font-medium text-outline">
+                  UPCOMING
+                </span>
+</div>
+<span class="font-title-lg text-title-lg font-bold text-on-surface">Model Deployment &amp; Inference Pipelines</span>
+</div>
+<div class="flex items-center gap-2 text-outline font-label-sm text-label-sm shrink-0">
+<span class="material-symbols-outlined text-[16px]">schedule</span>
+<span>6.5 hours • Locked</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Active Sprint Checklist Section -->
+<div class="bg-surface-container-lowest rounded-xl p-6 shadow-sm flex flex-col gap-5">
+<div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+<div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px] text-primary-container">checklist</span>
+<h2 class="font-headline-md text-headline-md font-bold text-on-surface">Active Sprint Checklist</h2>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Week 02: Model Validation &amp; Generalization (1 of 4 completed)</p>
+</div>
+<span class="font-label-sm text-label-sm px-2.5 py-1 rounded bg-surface-container-low text-on-surface-variant font-mono">2h 27m total content</span>
+</div>
+<div class="flex flex-col gap-3">
+<!-- Task 1: Completed -->
+<div class="flex items-center justify-between p-4 rounded-lg bg-surface-container-low/70 transition-all">
+<div class="flex items-center gap-3 min-w-0">
+<div class="w-6 h-6 rounded bg-primary-container text-on-primary flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-[16px]">check</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-body-md text-body-md font-bold text-on-surface truncate line-through opacity-70">
+                  Understand validation sets vs test sets
+                </span>
+<span class="font-body-sm text-body-sm text-outline flex items-center gap-2">
+<span>30 min</span>
+<span>•</span>
+<span>Theory &amp; Schema</span>
+<span>•</span>
+<span class="text-primary-container font-semibold">Completed yesterday</span>
+</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline text-[20px] shrink-0">history</span>
+</div>
+<!-- Task 2: In Progress -->
+<div class="flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-lg bg-surface-container-lowest shadow-sm gap-4">
+<div class="flex items-start sm:items-center gap-3 min-w-0">
+<div class="w-6 h-6 rounded-full bg-secondary-fixed text-on-secondary-fixed flex items-center justify-center shrink-0 mt-0.5 sm:mt-0">
+<span class="material-symbols-outlined text-[16px] text-secondary-container">play_arrow</span>
+</div>
+<div class="flex flex-col min-w-0">
+<div class="flex items-center gap-2">
+<span class="font-body-md text-body-md font-bold text-on-surface truncate">
+                    Build a train/validation split from scratch
+                  </span>
+<span class="inline-flex px-2 py-0.5 rounded bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-bold">
+                    IN PROGRESS
+                  </span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant flex items-center gap-2">
+<span>32 min</span>
+<span>•</span>
+<span>Interactive Code Sandbox</span>
+<span>•</span>
+<span class="text-secondary-container font-semibold">12 min remaining</span>
+</span>
+</div>
+</div>
+<button class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-primary-container text-on-primary hover:opacity-95 text-label-md font-label-md font-bold shrink-0 self-start sm:self-auto shadow-xs" type="button">
+<span class="material-symbols-outlined text-[16px]">code</span>
+<span>Resume code</span>
+</button>
+</div>
+<!-- Task 3: Queued -->
+<div class="flex items-center justify-between p-4 rounded-lg bg-surface-container-lowest shadow-xs opacity-90">
+<div class="flex items-center gap-3 min-w-0">
+<div class="w-6 h-6 rounded bg-surface-container-highest text-outline flex items-center justify-center shrink-0">
+<span class="font-label-sm text-label-sm font-bold">3</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-body-md text-body-md font-bold text-on-surface truncate">
+                  Cross-validation in practice with scikit-learn
+                </span>
+<span class="font-body-sm text-body-sm text-outline flex items-center gap-2">
+<span>45 min</span>
+<span>•</span>
+<span>Interactive Notebook</span>
+<span>•</span>
+<span>K-Fold, StratifiedKFold</span>
+</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline text-[20px] shrink-0">lock_open</span>
+</div>
+<!-- Task 4: Diagnostic Checkpoint -->
+<div class="flex items-center justify-between p-4 rounded-lg bg-surface-container-low opacity-80">
+<div class="flex items-center gap-3 min-w-0">
+<div class="w-6 h-6 rounded bg-surface-container-highest text-outline flex items-center justify-center shrink-0">
+<span class="font-label-sm text-label-sm font-bold">4</span>
+</div>
+<div class="flex flex-col min-w-0">
+<span class="font-body-md text-body-md font-bold text-on-surface truncate">
+                  Model selection checkpoint &amp; error analysis
+                </span>
+<span class="font-body-sm text-body-sm text-outline flex items-center gap-2">
+<span>40 min</span>
+<span>•</span>
+<span>Diagnostic Checkpoint</span>
+<span>•</span>
+<span class="text-on-surface-variant font-medium">Required to unlock Feature Engineering</span>
+</span>
+</div>
+</div>
+<span class="material-symbols-outlined text-outline text-[20px] shrink-0">assignment</span>
+</div>
+</div>
+</div>
+</div>
+<!-- RIGHT COLUMN (4 cols) -->
+<div class="lg:col-span-4 flex flex-col gap-6">
+<!-- This Week's Goal Card -->
+<div class="bg-surface-container-lowest rounded-xl p-6 shadow-sm flex flex-col gap-5">
+<div class="flex items-center justify-between">
+<h2 class="font-title-lg text-title-lg font-bold text-on-surface">This Week's Goal</h2>
+<span class="font-label-sm text-label-sm px-2 py-0.5 rounded bg-primary-fixed text-primary-container font-bold uppercase">Sprint 02</span>
+</div>
+<!-- Semi-Circular / Donut Radial Chart -->
+<div class="flex flex-col items-center justify-center pt-2">
+<div class="relative w-44 h-44 flex items-center justify-center">
+<svg class="w-full h-full transform -rotate-90" viewbox="0 0 100 100">
+<circle class="text-surface-container" cx="50" cy="50" fill="transparent" r="40" stroke="currentColor" stroke-width="8"></circle>
+<!-- 4.2 / 15 = 28% -> circumference 251.32 -> stroke-dashoffset = 251.32 * (1 - 0.28) = ~180.9 -->
+<circle class="text-primary-container transition-all duration-1000" cx="50" cy="50" fill="transparent" r="40" stroke="currentColor" stroke-dasharray="251.32" stroke-dashoffset="180.9" stroke-linecap="round" stroke-width="8"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+<span class="font-display-lg text-display-lg leading-none font-bold text-on-surface">4.2h</span>
+<span class="font-body-sm text-body-sm text-outline mt-0.5">of 15.0h done</span>
+</div>
+</div>
+<span class="font-label-sm text-label-sm text-primary-container font-semibold mt-2">
+            Remaining required: 10.8 hours (3.6h / day)
+          </span>
+</div>
+<!-- 7-Day Mini Calendar Streak -->
+<div class="pt-2 border-t border-surface-container">
+<span class="font-label-sm text-label-sm uppercase font-bold text-outline tracking-wider block mb-3">Daily Velocity Tracker</span>
+<div class="grid grid-cols-7 gap-1.5 text-center">
+<!-- Mon: Done -->
+<div class="flex flex-col items-center gap-1.5 p-1.5 rounded-lg bg-surface-container-low">
+<span class="font-label-sm text-label-sm text-outline">M</span>
+<div class="w-6 h-6 rounded-full bg-primary-container text-on-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[14px]">check</span>
+</div>
+<span class="font-label-sm text-label-sm font-mono text-outline">2.1h</span>
+</div>
+<!-- Tue: Done -->
+<div class="flex flex-col items-center gap-1.5 p-1.5 rounded-lg bg-surface-container-low">
+<span class="font-label-sm text-label-sm text-outline">T</span>
+<div class="w-6 h-6 rounded-full bg-primary-container text-on-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-[14px]">check</span>
+</div>
+<span class="font-label-sm text-label-sm font-mono text-outline">2.1h</span>
+</div>
+<!-- Wed: Current Active -->
+<div class="flex flex-col items-center gap-1.5 p-1.5 rounded-lg bg-secondary-fixed/40 shadow-xs">
+<span class="font-label-sm text-label-sm font-bold text-secondary-container">W</span>
+<div class="w-6 h-6 rounded-full bg-secondary-container text-on-primary flex items-center justify-center animate-pulse">
+<span class="w-2 h-2 rounded-full bg-surface-container-lowest"></span>
+</div>
+<span class="font-label-sm text-label-sm font-mono font-bold text-secondary-container">TODAY</span>
+</div>
+<!-- Thu -->
+<div class="flex flex-col items-center gap-1.5 p-1.5 rounded-lg bg-surface-container-lowest">
+<span class="font-label-sm text-label-sm text-outline">T</span>
+<div class="w-6 h-6 rounded-full bg-surface-container flex items-center justify-center">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span>
+</div>
+<span class="font-label-sm text-label-sm font-mono text-outline">-</span>
+</div>
+<!-- Fri -->
+<div class="flex flex-col items-center gap-1.5 p-1.5 rounded-lg bg-surface-container-lowest">
+<span class="font-label-sm text-label-sm text-outline">F</span>
+<div class="w-6 h-6 rounded-full bg-surface-container flex items-center justify-center">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span>
+</div>
+<span class="font-label-sm text-label-sm font-mono text-outline">-</span>
+</div>
+<!-- Sat -->
+<div class="flex flex-col items-center gap-1.5 p-1.5 rounded-lg bg-surface-container-lowest">
+<span class="font-label-sm text-label-sm text-outline">S</span>
+<div class="w-6 h-6 rounded-full bg-surface-container flex items-center justify-center">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span>
+</div>
+<span class="font-label-sm text-label-sm font-mono text-outline">-</span>
+</div>
+<!-- Sun -->
+<div class="flex flex-col items-center gap-1.5 p-1.5 rounded-lg bg-surface-container-lowest">
+<span class="font-label-sm text-label-sm text-outline">S</span>
+<div class="w-6 h-6 rounded-full bg-surface-container flex items-center justify-center">
+<span class="w-1.5 h-1.5 rounded-full bg-outline"></span>
+</div>
+<span class="font-label-sm text-label-sm font-mono text-outline">-</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Active Sprint Focus Card -->
+<div class="bg-surface-container-lowest rounded-xl p-6 shadow-sm flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px] text-secondary-container">target</span>
+<h2 class="font-title-lg text-title-lg font-bold text-on-surface">Active Sprint Focus</h2>
+</div>
+<span class="text-outline font-label-sm text-label-sm">Curated Media</span>
+</div>
+<div class="flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-on-surface font-semibold">Diagnostic Confidence</span>
+<span class="font-label-sm text-label-sm text-primary-container font-bold">78% • Intermediate</span>
+</div>
+<div class="w-full h-1.5 bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary-container rounded-full" style="width: 78%"></div>
+</div>
+</div>
+<!-- Video Preview Thumbnail Component -->
+<div class="relative rounded-lg overflow-hidden group cursor-pointer shadow-sm">
+<div class="bg-cover bg-center w-full h-44 transition-transform duration-500 group-hover:scale-105" data-alt="Technical workspace screen showing Python machine learning notebook with scikit-learn cross-validation code and data split distribution plots in modern minimal lighting with soft sage green and charcoal accents." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCsQm8wCZ_Bpuy1OmXJrguhaWTqsnxK4JQmVpvcjGfcXxIYBvGIm7PmfpsjWdXvMktLPVNsuOQTIVYmdrT3-6ScJR_u0V9RJDI3eiNIgi5meUkLZezY23Kjv1gs3jiPWtryZKvb21yJYeR135FTJynVO5RNHy_hBNkYzRdAXeHeGzvm6jyomSOmlJe9AGF3q1Bw5n16-1tLq4F5mTnALpjH72S4qSCFqwMvRPI3K_NOnGj9H5F_5sZqqw')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-on-surface/90 via-on-surface/30 to-transparent flex flex-col justify-between p-3.5">
+<div class="flex justify-between items-start">
+<span class="px-2 py-0.5 rounded bg-surface-container-lowest/90 backdrop-blur-sm text-on-surface font-label-sm text-label-sm font-semibold">
+                14 min video
+              </span>
+<span class="px-2 py-0.5 rounded bg-primary-container text-on-primary font-label-sm text-label-sm font-bold">
+                94% match
+              </span>
+</div>
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-full bg-secondary-container text-on-primary flex items-center justify-center shrink-0 shadow-md group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">play_arrow</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-bold text-surface-container-lowest leading-tight line-clamp-2">
+                  Cross-validation explained: Why standard train-test fails
+                </span>
+<span class="text-outline-variant font-label-sm text-label-sm mt-0.5">Prof. S. Narang • Princeton ML Lab</span>
+</div>
+</div>
+</div>
+</div>
+<button class="w-full py-2.5 px-3 rounded-lg bg-surface-container-low text-primary-container hover:bg-surface-container transition-colors font-label-md text-label-md font-bold flex items-center justify-center gap-1.5" type="button">
+<span>Watch in learning modal</span>
+<span class="material-symbols-outlined text-[16px]">open_in_new</span>
+</button>
+</div>
+<!-- Need to re-adjust Card -->
+<div class="bg-surface-container-low rounded-xl p-5 shadow-sm flex flex-col gap-3">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px] text-outline">tune</span>
+<h2 class="font-title-lg text-title-lg font-bold text-on-surface">Need to re-adjust?</h2>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+          Work getting demanding? Inform SkillAlpha to stretch your 12-week schedule without losing momentum or breaking prerequisites.
+        </p>
+<div class="flex items-center gap-2 pt-1">
+<button class="flex-1 py-2 px-3 rounded-lg bg-surface-container-lowest text-on-surface hover:bg-surface-container-highest transition-colors font-label-md text-label-md font-bold text-center shadow-xs" type="button">
+            Recalibrate sprint
+          </button>
+<button class="py-2 px-3 rounded-lg bg-surface-container-lowest text-on-surface-variant hover:text-error transition-colors font-label-md text-label-md font-semibold shadow-xs" type="button">
+            Pause
+          </button>
+</div>
+</div>
+</div>
+</div>
+</div></div></main><footer class="w-full bg-surface-container-lowest border-t border-surface-variant py-8"><div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-space-md font-body-sm text-body-sm text-on-surface-variant"><div class="flex items-center gap-space-sm"><div class="w-5 h-5 rounded bg-primary-container flex items-center justify-center text-on-primary"><span class="material-symbols-outlined text-[14px]">north_east</span></div><span>SkillAlpha © 2025 SkillAlpha Intelligence Inc.</span></div><div class="flex flex-wrap items-center justify-center gap-space-lg"><a class="hover:text-on-surface transition-colors" data-path="product" href="#">Product</a><a class="hover:text-on-surface transition-colors" data-path="resources" href="#">Resources</a><a class="hover:text-on-surface transition-colors" data-path="about" href="#">About</a><a class="hover:text-on-surface transition-colors" data-path="github" href="#">GitHub</a><a class="hover:text-on-surface transition-colors" data-path="privacy" href="#">Privacy</a><a class="hover:text-on-surface transition-colors" data-path="terms" href="#">Terms</a></div></div></footer></body></html>
