@@ -14,7 +14,9 @@ class Settings(BaseSettings):
     # Database
     DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./skillalpha.db")
     
-    # LLM (Optional)
+    # LLM Integration (Groq / OpenAI)
+    GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", os.getenv("LLM_API_KEY", ""))
+    LLM_MODEL: str = os.getenv("LLM_MODEL", "llama-3.3-70b-versatile")
     LLM_API_KEY: str = os.getenv("LLM_API_KEY", "")
     
     class Config:

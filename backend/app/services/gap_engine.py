@@ -98,7 +98,18 @@ def evaluate_skill_gaps(
         else:
             focus_skills.append(skill.name)
             
-    # Generate transparent route explanation
+    # 1. Try Groq LLM generated route explanation if API key is present
+    from app.services.llm_service import generate_llm_route_reasoning
+    llm_explanation = generate_llm_route_reasoning(
+        goal=target_skills[0].domain if target_skills else "Target Goal",
+        skipped=skipped_skills,
+        focus=focus_skills,
+        reinforce=reinforce_skills
+    )
+    if llm_explanation:
+        return evaluated_skills, llm_explanation
+
+    # 2. Fallback to transparent rule-based route explanation
     reason_parts = []
     if skipped_skills:
         skipped_str = ", ".join(skipped_skills[:3])
