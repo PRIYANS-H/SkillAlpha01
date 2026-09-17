@@ -19,10 +19,24 @@ from app.api.feedback_router import router as feedback_router
 from app.api.admin_router import router as admin_router
 from app.api.content_router import router as content_router
 
+from app.models.db import Base, engine, SessionLocal
+from app.models.models import Skill
+from seed import seed_database
+
 logger = logging.getLogger("skillalpha")
 
 # Initialize database tables
 Base.metadata.create_all(bind=engine)
+
+# Auto-seed database on startup if empty
+try:
+    db = SessionLocal()
+    if db.query(Skill).count() == 0:
+        logger.info("Database is empty. Auto-seeding initial ontology & resources...")
+        seed_database()
+    db.close()
+except Exception as e:
+    logger.error(f"Auto-seed check failed: {e}")
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -30,7 +44,7 @@ app = FastAPI(
     openapi_url=f"{settings.API_V1_STR}/openapi.json"
 )
 
-# Explicit CORS configuration (No wildcard origins with credentials)
+# Explicit CORS configuration with Vercel & Render production support
 origins = [
     "http://localhost:5173",
     "http://127.0.0.1:5173",
@@ -41,6 +55,7 @@ origins = [
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
+    allow_origin_regex=r"https://.*\.vercel\.app|https://.*\.onrender\.com",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
