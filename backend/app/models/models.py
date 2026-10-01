@@ -9,6 +9,9 @@ from app.models.db import Base
 def generate_uuid():
     return str(uuid.uuid4())
 
+def utc_now():
+    return datetime.datetime.now(datetime.timezone.utc)
+
 class User(Base):
     __tablename__ = "users"
     
@@ -18,8 +21,8 @@ class User(Base):
     full_name = Column(String(255), nullable=True)
     role = Column(String(50), default="USER", nullable=False) # USER, ADMIN
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
 
     profile = relationship("Profile", back_populates="user", uselist=False)
     roadmaps = relationship("Roadmap", back_populates="user")
@@ -41,8 +44,8 @@ class Profile(Base):
     duration_weeks = Column(Integer, default=12)
     learning_preferences = Column(Text, nullable=True) # JSON list: ["VIDEO", "DOCUMENTATION"]
     github_username = Column(String(100), nullable=True)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
 
     user = relationship("User", back_populates="profile")
 
@@ -56,7 +59,7 @@ class Skill(Base):
     description = Column(Text, nullable=True)
     domain = Column(String(100), nullable=False, index=True) # Machine Learning, Web Dev, Data, etc.
     difficulty = Column(String(50), default="INTERMEDIATE") # BEGINNER, INTERMEDIATE, ADVANCED, EXPERT
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
 
     user_skills = relationship("UserSkill", back_populates="skill")
     resource_skills = relationship("ResourceSkill", back_populates="skill")
@@ -81,7 +84,7 @@ class UserSkill(Base):
     confidence_score = Column(Float, default=0.5) # 0.0 to 1.0
     status = Column(String(50), default="MISSING") # MASTERED, STRONG, NEEDS_REINFORCEMENT, MISSING, BLOCKED
     evidence_count = Column(Integer, default=0)
-    last_assessed_at = Column(DateTime, default=datetime.datetime.utcnow)
+    last_assessed_at = Column(DateTime, default=utc_now)
 
     user = relationship("User", back_populates="user_skills")
     skill = relationship("Skill", back_populates="user_skills")
@@ -103,8 +106,8 @@ class Resource(Base):
     freshness_score = Column(Float, default=0.95)
     engagement_score = Column(Float, default=0.80)
     verified = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
 
     resource_skills = relationship("ResourceSkill", back_populates="resource")
     feedback = relationship("ResourceFeedback", back_populates="resource")
@@ -129,7 +132,7 @@ class ResourceFeedback(Base):
     user_id = Column(String(36), ForeignKey("users.id"), nullable=False)
     is_useful = Column(Boolean, nullable=False)
     rating_reason = Column(String(255), nullable=True) # TOO_EASY, TOO_HARD, TOO_LONG, NOT_RELEVANT, HELPFUL
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
 
     resource = relationship("Resource", back_populates="feedback")
 
@@ -148,8 +151,8 @@ class Roadmap(Base):
     progress_percent = Column(Float, default=0.0)
     route_reasoning = Column(Text, nullable=True) # "Why your route looks like this" explanation
     is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
 
     user = relationship("User", back_populates="roadmaps")
     milestones = relationship("RoadmapMilestone", back_populates="roadmap", cascade="all, delete-orphan")
@@ -182,8 +185,8 @@ class RoadmapTask(Base):
     sequence_order = Column(Integer, nullable=False)
     status = Column(String(50), default="NOT_STARTED") # NOT_STARTED, IN_PROGRESS, COMPLETED, SKIPPED
     reason_why_next = Column(Text, nullable=True)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
 
     milestone = relationship("RoadmapMilestone", back_populates="tasks")
     task_resources = relationship("TaskResource", back_populates="task", cascade="all, delete-orphan")
@@ -210,7 +213,7 @@ class TaskProgress(Base):
     id = Column(String(36), primary_key=True, default=generate_uuid)
     task_id = Column(String(36), ForeignKey("roadmap_tasks.id"), nullable=False)
     user_id = Column(String(36), ForeignKey("users.id"), nullable=False)
-    started_at = Column(DateTime, default=datetime.datetime.utcnow)
+    started_at = Column(DateTime, default=utc_now)
     completed_at = Column(DateTime, nullable=True)
     time_spent_minutes = Column(Integer, default=0)
     self_evaluation = Column(String(50), nullable=True) # GOT_IT, SHAKY, LOST
@@ -224,7 +227,7 @@ class LearningSession(Base):
     id = Column(String(36), primary_key=True, default=generate_uuid)
     user_id = Column(String(36), ForeignKey("users.id"), nullable=False)
     task_id = Column(String(36), ForeignKey("roadmap_tasks.id"), nullable=False)
-    started_at = Column(DateTime, default=datetime.datetime.utcnow)
+    started_at = Column(DateTime, default=utc_now)
     ended_at = Column(DateTime, nullable=True)
     duration_seconds = Column(Integer, default=0)
     notes = Column(Text, nullable=True)
@@ -268,7 +271,7 @@ class AssessmentAttempt(Base):
     score = Column(Float, nullable=False)
     max_score = Column(Float, nullable=False)
     passed = Column(Boolean, default=True)
-    completed_at = Column(DateTime, default=datetime.datetime.utcnow)
+    completed_at = Column(DateTime, default=utc_now)
 
     user = relationship("User", back_populates="assessment_attempts")
     assessment = relationship("Assessment")
@@ -280,7 +283,7 @@ class SavedResource(Base):
     id = Column(String(36), primary_key=True, default=generate_uuid)
     user_id = Column(String(36), ForeignKey("users.id"), nullable=False)
     resource_id = Column(String(36), ForeignKey("resources.id"), nullable=False)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
 
     user = relationship("User", back_populates="saved_resources")
     resource = relationship("Resource")
@@ -294,7 +297,7 @@ class Notification(Base):
     title = Column(String(255), nullable=False)
     message = Column(Text, nullable=False)
     is_read = Column(Boolean, default=False)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)
 
     user = relationship("User", back_populates="notifications")
 
@@ -308,7 +311,7 @@ class Content(Base):
     value = Column(Text, nullable=False)
     locale = Column(String(10), default="en")
     updated_by = Column(String(255), nullable=True)
-    updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
 
 
 class AuditLog(Base):
@@ -320,4 +323,4 @@ class AuditLog(Base):
     resource_type = Column(String(100), nullable=False)
     details = Column(Text, nullable=True)
     ip_address = Column(String(100), nullable=True)
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, default=utc_now)

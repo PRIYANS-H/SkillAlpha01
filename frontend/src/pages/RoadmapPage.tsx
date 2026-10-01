@@ -100,8 +100,8 @@ export const RoadmapPage: React.FC = () => {
   }
 
   // Calculate dates for header schedule banner
-  const startDate = new Date();
-  const endDate = new Date();
+  const startDate = roadmap.created_at ? new Date(roadmap.created_at) : new Date();
+  const endDate = new Date(startDate.getTime());
   endDate.setDate(startDate.getDate() + (roadmap.duration_weeks * 7));
 
   const dailyHours = (roadmap.hours_per_week / 5.0).toFixed(1);
@@ -328,7 +328,7 @@ export const RoadmapPage: React.FC = () => {
                   </div>
 
                   <Link
-                    to="/learn"
+                    to={`/learn/${selectedTask.id}`}
                     className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-xl bg-secondary-container text-on-primary font-bold text-xs hover:brightness-105 transition-all shadow-sm"
                   >
                     <Play className="w-4 h-4" />

@@ -1,12 +1,15 @@
 import React, { useEffect, useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
 import { 
   Play, Pause, CheckCircle2, Clock, Sparkles, ExternalLink, 
-  ThumbsUp, ThumbsDown, Award, HelpCircle, ArrowRight, BookOpen 
+  ThumbsUp, ThumbsDown, Award, HelpCircle, ArrowRight, BookOpen, RefreshCw 
 } from 'lucide-react';
 import { apiClient } from '../api/client';
 import { TodayLearning } from '../types';
+import { ResourceCard } from '../components/resources/ResourceCard';
 
 export const TodayPage: React.FC = () => {
+  const { taskId } = useParams<{ taskId?: string }>();
   const [todayData, setTodayData] = useState<TodayLearning | null>(null);
   const [loading, setLoading] = useState(true);
   const [sessionActive, setSessionActive] = useState(false);
@@ -18,11 +21,35 @@ export const TodayPage: React.FC = () => {
   const [isCompleted, setIsCompleted] = useState(false);
   const [feedbackSubmitted, setFeedbackSubmitted] = useState<Record<string, boolean>>({});
 
-  const fetchTodayQueue = async () => {
+  // Skill Self-Check Quiz State
+  const [assessment, setAssessment] = useState<any | null>(null);
+  const [quizAnswer, setQuizAnswer] = useState<number | null>(null);
+  const [quizSubmitted, setQuizSubmitted] = useState(false);
+  const [quizResult, setQuizResult] = useState<any | null>(null);
+
+  const fetchSkillAssessment = async (skillId: string) => {
+    try {
+      const res: any = await apiClient.get(`/assessments/by-skill/${skillId}`);
+      if (res && res.questions && res.questions.length > 0) {
+        setAssessment(res);
+      } else {
+        setAssessment(null);
+      }
+    } catch (err) {
+      setAssessment(null);
+    }
+  };
+
+  const fetchTodayQueue = async (targetId?: string) => {
     setLoading(true);
     try {
-      const res: any = await apiClient.get('/recommendations/today');
+      const effectiveId = targetId || taskId;
+      const url = effectiveId ? `/recommendations/today?task_id=${effectiveId}` : '/recommendations/today';
+      const res: any = await apiClient.get(url);
       setTodayData(res);
+      if (res?.task?.skill_id) {
+        fetchSkillAssessment(res.task.skill_id);
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -32,7 +59,7 @@ export const TodayPage: React.FC = () => {
 
   useEffect(() => {
     fetchTodayQueue();
-  }, []);
+  }, [taskId]);
 
   // Timer Effect
   useEffect(() => {
@@ -63,6 +90,21 @@ export const TodayPage: React.FC = () => {
     setSessionActive(false);
   };
 
+  const handleVerifyQuiz = async () => {
+    if (!assessment || quizAnswer === null) return;
+    const currentQ = assessment.questions[0];
+    try {
+      const res: any = await apiClient.post(`/assessments/${assessment.id}/attempt`, {
+        answers: { [currentQ.id]: quizAnswer }
+      });
+      setQuizResult(res);
+      setQuizSubmitted(true);
+    } catch (err) {
+      console.error(err);
+      setQuizSubmitted(true);
+    }
+  };
+
   const handleCompleteTask = async () => {
     if (!todayData?.task) return;
     try {
@@ -82,6 +124,18 @@ export const TodayPage: React.FC = () => {
       console.error(err);
       setIsCompleted(true);
     }
+  };
+
+  const handleNextTask = () => {
+    setIsCompleted(false);
+    setSecondsElapsed(0);
+    setSessionId(null);
+    setSessionActive(false);
+    setAssessment(null);
+    setQuizAnswer(null);
+    setQuizSubmitted(false);
+    setQuizResult(null);
+    fetchTodayQueue();
   };
 
   const handleFeedback = async (resourceId: string, isUseful: boolean) => {
@@ -112,6 +166,60 @@ export const TodayPage: React.FC = () => {
 
   const task = todayData?.task;
 
+  // Empty state: No active roadmap found
+  if (!todayData?.roadmap_id && !task) {
+    return (
+      <div className="w-full pt-28 pb-16 max-w-3xl mx-auto px-4 text-center">
+        <div className="bg-surface-container-lowest rounded-2xl p-8 border border-outline-variant/60 shadow-sm">
+          <BookOpen className="w-12 h-12 text-primary mx-auto mb-4" />
+          <h1 className="text-2xl font-bold text-on-surface mb-2">No Active Learning Roadmap</h1>
+          <p className="text-xs text-on-surface-variant max-w-md mx-auto mb-6 leading-relaxed">
+            {todayData?.reason_why_today || "Complete onboarding to generate your personalized learning plan."}
+          </p>
+          <Link
+            to="/create"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-secondary-container text-on-primary font-bold text-sm"
+          >
+            <Sparkles className="w-4 h-4" />
+            <span>Build My Learning Path</span>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // All roadmap tasks completed state
+  if (todayData?.milestone_title === "Roadmap Completed" && !isCompleted) {
+    return (
+      <div className="w-full pt-28 pb-16 max-w-3xl mx-auto px-4 text-center">
+        <div className="bg-surface-container-lowest rounded-2xl p-8 border border-outline-variant/60 shadow-sm">
+          <div className="w-14 h-14 rounded-full bg-primary-fixed/50 text-primary flex items-center justify-center mx-auto mb-4">
+            <Award className="w-7 h-7" />
+          </div>
+          <h1 className="text-2xl font-bold text-on-surface mb-2">Roadmap Mastery Achieved!</h1>
+          <p className="text-xs text-on-surface-variant max-w-md mx-auto mb-6 leading-relaxed">
+            {todayData?.reason_why_today || "Congratulations! You have completed every milestone and practical task in your curriculum."}
+          </p>
+          <div className="flex items-center justify-center gap-3">
+            <Link
+              to="/progress"
+              className="px-5 py-2.5 rounded-xl bg-secondary-container text-on-primary font-bold text-xs"
+            >
+              View Mastery Profile
+            </Link>
+            <Link
+              to={`/roadmap/${todayData.roadmap_id}`}
+              className="px-5 py-2.5 rounded-xl bg-surface-container-low text-on-surface font-semibold text-xs hover:bg-surface-container"
+            >
+              Review Roadmap
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Task completed state
   if (!task || isCompleted) {
     return (
       <div className="w-full pt-28 pb-16 max-w-3xl mx-auto px-4 text-center">
@@ -121,23 +229,28 @@ export const TodayPage: React.FC = () => {
           </div>
           <h1 className="text-2xl font-bold text-on-surface mb-2">Today's Learning Completed!</h1>
           <p className="text-xs text-on-surface-variant max-w-md mx-auto mb-6 leading-relaxed">
-            Your evidence profile and skill scores have been updated based on your self-evaluation. Take a break or explore additional resources.
+            Your evidence profile and skill scores have been updated based on your self-evaluation. Take a break or continue to the next scheduled task.
           </p>
           <div className="flex items-center justify-center gap-3">
             <button
-              onClick={() => {
-                setIsCompleted(false);
-                fetchTodayQueue();
-              }}
-              className="px-5 py-2.5 rounded-xl bg-surface-container-low text-on-surface font-semibold text-xs hover:bg-surface-container"
+              onClick={handleNextTask}
+              className="px-5 py-2.5 rounded-xl bg-secondary-container text-on-primary font-bold text-xs hover:brightness-105"
             >
               Check Next Task
             </button>
+            <Link
+              to={`/roadmap/${todayData?.roadmap_id || 'active'}`}
+              className="px-5 py-2.5 rounded-xl bg-surface-container-low text-on-surface font-semibold text-xs hover:bg-surface-container"
+            >
+              View Full Roadmap
+            </Link>
           </div>
         </div>
       </div>
     );
   }
+
+  const firstQuestion = assessment?.questions?.[0];
 
   return (
     <div className="w-full pt-20 pb-16 bg-surface min-h-screen">
@@ -191,55 +304,79 @@ export const TodayPage: React.FC = () => {
             Recommended Resource Stack ({task.resources?.length || 0})
           </h2>
 
-          <div className="space-y-3 mb-8">
+          <div className="space-y-4 mb-8">
             {task.resources?.map((res, index) => (
-              <div
+              <ResourceCard
                 key={res.resource_id}
-                className="p-4 rounded-xl bg-surface-container-low/70 border border-outline-variant/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-surface-container transition-colors"
-              >
-                <div className="flex items-start gap-3">
-                  <span className="w-6 h-6 rounded bg-primary/10 text-primary flex items-center justify-center font-bold text-xs mt-0.5">
-                    {index + 1}
-                  </span>
-                  <div>
-                    <a
-                      href={res.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="font-bold text-sm text-on-surface hover:text-primary flex items-center gap-1.5"
-                    >
-                      <span>{res.title}</span>
-                      <ExternalLink className="w-3.5 h-3.5 text-on-surface-variant" />
-                    </a>
-                    <p className="text-xs text-on-surface-variant mt-0.5">{res.recommendation_reason}</p>
-                    <div className="flex items-center gap-2 mt-1 text-[11px] text-on-surface-variant">
-                      <span className="bg-surface-container px-2 py-0.5 rounded font-medium">{res.provider}</span>
-                      <span>{res.duration_minutes} min read/lab</span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Useful Feedback Controls */}
-                <div className="flex items-center gap-2 self-end sm:self-center">
-                  <span className="text-[10px] text-on-surface-variant">Useful?</span>
-                  <button
-                    onClick={() => handleFeedback(res.resource_id, true)}
-                    className={`p-1.5 rounded hover:bg-primary-fixed/40 transition-colors ${
-                      feedbackSubmitted[res.resource_id] ? 'text-primary' : 'text-on-surface-variant'
-                    }`}
-                  >
-                    <ThumbsUp className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => handleFeedback(res.resource_id, false)}
-                    className="p-1.5 rounded hover:bg-error-container/40 text-on-surface-variant transition-colors"
-                  >
-                    <ThumbsDown className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
+                resource={res}
+                index={index}
+                onFeedback={handleFeedback}
+                isFeedbackSubmitted={!!feedbackSubmitted[res.resource_id]}
+              />
             ))}
           </div>
+
+          {/* Self-Check Knowledge Verification Quiz */}
+          {firstQuestion && (
+            <div className="pt-6 border-t border-outline-variant/40 mb-6">
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-xs uppercase tracking-wider font-bold text-primary flex items-center gap-1.5">
+                  <HelpCircle className="w-4 h-4" /> Quick Self-Check Verification
+                </h2>
+                <span className="text-[10px] text-on-surface-variant font-semibold">
+                  Benchmark: {assessment.skill_name}
+                </span>
+              </div>
+
+              <div className="p-4 rounded-xl bg-surface-container-low border border-outline-variant/40 mb-3">
+                <div className="text-sm font-semibold text-on-surface mb-3">
+                  {firstQuestion.question_text}
+                </div>
+                <div className="space-y-2 mb-3">
+                  {firstQuestion.options.map((opt: string, idx: number) => (
+                    <label
+                      key={idx}
+                      className={`flex items-center gap-2 p-2.5 rounded-lg border text-xs cursor-pointer transition-colors ${
+                        quizAnswer === idx
+                          ? 'border-primary bg-primary-fixed/20'
+                          : 'border-outline-variant/40 bg-surface-container-lowest hover:border-outline'
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name="self_check_quiz"
+                        checked={quizAnswer === idx}
+                        onChange={() => setQuizAnswer(idx)}
+                        disabled={quizSubmitted}
+                        className="accent-primary"
+                      />
+                      <span className="text-on-surface">{opt}</span>
+                    </label>
+                  ))}
+                </div>
+
+                {!quizSubmitted ? (
+                  <button
+                    type="button"
+                    onClick={handleVerifyQuiz}
+                    disabled={quizAnswer === null}
+                    className="px-4 py-2 rounded-lg bg-primary text-on-primary text-xs font-semibold hover:bg-primary-container disabled:opacity-50 transition-colors"
+                  >
+                    Verify Answer
+                  </button>
+                ) : (
+                  <div className="mt-2 p-3 rounded-lg bg-surface-container text-xs text-on-surface">
+                    <span className="font-bold text-primary block mb-1">
+                      {quizResult?.passed ? "✓ Correct! Mastery evidence calibrated." : "Insight & Explanation:"}
+                    </span>
+                    <p className="text-on-surface-variant leading-relaxed">
+                      {firstQuestion.explanation || quizResult?.feedback}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
 
           {/* Reflection Checkpoint */}
           <div className="pt-6 border-t border-outline-variant/40">

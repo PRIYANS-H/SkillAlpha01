@@ -5,6 +5,7 @@ from app.models.db import get_db
 from app.models.models import Resource, SavedResource, User
 from app.schemas.schemas import APIResponse
 from app.security.auth import get_current_user
+from app.services.resource_matcher import resolve_resource_matches
 
 router = APIRouter(prefix="/resources", tags=["Resources"])
 
@@ -53,6 +54,34 @@ def get_resource_detail(resource_id: str, db: Session = Depends(get_db)):
     if not r:
         return APIResponse(error={"code": "NOT_FOUND", "message": "Resource not found"})
     return APIResponse(data=serialize_resource(r))
+
+
+@router.get("/{resource_id}/matches", response_model=APIResponse)
+def get_resource_matches(
+    resource_id: str,
+    search_hint: Optional[str] = Query(None),
+    resource_type: Optional[str] = Query(None),
+    name: Optional[str] = Query(None),
+    type: Optional[str] = Query(None),
+    db: Session = Depends(get_db)
+):
+    r = db.query(Resource).filter(Resource.id == resource_id).first()
+    effective_type = type or resource_type or (r.resource_type if r else "VIDEO")
+    effective_title = name or (r.title if r else search_hint or "Resource")
+    effective_provider = r.provider if r else "Web"
+    effective_url = r.url if r else ""
+    effective_desc = r.description if r else ""
+
+    result = resolve_resource_matches(
+        resource_id=resource_id,
+        title=effective_title,
+        resource_type=effective_type,
+        provider=effective_provider,
+        url=effective_url,
+        description=effective_desc,
+        search_hint=search_hint
+    )
+    return APIResponse(data=result)
 
 
 @router.post("/{resource_id}/save", response_model=APIResponse)

@@ -62,3 +62,23 @@ def update_user_profile(
     db.commit()
     db.refresh(profile)
     return APIResponse(data={"message": "Profile updated successfully"})
+
+
+@router.get("/me/skills", response_model=APIResponse)
+def get_user_skills(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    user_skills = db.query(UserSkill).filter(UserSkill.user_id == current_user.id).all()
+    res = [
+        {
+            "id": us.id,
+            "skill_id": us.skill_id,
+            "skill_name": us.skill.name if us.skill else "Unknown Skill",
+            "domain": us.skill.domain if us.skill else "",
+            "skill_score": us.skill_score,
+            "confidence_score": us.confidence_score,
+            "status": us.status,
+            "evidence_count": us.evidence_count,
+            "last_assessed_at": us.last_assessed_at.isoformat() if us.last_assessed_at else None
+        }
+        for us in user_skills
+    ]
+    return APIResponse(data=res)

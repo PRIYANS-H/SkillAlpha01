@@ -19,6 +19,9 @@ class Settings(BaseSettings):
     LLM_MODEL: str = os.getenv("LLM_MODEL", "llama-3.3-70b-versatile")
     LLM_API_KEY: str = os.getenv("LLM_API_KEY", "")
     
+    # YouTube Integration
+    YOUTUBE_DATA_API_KEY: str = os.getenv("YOUTUBE_DATA_API_KEY", "")
+    
     model_config = SettingsConfigDict(case_sensitive=True)
 
 settings = Settings()

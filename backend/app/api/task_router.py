@@ -32,33 +32,57 @@ def complete_task(
     progress_entry = TaskProgress(
         task_id=task.id,
         user_id=current_user.id,
-        completed_at=datetime.datetime.utcnow(),
+        completed_at=datetime.datetime.now(datetime.timezone.utc),
         time_spent_minutes=req.time_spent_minutes,
         self_evaluation=req.self_evaluation
     )
     db.add(progress_entry)
 
-    # Evidence-based learning loop: update UserSkill status if self-evaluation indicates reinforcement needed
-    if req.self_evaluation in ["SHAKY", "LOST"] and task.skill_id:
+    # Evidence-based learning loop: update UserSkill status based on self-evaluation
+    if task.skill_id:
         from app.models.models import UserSkill
         user_skill = db.query(UserSkill).filter(
             UserSkill.user_id == current_user.id,
             UserSkill.skill_id == task.skill_id
         ).first()
-        if not user_skill:
-            user_skill = UserSkill(
-                user_id=current_user.id,
-                skill_id=task.skill_id,
-                skill_score=0.40,
-                confidence_score=0.35,
-                status="NEEDS_REINFORCEMENT",
-                evidence_count=1
-            )
-            db.add(user_skill)
-        else:
-            user_skill.status = "NEEDS_REINFORCEMENT"
-            user_skill.confidence_score = max(0.20, (user_skill.confidence_score or 0.5) - 0.15)
-            user_skill.evidence_count = (user_skill.evidence_count or 0) + 1
+
+        now_utc = datetime.datetime.now(datetime.timezone.utc)
+        if req.self_evaluation in ["SHAKY", "LOST"]:
+            if not user_skill:
+                user_skill = UserSkill(
+                    user_id=current_user.id,
+                    skill_id=task.skill_id,
+                    skill_score=0.40,
+                    confidence_score=0.35,
+                    status="NEEDS_REINFORCEMENT",
+                    evidence_count=1,
+                    last_assessed_at=now_utc
+                )
+                db.add(user_skill)
+            else:
+                user_skill.status = "NEEDS_REINFORCEMENT"
+                user_skill.confidence_score = max(0.20, (user_skill.confidence_score or 0.5) - 0.15)
+                user_skill.evidence_count = (user_skill.evidence_count or 0) + 1
+                user_skill.last_assessed_at = now_utc
+        elif req.self_evaluation == "GOT_IT":
+            if not user_skill:
+                user_skill = UserSkill(
+                    user_id=current_user.id,
+                    skill_id=task.skill_id,
+                    skill_score=0.75,
+                    confidence_score=0.80,
+                    status="STRONG",
+                    evidence_count=1,
+                    last_assessed_at=now_utc
+                )
+                db.add(user_skill)
+            else:
+                new_score = min(1.0, round((user_skill.skill_score or 0.5) + 0.15, 2))
+                user_skill.skill_score = new_score
+                user_skill.confidence_score = min(1.0, round((user_skill.confidence_score or 0.5) + 0.10, 2))
+                user_skill.status = "MASTERED" if new_score >= 0.80 else "STRONG"
+                user_skill.evidence_count = (user_skill.evidence_count or 0) + 1
+                user_skill.last_assessed_at = now_utc
 
     # Recalculate roadmap overall progress percentage
     milestone = task.milestone

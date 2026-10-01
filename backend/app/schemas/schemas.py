@@ -178,6 +178,11 @@ class TaskCompleteRequest(BaseModel):
     self_evaluation: str = "GOT_IT" # GOT_IT, SHAKY, LOST
     notes: Optional[str] = None
 
+class LearningSessionUpdateRequest(BaseModel):
+    duration_seconds: int = 0
+    notes: Optional[str] = None
+    status: str = "COMPLETED"
+
 # Assessment Schemas
 class AssessmentQuestionResponse(BaseModel):
     id: str

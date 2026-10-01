@@ -1,15 +1,20 @@
 import datetime
-from fastapi import APIRouter, Depends, HTTPException, status
+from typing import Optional
+from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from app.models.db import get_db
 from app.models.models import RoadmapTask, RoadmapMilestone, Roadmap, LearningSession, User
-from app.schemas.schemas import APIResponse
+from app.schemas.schemas import APIResponse, LearningSessionUpdateRequest
 from app.security.auth import get_current_user
 
 router = APIRouter(tags=["Learning & Recommendations"])
 
 @router.get("/recommendations/today", response_model=APIResponse)
-def get_today_learning(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def get_today_learning(
+    task_id: Optional[str] = Query(None),
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
     active_roadmap = db.query(Roadmap).filter(
         Roadmap.user_id == current_user.id,
         Roadmap.is_active == True
@@ -27,14 +32,24 @@ def get_today_learning(current_user: User = Depends(get_current_user), db: Sessi
     next_task = None
     milestone_title = None
 
-    for m in sorted(active_roadmap.milestones, key=lambda x: x.sequence_order):
-        for t in sorted(m.tasks, key=lambda x: x.sequence_order):
-            if t.status in ["NOT_STARTED", "IN_PROGRESS"]:
-                next_task = t
-                milestone_title = m.title
+    if task_id:
+        target_task = db.query(RoadmapTask).join(RoadmapMilestone).join(Roadmap).filter(
+            RoadmapTask.id == task_id,
+            Roadmap.user_id == current_user.id
+        ).first()
+        if target_task:
+            next_task = target_task
+            milestone_title = target_task.milestone.title if target_task.milestone else None
+
+    if not next_task:
+        for m in sorted(active_roadmap.milestones, key=lambda x: x.sequence_order):
+            for t in sorted(m.tasks, key=lambda x: x.sequence_order):
+                if t.status in ["NOT_STARTED", "IN_PROGRESS"]:
+                    next_task = t
+                    milestone_title = m.title
+                    break
+            if next_task:
                 break
-        if next_task:
-            break
 
     if not next_task:
         return APIResponse(data={
@@ -113,8 +128,9 @@ def start_learning_session(task_id: str, current_user: User = Depends(get_curren
 @router.patch("/learning-sessions/{session_id}", response_model=APIResponse)
 def update_learning_session(
     session_id: str,
+    req: Optional[LearningSessionUpdateRequest] = None,
     duration_seconds: int = 0,
-    notes: str = None,
+    notes: Optional[str] = None,
     status: str = "COMPLETED",
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
@@ -130,12 +146,16 @@ def update_learning_session(
             detail="Learning session not found or access denied."
         )
 
-    session.duration_seconds = duration_seconds
-    if notes:
-        session.notes = notes
-    session.status = status
-    if status == "COMPLETED":
-        session.ended_at = datetime.datetime.utcnow()
+    actual_duration = req.duration_seconds if req and req.duration_seconds else duration_seconds
+    actual_notes = req.notes if req and req.notes is not None else notes
+    actual_status = req.status if req and req.status else status
+
+    session.duration_seconds = actual_duration
+    if actual_notes:
+        session.notes = actual_notes
+    session.status = actual_status
+    if actual_status == "COMPLETED":
+        session.ended_at = datetime.datetime.now(datetime.timezone.utc)
         if session.task:
             session.task.status = "COMPLETED"
 

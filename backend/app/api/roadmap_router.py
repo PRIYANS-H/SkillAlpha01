@@ -1,8 +1,9 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from app.models.db import get_db
-from app.models.models import Roadmap, User
+from app.models.models import Roadmap, User, Profile
 from app.schemas.schemas import APIResponse, OnboardingRequest
+import json
 from app.security.auth import get_current_user
 from app.services.roadmap_service import generate_roadmap_for_user, adaptive_replan_roadmap
 
@@ -81,6 +82,18 @@ def create_roadmap(req: OnboardingRequest, current_user: User = Depends(get_curr
         self_reported_skills=self_reported,
         preferred_types=req.learning_preferences
     )
+
+    # Sync onboarding profile details
+    profile = db.query(Profile).filter(Profile.user_id == current_user.id).first()
+    if not profile:
+        profile = Profile(user_id=current_user.id)
+        db.add(profile)
+    profile.goal = req.goal
+    profile.available_hours = req.available_hours
+    profile.duration_weeks = req.duration_weeks
+    profile.learning_preferences = json.dumps(req.learning_preferences)
+    db.commit()
+
     return APIResponse(data=serialize_roadmap(roadmap))
 
 
