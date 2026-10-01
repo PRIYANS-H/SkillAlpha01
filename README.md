@@ -28,23 +28,30 @@ SkillAlpha is a real, production-oriented startup MVP that understands a learner
 
 ## Quick Start (Local Setup)
 
-### 1. Run Backend Server
+### 1. Configure Environment Variables
+Copy `.env.example` to `backend/.env` (or configure your keys):
+```bash
+cp .env.example backend/.env
+```
+* **YouTube Data API v3** (optional but recommended for dynamic videos): Set `YOUTUBE_DATA_API_KEY="AIza..."`
+* **Groq API Key** (optional for dynamic AI diagnostic questions): Set `GROQ_API_KEY="gsk_..."`
+
+### 2. Run Backend Server
 ```bash
 cd backend
 python -m pip install -r requirements.txt
-python seed.py
-uvicorn app.main:app --reload --port 8000
+python -m uvicorn app.main:app --reload --port 8000
 ```
 - Backend API running at `http://localhost:8000`
 - Interactive Swagger docs at `http://localhost:8000/docs`
 
-### 2. Run Backend Tests
+### 3. Run Backend Tests
 ```bash
 cd backend
 python -m pytest tests/test_api.py
 ```
 
-### 3. Run Frontend Development Server
+### 4. Run Frontend Development Server
 ```bash
 cd frontend
 npm install
@@ -54,7 +61,30 @@ npm run dev
 
 ---
 
-## Production Credentials (Pre-seeded)
+## Deployment (Vercel + Render)
+
+### Backend on Render
+- **Root Directory**: `backend`
+- **Build Command**: `pip install -r requirements.txt`
+- **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+- **Environment Variables**:
+  - `JWT_SECRET`: your secret key
+  - `DATABASE_URL`: `sqlite:///./skillalpha.db` (or PostgreSQL connection string)
+  - `YOUTUBE_DATA_API_KEY`: your Google Cloud API key
+  - `GROQ_API_KEY`: your Groq API key (optional)
+
+### Frontend on Vercel
+- **Root Directory**: `frontend`
+- **Framework Preset**: `Vite`
+- **Build Command**: `npm run build`
+- **Output Directory**: `dist`
+- **Environment Variables**:
+  - `VITE_API_URL`: your live Render backend URL (e.g. `https://skillalpha-api.onrender.com`)
+
+---
+
+## Pre-seeded Credentials
 
 - **Learner User**: `learner@skillalpha.com` / `learner123`
 - **Admin User**: `admin@skillalpha.com` / `admin123`
+
