@@ -68,6 +68,37 @@ def get_target_skill_graph_for_goal(db: Session, goal_name: str) -> List[Skill]:
             ("State Management & React Query", "Frontend", "ADVANCED"),
             ("Performance Optimization & Memoization", "Frontend", "EXPERT")
         ]
+    elif "data engineer" in goal_lower or "etl" in goal_lower or "pipeline" in goal_lower:
+        skill_names = [
+            ("SQL & Analytical Queries", "Data Engineering", "BEGINNER"),
+            ("Python Architecture", "Data Engineering", "BEGINNER"),
+            ("Data Modeling & Warehousing", "Data Engineering", "INTERMEDIATE"),
+            ("Apache Spark & Distributed Computing", "Data Engineering", "ADVANCED"),
+            ("Orchestration & Airflow", "Data Engineering", "ADVANCED"),
+            ("Docker & Containerization", "DevOps", "INTERMEDIATE")
+        ]
+    elif "devops" in goal_lower or "cloud" in goal_lower or "aws" in goal_lower:
+        skill_names = [
+            ("Linux Systems & Shell Scripting", "DevOps", "BEGINNER"),
+            ("Docker & Containerization", "DevOps", "INTERMEDIATE"),
+            ("Kubernetes Orchestration", "DevOps", "ADVANCED"),
+            ("Infrastructure as Code & Terraform", "DevOps", "ADVANCED"),
+            ("CI/CD Pipeline Automation", "DevOps", "INTERMEDIATE")
+        ]
+    elif "cybersecurity" in goal_lower or "security" in goal_lower:
+        skill_names = [
+            ("Network Fundamentals & Security", "Security", "BEGINNER"),
+            ("Web Security & OWASP Top 10", "Security", "INTERMEDIATE"),
+            ("Cryptography & Identity Hygiene", "Security", "INTERMEDIATE"),
+            ("Penetration Testing & Auditing", "Security", "ADVANCED")
+        ]
+    elif "mobile" in goal_lower or "flutter" in goal_lower or "react native" in goal_lower:
+        skill_names = [
+            ("Mobile UI Architecture", "Mobile", "BEGINNER"),
+            ("State Management & Reactivity", "Mobile", "INTERMEDIATE"),
+            ("REST & GraphQL Integration", "Mobile", "INTERMEDIATE"),
+            ("Native Device Access & Security", "Mobile", "ADVANCED")
+        ]
     else: # Default engineering path
         skill_names = [
             ("Python Architecture", "General", "BEGINNER"),

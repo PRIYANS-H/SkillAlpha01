@@ -1,5 +1,5 @@
 import os
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "SkillAlpha API"
@@ -19,7 +19,6 @@ class Settings(BaseSettings):
     LLM_MODEL: str = os.getenv("LLM_MODEL", "llama-3.3-70b-versatile")
     LLM_API_KEY: str = os.getenv("LLM_API_KEY", "")
     
-    class Config:
-        case_sensitive = True
+    model_config = SettingsConfigDict(case_sensitive=True)
 
 settings = Settings()

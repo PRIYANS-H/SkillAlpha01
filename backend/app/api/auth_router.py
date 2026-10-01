@@ -33,9 +33,9 @@ def register(req: UserRegisterRequest, db: Session = Depends(get_db)):
     db.commit()
 
     token = create_access_token({"sub": user.id, "email": user.email, "role": user.role})
-    user_resp = UserResponse.from_orm(user)
+    user_resp = UserResponse.model_validate(user)
     
-    return APIResponse(data={"access_token": token, "token_type": "bearer", "user": user_resp.dict()})
+    return APIResponse(data={"access_token": token, "token_type": "bearer", "user": user_resp.model_dump()})
 
 
 @router.post("/login", response_model=APIResponse)
@@ -48,15 +48,15 @@ def login(req: UserLoginRequest, db: Session = Depends(get_db)):
         return APIResponse(error={"code": "INACTIVE_ACCOUNT", "message": "User account is inactive."})
 
     token = create_access_token({"sub": user.id, "email": user.email, "role": user.role})
-    user_resp = UserResponse.from_orm(user)
+    user_resp = UserResponse.model_validate(user)
     
-    return APIResponse(data={"access_token": token, "token_type": "bearer", "user": user_resp.dict()})
+    return APIResponse(data={"access_token": token, "token_type": "bearer", "user": user_resp.model_dump()})
 
 
 @router.get("/me", response_model=APIResponse)
 def get_me(current_user: User = Depends(get_current_user)):
-    user_resp = UserResponse.from_orm(current_user)
-    return APIResponse(data=user_resp.dict())
+    user_resp = UserResponse.model_validate(current_user)
+    return APIResponse(data=user_resp.model_dump())
 
 
 @router.post("/logout", response_model=APIResponse)

@@ -1,5 +1,5 @@
 from typing import List, Optional, Any, Dict
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, ConfigDict
 from datetime import datetime
 
 # Standard API Response wrapper
@@ -26,8 +26,7 @@ class UserResponse(BaseModel):
     is_active: bool
     created_at: datetime
     
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class TokenResponse(BaseModel):
     access_token: str
@@ -52,8 +51,7 @@ class ProfileResponse(BaseModel):
     learning_preferences: Optional[List[str]] = None
     github_username: Optional[str] = None
     
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 # Skill Schemas
 class SkillBase(BaseModel):
@@ -67,8 +65,7 @@ class SkillResponse(SkillBase):
     id: str
     prerequisites: List[str] = []
     
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class UserSkillUpdate(BaseModel):
     skill_name: str
@@ -85,8 +82,7 @@ class UserSkillResponse(BaseModel):
     evidence_count: int
     last_assessed_at: datetime
     
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 # Resource Schemas
 class ResourceResponse(BaseModel):
@@ -105,8 +101,7 @@ class ResourceResponse(BaseModel):
     match_reason: Optional[str] = None
     skill_names: List[str] = []
     
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 # Onboarding / Roadmap Creation Request
 class OnboardingRequest(BaseModel):
@@ -139,8 +134,7 @@ class RoadmapTaskResponse(BaseModel):
     reason_why_next: Optional[str] = None
     resources: List[RoadmapTaskResourceResponse] = []
     
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class RoadmapMilestoneResponse(BaseModel):
     id: str
@@ -151,8 +145,7 @@ class RoadmapMilestoneResponse(BaseModel):
     is_completed: bool
     tasks: List[RoadmapTaskResponse] = []
     
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 class RoadmapResponse(BaseModel):
     id: str
@@ -169,8 +162,7 @@ class RoadmapResponse(BaseModel):
     created_at: datetime
     milestones: List[RoadmapMilestoneResponse] = []
     
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 # Today's Learning Response
 class TodayLearningResponse(BaseModel):
