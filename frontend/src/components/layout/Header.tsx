@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
-  GraduationCap, Search, Bell, User, LogOut, Shield, Compass, 
+  Search, Bell, User, LogOut, Shield, Compass, 
   Map, BookOpen, BookmarkCheck, BarChart3, Menu, X 
 } from 'lucide-react';
+import { SkillAlphaLogo } from '../brand/SkillAlphaLogo';
 
 interface HeaderProps {
   user?: any;
@@ -36,13 +37,10 @@ export const Header: React.FC<HeaderProps> = ({ user, onLogout }) => {
         
         {/* Brand Logo */}
         <div className="flex items-center gap-3">
-          <Link to="/" className="flex items-center gap-2.5 group">
-            <div className="w-9 h-9 rounded-xl bg-primary-container flex items-center justify-center text-on-primary font-bold shadow-sm group-hover:scale-105 transition-transform">
-              <GraduationCap className="w-5 h-5 text-on-primary" />
-            </div>
-            <span className="font-bold text-xl text-on-surface tracking-tight font-sans">SkillAlpha</span>
+          <Link to="/" className="flex items-center group py-1">
+            <SkillAlphaLogo size="md" variant="horizontal" />
           </Link>
-          <span className="hidden sm:inline-flex items-center px-2.5 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-medium text-xs border border-outline-variant/40">
+          <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-medium text-[11px] border border-outline-variant/40 ml-0.5">
             adaptive learning
           </span>
         </div>

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { GraduationCap, ArrowRight } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
+import { SkillAlphaLogo } from '../components/brand/SkillAlphaLogo';
 import { apiClient } from '../api/client';
 
 export const RegisterPage: React.FC<{ onLoginSuccess?: (user: any) => void }> = ({ onLoginSuccess }) => {
@@ -31,8 +32,8 @@ export const RegisterPage: React.FC<{ onLoginSuccess?: (user: any) => void }> = 
     <div className="w-full pt-28 pb-16 bg-surface min-h-screen flex items-center justify-center px-4">
       <div className="w-full max-w-md bg-surface-container-lowest rounded-2xl border border-outline-variant/60 shadow-lg p-6 sm:p-8">
         <div className="text-center mb-6">
-          <div className="w-12 h-12 rounded-xl bg-primary-container text-on-primary flex items-center justify-center mx-auto mb-3">
-            <GraduationCap className="w-6 h-6" />
+          <div className="flex justify-center mb-4">
+            <SkillAlphaLogo size="lg" variant="full" showTagline />
           </div>
           <h1 className="text-2xl font-extrabold text-on-surface">Create Account</h1>
           <p className="text-xs text-on-surface-variant mt-1">Start learning in the right order with SkillAlpha.</p>

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Header } from './components/layout/Header';
+import { SkillAlphaLogo } from './components/brand/SkillAlphaLogo';
 import { LandingPage } from './pages/LandingPage';
 import { OnboardingPage } from './pages/OnboardingPage';
 import { RoadmapPage } from './pages/RoadmapPage';
@@ -85,9 +86,9 @@ export const App: React.FC = () => {
 
           <footer className="w-full bg-surface-container-lowest border-t border-outline-variant/40 py-8">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-on-surface-variant">
-              <div className="flex items-center gap-2 font-bold text-on-surface">
-                <span>SkillAlpha</span>
-                <span>© 2026 SkillAlpha Intelligence Inc.</span>
+              <div className="flex items-center gap-3">
+                <SkillAlphaLogo size="sm" variant="horizontal" />
+                <span className="text-[11px] text-on-surface-variant font-normal">© 2026 SkillAlpha Intelligence Inc.</span>
               </div>
               <div className="flex items-center gap-6">
                 <span>Everything you need to learn. In the right order.</span>
