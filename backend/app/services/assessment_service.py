@@ -87,6 +87,13 @@ GOAL_DIAGNOSTIC_QUESTIONS = {
 }
 
 def get_diagnostic_questions_for_goal(goal_name: str) -> List[Dict]:
+    # 1. Try dynamic Groq LLM generated questions if API key is present
+    from app.services.llm_service import generate_llm_diagnostic_questions
+    llm_questions = generate_llm_diagnostic_questions(goal_name, count=2)
+    if llm_questions:
+        return llm_questions
+
+    # 2. Fallback to goal template dictionary
     goal_lower = goal_name.lower()
     
     if "machine learning" in goal_lower or "ml" in goal_lower:
