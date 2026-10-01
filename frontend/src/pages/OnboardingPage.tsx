@@ -141,17 +141,45 @@ export const OnboardingPage: React.FC = () => {
         localStorage.setItem('skillalpha_token', token);
       }
 
-      const res: any = await apiClient.post('/roadmaps', {
-        goal,
-        known_skills: knownSkills,
-        available_hours: hoursPerWeek,
-        duration_weeks: durationWeeks,
-        learning_preferences: preferences
-      });
+      let res: any;
+      try {
+        res = await apiClient.post('/roadmaps', {
+          goal,
+          known_skills: knownSkills,
+          available_hours: hoursPerWeek,
+          duration_weeks: durationWeeks,
+          learning_preferences: preferences
+        });
+      } catch (postErr: any) {
+        // If token in localStorage is invalid or expired, refresh token and retry
+        if (postErr.message?.toLowerCase().includes('credential') || postErr.message?.includes('401')) {
+          localStorage.removeItem('skillalpha_token');
+          const regRes: any = await apiClient.post('/auth/register', {
+            email: `learner_${Date.now()}@skillalpha.io`,
+            password: 'password123',
+            full_name: 'Learner'
+          });
+          localStorage.setItem('skillalpha_token', regRes.access_token);
+          res = await apiClient.post('/roadmaps', {
+            goal,
+            known_skills: knownSkills,
+            available_hours: hoursPerWeek,
+            duration_weeks: durationWeeks,
+            learning_preferences: preferences
+          });
+        } else {
+          throw postErr;
+        }
+      }
 
       navigate(`/roadmap/${res.id}`);
     } catch (err: any) {
-      setErrorMsg(err.message || 'Failed to generate roadmap. Please try again.');
+      const msg = err.message || '';
+      if (msg.includes('not be found') || msg.includes('404')) {
+        setErrorMsg('Backend Connection Error: The API server could not be reached. If running locally, ensure backend is running at http://localhost:8000. If deployed on Vercel, set VITE_API_URL in your Vercel project environment variables (and wait 30s if your Render backend is waking up).');
+      } else {
+        setErrorMsg(msg || 'Failed to generate roadmap. Please try again.');
+      }
       setIsSubmitting(false);
     }
   };
