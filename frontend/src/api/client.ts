@@ -35,6 +35,23 @@ apiClient.interceptors.response.use(
     return data && data.data !== undefined ? data.data : data;
   },
   (error) => {
+    if (error.response?.status === 405) {
+      return Promise.reject(
+        new Error(
+          'API returned 405 Method Not Allowed. VITE_API_URL is missing or points to the Vercel frontend rather than the deployed backend server (e.g. Render).'
+        )
+      );
+    }
+    if (error.response?.status === 404 && typeof window !== 'undefined' && !window.location.hostname.includes('localhost')) {
+      const isMissingApiEnv = !(import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL);
+      if (isMissingApiEnv) {
+        return Promise.reject(
+          new Error(
+            'API returned 404. VITE_API_URL is not configured in Vercel settings. Please set VITE_API_URL to your deployed backend URL.'
+          )
+        );
+      }
+    }
     const msg = error.response?.data?.error?.message || error.message || 'Network error';
     return Promise.reject(new Error(msg));
   }
