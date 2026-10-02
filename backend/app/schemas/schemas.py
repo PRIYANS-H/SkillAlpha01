@@ -20,8 +20,10 @@ class UserLoginRequest(BaseModel):
 
 class UserResponse(BaseModel):
     id: str
+    auth_id: Optional[str] = None
     email: str
     full_name: Optional[str] = None
+    avatar_url: Optional[str] = None
     role: str
     is_active: bool
     created_at: datetime

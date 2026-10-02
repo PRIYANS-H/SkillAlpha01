@@ -1,9 +1,29 @@
 import uuid
+import jwt
 import pytest
+from unittest.mock import patch, MagicMock
 from fastapi.testclient import TestClient
+
 from app.main import app
+from app.models.db import SessionLocal
+from app.models.models import User, Profile
 
 client = TestClient(app)
+
+def create_mock_supabase_token(sub: str, email: str, full_name: str = "Test User") -> str:
+    """Creates a mock Supabase JWT token for automated testing."""
+    payload = {
+        "sub": sub,
+        "email": email,
+        "user_metadata": {
+            "full_name": full_name,
+            "name": full_name
+        },
+        "role": "authenticated",
+        "aud": "authenticated"
+    }
+    return jwt.encode(payload, "test_secret_for_unit_tests_only", algorithm="HS256")
+
 
 def test_root_endpoint():
     response = client.get("/")
@@ -12,26 +32,93 @@ def test_root_endpoint():
     assert data["status"] == "online"
     assert "SkillAlpha" in data["service"]
 
-def test_auth_and_onboarding_flow():
-    unique_email = f"testlearner_{uuid.uuid4().hex[:8]}@skillalpha.com"
-    # 1. Register new user
-    reg_resp = client.post("/api/auth/register", json={
-        "email": unique_email,
-        "password": "password123",
-        "full_name": "Test Learner"
-    })
-    assert reg_resp.status_code == 200
-    reg_data = reg_resp.json()
-    assert reg_data["error"] is None
-    token = reg_data["data"]["access_token"]
+
+def test_supabase_auth_auto_provisioning_and_idempotency():
+    auth_id = str(uuid.uuid4())
+    unique_email = f"learner_{uuid.uuid4().hex[:8]}@supabase.test"
+    token = create_mock_supabase_token(auth_id, unique_email, "Alex Rivera")
     headers = {"Authorization": f"Bearer {token}"}
 
-    # 2. Get me
+    # 1. First authenticated request -> Auto-provisions public.users row and Profile
+    resp = client.get("/api/auth/me", headers=headers)
+    assert resp.status_code == 200
+    user_data = resp.json()["data"]
+    assert user_data["email"] == unique_email
+    assert user_data["full_name"] == "Alex Rivera"
+    assert user_data["role"] == "learner"
+
+    # Verify directly in database
+    db = SessionLocal()
+    try:
+        user_row = db.query(User).filter(User.auth_id == auth_id).first()
+        assert user_row is not None
+        assert user_row.email == unique_email
+        assert user_row.profile is not None
+        initial_id = user_row.id
+
+        # 2. Subsequent request with same JWT -> returns existing user without duplicating
+        resp2 = client.get("/api/auth/me", headers=headers)
+        assert resp2.status_code == 200
+        assert resp2.json()["data"]["id"] == initial_id
+        
+        users_count = db.query(User).filter(User.auth_id == auth_id).count()
+        assert users_count == 1
+    finally:
+        db.close()
+
+
+def test_supabase_auth_invalid_tokens():
+    # 1. Missing Authorization header
+    resp_missing = client.get("/api/auth/me")
+    assert resp_missing.status_code == 401
+
+    # 2. Malformed token
+    resp_malformed = client.get("/api/auth/me", headers={"Authorization": "Bearer not-a-real-jwt"})
+    assert resp_malformed.status_code == 401
+
+
+def test_admin_role_gating():
+    auth_id = str(uuid.uuid4())
+    email = f"user_{uuid.uuid4().hex[:8]}@test.com"
+    token = create_mock_supabase_token(auth_id, email, "Regular User")
+    headers = {"Authorization": f"Bearer {token}"}
+
+    # Auto-provision user (default role: "learner")
+    init_res = client.get("/api/auth/me", headers=headers)
+    assert init_res.status_code == 200
+    assert init_res.json()["data"]["role"] == "learner"
+
+    # Non-admin access to admin endpoint -> 403 Forbidden
+    admin_res = client.get("/api/admin/metrics", headers=headers)
+    assert admin_res.status_code == 403
+
+    # Manually promote user to 'admin' in database (per Part 4 specification)
+    db = SessionLocal()
+    try:
+        user = db.query(User).filter(User.auth_id == auth_id).first()
+        user.role = "admin"
+        db.commit()
+    finally:
+        db.close()
+
+    # Now admin access -> 200 OK
+    admin_success_res = client.get("/api/admin/metrics", headers=headers)
+    assert admin_success_res.status_code == 200
+    assert "active_users" in admin_success_res.json()["data"]
+
+
+def test_auth_and_onboarding_flow():
+    auth_id = str(uuid.uuid4())
+    unique_email = f"testlearner_{uuid.uuid4().hex[:8]}@skillalpha.com"
+    token = create_mock_supabase_token(auth_id, unique_email, "Test Learner")
+    headers = {"Authorization": f"Bearer {token}"}
+
+    # 1. Get me (auto-provisions)
     me_resp = client.get("/api/auth/me", headers=headers)
     assert me_resp.status_code == 200
     assert me_resp.json()["data"]["email"] == unique_email
 
-    # 3. Onboarding / Create Roadmap
+    # 2. Onboarding / Create Roadmap
     onboard_resp = client.post("/api/roadmaps", headers=headers, json={
         "goal": "Become a Machine Learning Engineer",
         "known_skills": [
@@ -48,19 +135,19 @@ def test_auth_and_onboarding_flow():
     assert rm_data["route_reasoning"] is not None
     assert len(rm_data["milestones"]) > 0
 
-    # 4. Fetch Today's Learning
+    # 3. Fetch Today's Learning
     today_resp = client.get("/api/recommendations/today", headers=headers)
     assert today_resp.status_code == 200
     today_data = today_resp.json()["data"]
     assert today_data["task"] is not None
     assert "resources" in today_data["task"]
 
-    # 5. Fetch Public Resources
+    # 4. Fetch Public Resources
     res_resp = client.get("/api/resources")
     assert res_resp.status_code == 200
     assert len(res_resp.json()["data"]) > 0
 
-    # 6. Fetch Diagnostic Questions by Goal
+    # 5. Fetch Diagnostic Questions by Goal
     diag_resp = client.get("/api/assessments/diagnostic-by-goal?goal=React")
     assert diag_resp.status_code == 200
     assert len(diag_resp.json()["data"]["questions"]) > 0
@@ -68,17 +155,11 @@ def test_auth_and_onboarding_flow():
 
 def test_adaptive_replanning_and_ownership():
     # Setup User A
-    user_a_email = f"user_a_{uuid.uuid4().hex[:8]}@skillalpha.com"
-    token_a = client.post("/api/auth/register", json={
-        "email": user_a_email, "password": "password123", "full_name": "User A"
-    }).json()["data"]["access_token"]
+    token_a = create_mock_supabase_token(str(uuid.uuid4()), f"user_a_{uuid.uuid4().hex[:8]}@skillalpha.com", "User A")
     headers_a = {"Authorization": f"Bearer {token_a}"}
 
     # Setup User B
-    user_b_email = f"user_b_{uuid.uuid4().hex[:8]}@skillalpha.com"
-    token_b = client.post("/api/auth/register", json={
-        "email": user_b_email, "password": "password123", "full_name": "User B"
-    }).json()["data"]["access_token"]
+    token_b = create_mock_supabase_token(str(uuid.uuid4()), f"user_b_{uuid.uuid4().hex[:8]}@skillalpha.com", "User B")
     headers_b = {"Authorization": f"Bearer {token_b}"}
 
     # User A creates a roadmap
@@ -118,11 +199,9 @@ def test_adaptive_replanning_and_ownership():
 
 
 def test_complete_core_loop_end_to_end():
+    auth_id = str(uuid.uuid4())
     email = f"loop_learner_{uuid.uuid4().hex[:8]}@skillalpha.com"
-    reg_resp = client.post("/api/auth/register", json={
-        "email": email, "password": "password123", "full_name": "Core Loop Learner"
-    })
-    token = reg_resp.json()["data"]["access_token"]
+    token = create_mock_supabase_token(auth_id, email, "Core Loop Learner")
     headers = {"Authorization": f"Bearer {token}"}
 
     # 1. Onboarding diagnostic questions
@@ -192,8 +271,6 @@ def test_complete_core_loop_end_to_end():
         assert completed_skill["status"] in ["STRONG", "MASTERED"]
         assert completed_skill["evidence_count"] >= 1
 
-
-from unittest.mock import patch, MagicMock
 
 def test_resource_matches_youtube_mocked_success():
     mock_youtube_response = {
@@ -296,4 +373,3 @@ def test_resource_matches_docs_and_books():
     assert book_data["type"] == "book"
     assert len(book_data["topics"]) > 0
     assert "download_link" not in book_data
-

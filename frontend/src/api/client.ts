@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { getSupabaseToken } from './supabase';
 
 const getBaseUrl = (): string => {
   const envUrl = (import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || '').trim();
@@ -16,9 +17,9 @@ export const apiClient = axios.create({
   },
 });
 
-// Request Interceptor: Attach JWT Token if present
-apiClient.interceptors.request.use((config) => {
-  const token = localStorage.getItem('skillalpha_token');
+// Request Interceptor: Attach Supabase JWT Token if present
+apiClient.interceptors.request.use(async (config) => {
+  const token = await getSupabaseToken();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }

@@ -16,10 +16,12 @@ class User(Base):
     __tablename__ = "users"
     
     id = Column(String(36), primary_key=True, default=generate_uuid)
+    auth_id = Column(String(64), unique=True, index=True, nullable=True) # Supabase auth.users.id link
     email = Column(String(255), unique=True, index=True, nullable=False)
-    hashed_password = Column(String(255), nullable=False)
+    hashed_password = Column(String(255), nullable=True) # Nullable: auth managed by Supabase Auth
     full_name = Column(String(255), nullable=True)
-    role = Column(String(50), default="USER", nullable=False) # USER, ADMIN
+    avatar_url = Column(Text, nullable=True)
+    role = Column(String(50), default="learner", nullable=False) # learner, admin
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=utc_now)
     updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)

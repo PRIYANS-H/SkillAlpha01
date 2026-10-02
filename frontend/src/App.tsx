@@ -14,6 +14,7 @@ import { ProfilePage } from './pages/ProfilePage';
 import { AdminPage } from './pages/AdminPage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
+import { supabase } from './api/supabase';
 import { apiClient } from './api/client';
 
 const queryClient = new QueryClient();
@@ -22,19 +23,15 @@ export const App: React.FC = () => {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
-  const checkAuth = async () => {
-    const token = localStorage.getItem('skillalpha_token');
-    if (!token) {
-      setUser(null);
-      setLoading(false);
-      return;
+  const syncBackendUser = async (accessToken?: string) => {
+    if (accessToken) {
+      localStorage.setItem('skillalpha_token', accessToken);
     }
-
     try {
       const res: any = await apiClient.get('/auth/me');
       setUser(res);
     } catch (err) {
-      localStorage.removeItem('skillalpha_token');
+      console.warn('Could not sync user with backend:', err);
       setUser(null);
     } finally {
       setLoading(false);
@@ -42,12 +39,43 @@ export const App: React.FC = () => {
   };
 
   useEffect(() => {
-    checkAuth();
+    // 1. Initial session check
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.access_token) {
+        syncBackendUser(session.access_token);
+      } else {
+        setLoading(false);
+      }
+    });
+
+    // 2. Synchronize with Supabase session changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session?.access_token) {
+        localStorage.setItem('skillalpha_token', session.access_token);
+        if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+          syncBackendUser(session.access_token);
+        }
+      } else if (event === 'SIGNED_OUT') {
+        localStorage.removeItem('skillalpha_token');
+        setUser(null);
+        setLoading(false);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem('skillalpha_token');
-    setUser(null);
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+    } catch (e) {
+      console.error('Error signing out of Supabase:', e);
+    } finally {
+      localStorage.removeItem('skillalpha_token');
+      setUser(null);
+    }
   };
 
   return (

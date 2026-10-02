@@ -5,6 +5,7 @@ import {
   BookOpen, Video, Code, FileText, Check, HelpCircle 
 } from 'lucide-react';
 import { apiClient } from '../api/client';
+import { supabase } from '../api/supabase';
 
 const GOAL_PRESETS = [
   { 
@@ -130,47 +131,27 @@ export const OnboardingPage: React.FC = () => {
     setIsSubmitting(true);
     setErrorMsg(null);
     try {
-      let token = localStorage.getItem('skillalpha_token');
-      if (!token) {
-        const regRes: any = await apiClient.post('/auth/register', {
-          email: `learner_${Date.now()}@skillalpha.io`,
-          password: 'password123',
-          full_name: 'Learner'
-        });
-        token = regRes.access_token;
-        localStorage.setItem('skillalpha_token', token);
-      }
-
-      let res: any;
-      try {
-        res = await apiClient.post('/roadmaps', {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        // Save pending roadmap configuration and redirect to sign up
+        localStorage.setItem('skillalpha_pending_roadmap', JSON.stringify({
           goal,
           known_skills: knownSkills,
           available_hours: hoursPerWeek,
           duration_weeks: durationWeeks,
           learning_preferences: preferences
-        });
-      } catch (postErr: any) {
-        // If token in localStorage is invalid or expired, refresh token and retry
-        if (postErr.message?.toLowerCase().includes('credential') || postErr.message?.includes('401')) {
-          localStorage.removeItem('skillalpha_token');
-          const regRes: any = await apiClient.post('/auth/register', {
-            email: `learner_${Date.now()}@skillalpha.io`,
-            password: 'password123',
-            full_name: 'Learner'
-          });
-          localStorage.setItem('skillalpha_token', regRes.access_token);
-          res = await apiClient.post('/roadmaps', {
-            goal,
-            known_skills: knownSkills,
-            available_hours: hoursPerWeek,
-            duration_weeks: durationWeeks,
-            learning_preferences: preferences
-          });
-        } else {
-          throw postErr;
-        }
+        }));
+        navigate('/register?from=create');
+        return;
       }
+
+      const res: any = await apiClient.post('/roadmaps', {
+        goal,
+        known_skills: knownSkills,
+        available_hours: hoursPerWeek,
+        duration_weeks: durationWeeks,
+        learning_preferences: preferences
+      });
 
       navigate(`/roadmap/${res.id}`);
     } catch (err: any) {
