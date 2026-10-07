@@ -82,7 +82,7 @@ export const Header: React.FC<HeaderProps> = ({ user, onLogout }) => {
           </button>
 
           {/* Admin Link */}
-          {user?.role === 'ADMIN' && (
+          {user?.role?.toUpperCase() === 'ADMIN' && (
             <Link
               to="/admin"
               className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-primary bg-primary-fixed/40 font-medium text-xs hover:bg-primary-fixed/70 transition-colors"
@@ -118,7 +118,7 @@ export const Header: React.FC<HeaderProps> = ({ user, onLogout }) => {
                     <User className="w-4 h-4" />
                     Profile & Settings
                   </Link>
-                  {user.role === 'ADMIN' && (
+                  {user?.role?.toUpperCase() === 'ADMIN' && (
                     <Link
                       to="/admin"
                       onClick={() => setUserDropdownOpen(false)}
