@@ -3,12 +3,13 @@ from typing import Optional
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session
 from app.models.db import get_db
-from app.models.models import Assessment, Skill, User
+from app.models.models import Assessment, Skill, User, Roadmap
 from app.schemas.schemas import APIResponse, AssessmentAttemptRequest
 from app.security.auth import get_current_user
 from app.services.assessment_service import (
     get_or_create_assessment_for_skill, evaluate_assessment_attempt, get_diagnostic_questions_for_goal
 )
+from app.services.roadmap_service import adapt_roadmap_to_evidence
 
 router = APIRouter(prefix="/assessments", tags=["Assessments"])
 
@@ -67,11 +68,28 @@ def submit_assessment_attempt(
     if not attempt:
         return APIResponse(error={"code": "NOT_FOUND", "message": "Assessment evaluation failed"})
 
+    # Quiz evidence can reinforce or clear steps on the learner's active route
+    adaptation = None
+    active_roadmap = db.query(Roadmap).filter(
+        Roadmap.user_id == current_user.id,
+        Roadmap.is_active == True
+    ).order_by(Roadmap.created_at.desc()).first()
+    if active_roadmap:
+        reinforced, cleared = adapt_roadmap_to_evidence(db, active_roadmap, current_user.id)
+        db.commit()
+        if reinforced or cleared:
+            adaptation = {
+                "reinforced_skills": reinforced,
+                "cleared_skills": cleared,
+                "route_reasoning": active_roadmap.route_reasoning
+            }
+
     return APIResponse(data={
         "attempt_id": attempt.id,
         "score": attempt.score,
         "max_score": attempt.max_score,
         "passed": attempt.passed,
         "new_skill_score": new_score,
-        "feedback": feedback
+        "feedback": feedback,
+        "adaptation": adaptation
     })

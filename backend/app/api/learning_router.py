@@ -131,7 +131,7 @@ def update_learning_session(
     req: Optional[LearningSessionUpdateRequest] = None,
     duration_seconds: int = 0,
     notes: Optional[str] = None,
-    status: str = "COMPLETED",
+    session_status: str = Query("COMPLETED", alias="status"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
@@ -148,7 +148,7 @@ def update_learning_session(
 
     actual_duration = req.duration_seconds if req and req.duration_seconds else duration_seconds
     actual_notes = req.notes if req and req.notes is not None else notes
-    actual_status = req.status if req and req.status else status
+    actual_status = req.status if req and req.status else session_status
 
     session.duration_seconds = actual_duration
     if actual_notes:

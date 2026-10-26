@@ -2,9 +2,11 @@ import datetime
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.models.db import get_db
-from app.models.models import RoadmapTask, TaskProgress, Roadmap, RoadmapMilestone, User
+from app.models.models import RoadmapTask, TaskProgress, Roadmap, RoadmapMilestone, User, UserSkill
 from app.schemas.schemas import APIResponse, TaskCompleteRequest
 from app.security.auth import get_current_user
+from app.services.gap_engine import record_skill_evidence
+from app.services.roadmap_service import adapt_roadmap_to_evidence
 
 router = APIRouter(prefix="/tasks", tags=["Tasks"])
 
@@ -27,6 +29,14 @@ def complete_task(
             detail="Task not found or access denied."
         )
 
+    # Idempotent: a repeated submission must not count the same evidence twice
+    already_recorded = db.query(TaskProgress).filter(
+        TaskProgress.task_id == task.id,
+        TaskProgress.user_id == current_user.id
+    ).first()
+    if already_recorded:
+        return APIResponse(data={"message": "Task already completed", "status": "COMPLETED", "adaptation": None})
+
     task.status = "COMPLETED"
 
     progress_entry = TaskProgress(
@@ -38,63 +48,33 @@ def complete_task(
     )
     db.add(progress_entry)
 
-    # Evidence-based learning loop: update UserSkill status based on self-evaluation
-    if task.skill_id:
-        from app.models.models import UserSkill
+    # Evidence-based learning loop: update UserSkill based on self-evaluation
+    if task.skill_id and req.self_evaluation in ["GOT_IT", "SHAKY", "LOST"]:
         user_skill = db.query(UserSkill).filter(
             UserSkill.user_id == current_user.id,
             UserSkill.skill_id == task.skill_id
         ).first()
+        old_score = user_skill.skill_score if user_skill else None
+        old_confidence = user_skill.confidence_score if user_skill else None
 
-        now_utc = datetime.datetime.now(datetime.timezone.utc)
-        if req.self_evaluation in ["SHAKY", "LOST"]:
-            if not user_skill:
-                user_skill = UserSkill(
-                    user_id=current_user.id,
-                    skill_id=task.skill_id,
-                    skill_score=0.40,
-                    confidence_score=0.35,
-                    status="NEEDS_REINFORCEMENT",
-                    evidence_count=1,
-                    last_assessed_at=now_utc
-                )
-                db.add(user_skill)
-            else:
-                user_skill.status = "NEEDS_REINFORCEMENT"
-                user_skill.confidence_score = max(0.20, (user_skill.confidence_score or 0.5) - 0.15)
-                user_skill.evidence_count = (user_skill.evidence_count or 0) + 1
-                user_skill.last_assessed_at = now_utc
-        elif req.self_evaluation == "GOT_IT":
-            if not user_skill:
-                user_skill = UserSkill(
-                    user_id=current_user.id,
-                    skill_id=task.skill_id,
-                    skill_score=0.75,
-                    confidence_score=0.80,
-                    status="STRONG",
-                    evidence_count=1,
-                    last_assessed_at=now_utc
-                )
-                db.add(user_skill)
-            else:
-                new_score = min(1.0, round((user_skill.skill_score or 0.5) + 0.15, 2))
-                user_skill.skill_score = new_score
-                user_skill.confidence_score = min(1.0, round((user_skill.confidence_score or 0.5) + 0.10, 2))
-                user_skill.status = "MASTERED" if new_score >= 0.80 else "STRONG"
-                user_skill.evidence_count = (user_skill.evidence_count or 0) + 1
-                user_skill.last_assessed_at = now_utc
+        if req.self_evaluation == "GOT_IT":
+            # Solid after studying: at least STRONG
+            new_score = max(0.65, (old_score if old_score is not None else 0.60) + 0.15)
+            new_confidence = (old_confidence or 0.70) + 0.10
+        else:
+            # Studied but not solid: lands in the reinforcement band
+            new_score = min(max(old_score if old_score is not None else 0.40, 0.40), 0.60)
+            new_confidence = max(0.20, (old_confidence or 0.5) - 0.15)
 
-    # Recalculate roadmap overall progress percentage
-    milestone = task.milestone
-    if milestone:
-        roadmap = milestone.roadmap
-        if roadmap:
-            all_tasks = []
-            for m in roadmap.milestones:
-                all_tasks.extend(m.tasks)
-            comp_count = sum(1 for t in all_tasks if t.status == "COMPLETED")
-            roadmap.completed_tasks = comp_count
-            roadmap.progress_percent = round((comp_count / float(len(all_tasks))) * 100, 1) if all_tasks else 0.0
+        record_skill_evidence(db, current_user.id, task.skill_id, new_score, new_confidence, user_skill)
+
+    # Recalculate progress and adapt the route to the new evidence
+    adaptation = None
+    roadmap = task.milestone.roadmap if task.milestone else None
+    if roadmap:
+        reinforced, _ = adapt_roadmap_to_evidence(db, roadmap, current_user.id)
+        if reinforced:
+            adaptation = {"reinforced_skills": reinforced, "route_reasoning": roadmap.route_reasoning}
 
     db.commit()
-    return APIResponse(data={"message": "Task completed successfully", "status": "COMPLETED"})
+    return APIResponse(data={"message": "Task completed successfully", "status": "COMPLETED", "adaptation": adaptation})

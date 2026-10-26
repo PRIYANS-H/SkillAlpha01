@@ -2,11 +2,13 @@ import json
 from typing import List, Dict, Tuple
 from sqlalchemy.orm import Session
 from app.models.models import Assessment, AssessmentQuestion, AssessmentAttempt, UserSkill, Skill
+from app.services.gap_engine import record_skill_evidence, blend_assessment_score
 
 GOAL_DIAGNOSTIC_QUESTIONS = {
     "machine learning": [
         (
             "Data Leakage Prevention",
+            "Model Validation & Split Hygiene",
             "When scaling numerical features for cross-validation, where should the scaler be fit?",
             ["Fit strictly on each training fold inside the CV loop", "Fit on the full dataset before splitting into folds", "Fit on the test set first then apply to train", "Scaling is not needed for CV"],
             0,
@@ -14,6 +16,7 @@ GOAL_DIAGNOSTIC_QUESTIONS = {
         ),
         (
             "Model Validation",
+            "Model Validation & Split Hygiene",
             "What is the main benefit of Stratified K-Fold cross-validation over standard K-Fold?",
             ["Preserves the original target class ratio across every validation fold", "Doubles training speed by skipping hyperparameter fitting", "Eliminates memory overhead during matrix inversion", "Removes outliers automatically"],
             0,
@@ -23,6 +26,7 @@ GOAL_DIAGNOSTIC_QUESTIONS = {
     "data science": [
         (
             "Exploratory Data Analysis",
+            "Pandas & Data Manipulation",
             "Which pandas operation is most memory-efficient for filtering a multi-gigabyte DataFrame?",
             ["Vectorized boolean indexing with chunking or query()", "Iterating line-by-line with for row in df.iterrows()", "Converting to Python dicts first", "Repeated append() in a loop"],
             0,
@@ -30,6 +34,7 @@ GOAL_DIAGNOSTIC_QUESTIONS = {
         ),
         (
             "Statistical Evaluation",
+            "Model Validation & Split Hygiene",
             "When evaluating an imbalanced classification model (99% negative class), which metric is most reliable?",
             ["Area Under ROC Curve (ROC-AUC) or PR-AUC", "Raw Accuracy Score", "Mean Squared Error", "R-squared Score"],
             0,
@@ -39,6 +44,7 @@ GOAL_DIAGNOSTIC_QUESTIONS = {
     "backend": [
         (
             "API Architecture",
+            "RESTful API Architecture",
             "In RESTful HTTP design, which method MUST be idempotent according to HTTP spec?",
             ["GET, PUT, and DELETE", "POST only", "PATCH only", "None of the above"],
             0,
@@ -46,6 +52,7 @@ GOAL_DIAGNOSTIC_QUESTIONS = {
         ),
         (
             "Database Indexing",
+            "Database Indexing & ORM Hygiene",
             "What is the primary trade-off when adding a B-Tree index to a database table?",
             ["Speeds up SELECT queries but slows down INSERT/UPDATE writes", "Slows down SELECT queries but speeds up WRITES", "Increases CPU usage without affecting disk space", "Disables transactions"],
             0,
@@ -55,6 +62,7 @@ GOAL_DIAGNOSTIC_QUESTIONS = {
     "react": [
         (
             "State Management",
+            "React Component Architecture",
             "Why must React component state never be mutated directly (e.g. state.count = 5)?",
             ["Direct mutation bypasses React's virtual DOM re-render trigger", "It causes compiler errors in Vite", "TypeScript forbids object mutations", "It deletes local storage"],
             0,
@@ -62,6 +70,7 @@ GOAL_DIAGNOSTIC_QUESTIONS = {
         ),
         (
             "Effect Hook Dependencies",
+            "Performance Optimization & Memoization",
             "What happens if an object created inside render is passed to useEffect dependency array without useMemo?",
             ["The effect fires on every single render due to new object reference", "React throws a runtime crash", "The effect only runs once", "It turns off hot reload"],
             0,
@@ -71,6 +80,7 @@ GOAL_DIAGNOSTIC_QUESTIONS = {
     "general": [
         (
             "Software Architecture",
+            "Software Architecture",
             "What is the primary goal of modular decoupling in software engineering?",
             ["Isolating changes so updating one component doesn't break others", "Reducing code file count to 1", "Eliminating database usage", "Making code run 10x faster"],
             0,
@@ -78,6 +88,7 @@ GOAL_DIAGNOSTIC_QUESTIONS = {
         ),
         (
             "Version Control",
+            None,
             "What is the key advantage of feature branch workflows in Git?",
             ["Allows independent development and review before merging to main", "Deletes previous commit history automatically", "Encrypts all source code files", "Bypasses CI/CD build checks"],
             0,
@@ -108,10 +119,11 @@ def get_diagnostic_questions_for_goal(goal_name: str) -> List[Dict]:
         raw_q = GOAL_DIAGNOSTIC_QUESTIONS["general"]
 
     questions = []
-    for idx, (title, text, opts, correct_i, expl) in enumerate(raw_q):
+    for idx, (title, skill_name, text, opts, correct_i, expl) in enumerate(raw_q):
         questions.append({
             "id": f"diag_q_{idx+1}",
             "title": title,
+            "skill_name": skill_name,
             "question_text": text,
             "options": opts,
             "correct_option_index": correct_i,
@@ -206,25 +218,13 @@ def evaluate_assessment_attempt(
     ).first()
 
     old_score = user_skill.skill_score if user_skill else 0.40
-    evidence = (user_skill.evidence_count if user_skill else 0) + 1
-    new_score = round(old_score * 0.6 + score_ratio * 0.4, 2)
-    new_confidence = min(0.95, round((user_skill.confidence_score if user_skill else 0.5) + 0.15, 2))
-
-    if not user_skill:
-        user_skill = UserSkill(
-            user_id=user_id,
-            skill_id=assessment.skill_id,
-            skill_score=new_score,
-            confidence_score=new_confidence,
-            status="STRONG" if new_score >= 0.65 else ("NEEDS_REINFORCEMENT" if new_score >= 0.40 else "MISSING"),
-            evidence_count=evidence
-        )
-        db.add(user_skill)
-    else:
-        user_skill.skill_score = new_score
-        user_skill.confidence_score = new_confidence
-        user_skill.evidence_count = evidence
-        user_skill.status = "STRONG" if new_score >= 0.65 else ("NEEDS_REINFORCEMENT" if new_score >= 0.40 else "MISSING")
+    user_skill = record_skill_evidence(
+        db, user_id, assessment.skill_id,
+        new_score=blend_assessment_score(old_score, score_ratio),
+        new_confidence=(user_skill.confidence_score if user_skill else 0.5) + 0.15,
+        user_skill=user_skill
+    )
+    new_score = user_skill.skill_score
 
     db.commit()
 

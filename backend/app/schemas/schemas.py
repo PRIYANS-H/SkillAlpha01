@@ -106,9 +106,14 @@ class ResourceResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 # Onboarding / Roadmap Creation Request
+class DiagnosticResult(BaseModel):
+    skill_name: str
+    is_correct: bool
+
 class OnboardingRequest(BaseModel):
     goal: str
     known_skills: List[UserSkillUpdate] = []
+    diagnostic_results: List[DiagnosticResult] = []
     available_hours: int = 10
     duration_weeks: int = 12
     learning_preferences: List[str] = ["VIDEO", "DOCUMENTATION", "PROJECT"]

@@ -73,6 +73,10 @@ def create_roadmap(req: OnboardingRequest, current_user: User = Depends(get_curr
         item.skill_name.lower(): item.self_reported_level
         for item in req.known_skills
     }
+    diagnostic = {}
+    for result in req.diagnostic_results:
+        correct, total = diagnostic.get(result.skill_name.lower(), (0, 0))
+        diagnostic[result.skill_name.lower()] = (correct + int(result.is_correct), total + 1)
     roadmap = generate_roadmap_for_user(
         db=db,
         user_id=current_user.id,
@@ -80,7 +84,8 @@ def create_roadmap(req: OnboardingRequest, current_user: User = Depends(get_curr
         hours_per_week=req.available_hours,
         duration_weeks=req.duration_weeks,
         self_reported_skills=self_reported,
-        preferred_types=req.learning_preferences
+        preferred_types=req.learning_preferences,
+        diagnostic_results=diagnostic
     )
 
     # Sync onboarding profile details

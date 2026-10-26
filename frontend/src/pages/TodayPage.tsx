@@ -23,9 +23,14 @@ export const TodayPage: React.FC = () => {
 
   // Skill Self-Check Quiz State
   const [assessment, setAssessment] = useState<any | null>(null);
-  const [quizAnswer, setQuizAnswer] = useState<number | null>(null);
+  const [quizAnswers, setQuizAnswers] = useState<Record<string, number>>({});
   const [quizSubmitted, setQuizSubmitted] = useState(false);
   const [quizResult, setQuizResult] = useState<any | null>(null);
+  const [quizError, setQuizError] = useState<string | null>(null);
+
+  // Completion outcome
+  const [completeError, setCompleteError] = useState<string | null>(null);
+  const [adaptation, setAdaptation] = useState<any | null>(null);
 
   const fetchSkillAssessment = async (skillId: string) => {
     try {
@@ -91,22 +96,22 @@ export const TodayPage: React.FC = () => {
   };
 
   const handleVerifyQuiz = async () => {
-    if (!assessment || quizAnswer === null) return;
-    const currentQ = assessment.questions[0];
+    if (!assessment) return;
+    setQuizError(null);
     try {
       const res: any = await apiClient.post(`/assessments/${assessment.id}/attempt`, {
-        answers: { [currentQ.id]: quizAnswer }
+        answers: quizAnswers
       });
       setQuizResult(res);
       setQuizSubmitted(true);
-    } catch (err) {
-      console.error(err);
-      setQuizSubmitted(true);
+    } catch (err: any) {
+      setQuizError(err.message || 'Could not submit your answers. Please try again.');
     }
   };
 
   const handleCompleteTask = async () => {
     if (!todayData?.task) return;
+    setCompleteError(null);
     try {
       if (sessionId) {
         await apiClient.patch(`/learning-sessions/${sessionId}`, {
@@ -114,15 +119,15 @@ export const TodayPage: React.FC = () => {
           status: 'COMPLETED'
         });
       }
-      await apiClient.post(`/tasks/${todayData.task.id}/complete`, {
+      const res: any = await apiClient.post(`/tasks/${todayData.task.id}/complete`, {
         time_spent_minutes: Math.max(1, Math.round(secondsElapsed / 60)),
         self_evaluation: selfEval
       });
+      setAdaptation(res?.adaptation || null);
       setIsCompleted(true);
       setSessionActive(false);
-    } catch (err) {
-      console.error(err);
-      setIsCompleted(true);
+    } catch (err: any) {
+      setCompleteError(err.message || 'Could not save your progress. Please try again.');
     }
   };
 
@@ -131,10 +136,14 @@ export const TodayPage: React.FC = () => {
     setSecondsElapsed(0);
     setSessionId(null);
     setSessionActive(false);
+    setSelfEval('GOT_IT');
     setAssessment(null);
-    setQuizAnswer(null);
+    setQuizAnswers({});
     setQuizSubmitted(false);
     setQuizResult(null);
+    setQuizError(null);
+    setCompleteError(null);
+    setAdaptation(null);
     fetchTodayQueue();
   };
 
@@ -231,6 +240,12 @@ export const TodayPage: React.FC = () => {
           <p className="text-xs text-on-surface-variant max-w-md mx-auto mb-6 leading-relaxed">
             Your evidence profile and skill scores have been updated based on your self-evaluation. Take a break or continue to the next scheduled task.
           </p>
+          {adaptation?.route_reasoning && (
+            <div className="p-4 rounded-xl bg-surface-container-low border-l-4 border-secondary-container text-xs text-on-surface text-left mb-6">
+              <strong className="text-secondary-container block mb-0.5">Plan update:</strong>
+              {adaptation.route_reasoning}
+            </div>
+          )}
           <div className="flex items-center justify-center gap-3">
             <button
               onClick={handleNextTask}
@@ -250,7 +265,8 @@ export const TodayPage: React.FC = () => {
     );
   }
 
-  const firstQuestion = assessment?.questions?.[0];
+  const quizQuestions: any[] = assessment?.questions || [];
+  const allQuestionsAnswered = quizQuestions.every((q) => quizAnswers[q.id] !== undefined);
 
   return (
     <div className="w-full pt-20 pb-16 bg-surface min-h-screen">
@@ -317,7 +333,7 @@ export const TodayPage: React.FC = () => {
           </div>
 
           {/* Self-Check Knowledge Verification Quiz */}
-          {firstQuestion && (
+          {quizQuestions.length > 0 && (
             <div className="pt-6 border-t border-outline-variant/40 mb-6">
               <div className="flex items-center justify-between mb-3">
                 <h2 className="text-xs uppercase tracking-wider font-bold text-primary flex items-center gap-1.5">
@@ -328,53 +344,64 @@ export const TodayPage: React.FC = () => {
                 </span>
               </div>
 
-              <div className="p-4 rounded-xl bg-surface-container-low border border-outline-variant/40 mb-3">
-                <div className="text-sm font-semibold text-on-surface mb-3">
-                  {firstQuestion.question_text}
+              {quizQuestions.map((question, qIdx) => (
+                <div key={question.id} className="p-4 rounded-xl bg-surface-container-low border border-outline-variant/40 mb-3">
+                  <div className="text-sm font-semibold text-on-surface mb-3">
+                    {qIdx + 1}. {question.question_text}
+                  </div>
+                  <div className="space-y-2">
+                    {question.options.map((opt: string, idx: number) => (
+                      <label
+                        key={idx}
+                        className={`flex items-center gap-2 p-2.5 rounded-lg border text-xs cursor-pointer transition-colors ${
+                          quizAnswers[question.id] === idx
+                            ? 'border-primary bg-primary-fixed/20'
+                            : 'border-outline-variant/40 bg-surface-container-lowest hover:border-outline'
+                        }`}
+                      >
+                        <input
+                          type="radio"
+                          name={`self_check_${question.id}`}
+                          checked={quizAnswers[question.id] === idx}
+                          onChange={() => setQuizAnswers({ ...quizAnswers, [question.id]: idx })}
+                          disabled={quizSubmitted}
+                          className="accent-primary"
+                        />
+                        <span className="text-on-surface">{opt}</span>
+                      </label>
+                    ))}
+                  </div>
+                  {quizSubmitted && question.explanation && (
+                    <p className="mt-3 text-xs text-on-surface-variant leading-relaxed">{question.explanation}</p>
+                  )}
                 </div>
-                <div className="space-y-2 mb-3">
-                  {firstQuestion.options.map((opt: string, idx: number) => (
-                    <label
-                      key={idx}
-                      className={`flex items-center gap-2 p-2.5 rounded-lg border text-xs cursor-pointer transition-colors ${
-                        quizAnswer === idx
-                          ? 'border-primary bg-primary-fixed/20'
-                          : 'border-outline-variant/40 bg-surface-container-lowest hover:border-outline'
-                      }`}
-                    >
-                      <input
-                        type="radio"
-                        name="self_check_quiz"
-                        checked={quizAnswer === idx}
-                        onChange={() => setQuizAnswer(idx)}
-                        disabled={quizSubmitted}
-                        className="accent-primary"
-                      />
-                      <span className="text-on-surface">{opt}</span>
-                    </label>
-                  ))}
-                </div>
+              ))}
 
-                {!quizSubmitted ? (
+              {!quizSubmitted ? (
+                <>
                   <button
                     type="button"
                     onClick={handleVerifyQuiz}
-                    disabled={quizAnswer === null}
+                    disabled={!allQuestionsAnswered}
                     className="px-4 py-2 rounded-lg bg-primary text-on-primary text-xs font-semibold hover:bg-primary-container disabled:opacity-50 transition-colors"
                   >
-                    Verify Answer
+                    Verify Answers
                   </button>
-                ) : (
-                  <div className="mt-2 p-3 rounded-lg bg-surface-container text-xs text-on-surface">
-                    <span className="font-bold text-primary block mb-1">
-                      {quizResult?.passed ? "✓ Correct! Mastery evidence calibrated." : "Insight & Explanation:"}
-                    </span>
-                    <p className="text-on-surface-variant leading-relaxed">
-                      {firstQuestion.explanation || quizResult?.feedback}
-                    </p>
-                  </div>
-                )}
-              </div>
+                  {quizError && (
+                    <p className="mt-2 text-xs text-on-error-container bg-error-container rounded-lg p-2.5">{quizError}</p>
+                  )}
+                </>
+              ) : (
+                <div className="mt-2 p-3 rounded-lg bg-surface-container text-xs text-on-surface">
+                  <span className="font-bold text-primary block mb-1">
+                    {quizResult?.passed ? "✓ Passed! Mastery evidence calibrated." : "Not there yet. Review the explanations above."}
+                  </span>
+                  <p className="text-on-surface-variant leading-relaxed">{quizResult?.feedback}</p>
+                  {quizResult?.adaptation?.route_reasoning && (
+                    <p className="text-on-surface-variant leading-relaxed mt-1">{quizResult.adaptation.route_reasoning}</p>
+                  )}
+                </div>
+              )}
             </div>
           )}
 
@@ -407,6 +434,10 @@ export const TodayPage: React.FC = () => {
                 ))}
               </div>
             </div>
+
+            {completeError && (
+              <p className="mb-3 text-xs text-on-error-container bg-error-container rounded-lg p-2.5">{completeError}</p>
+            )}
 
             <button
               onClick={handleCompleteTask}

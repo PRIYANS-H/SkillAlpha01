@@ -35,7 +35,7 @@ def verify_supabase_jwt(token: str) -> Dict[str, Any]:
     1. Project JWT secret (HS256) if SUPABASE_JWT_SECRET is configured
     2. JWKS endpoint if SUPABASE_URL provides asymmetric keys
     3. Direct Supabase Auth user verification API (/auth/v1/user)
-    4. Fallback decode for local testing/mock environments
+    Tokens are never accepted without signature verification; tests sign with SUPABASE_JWT_SECRET.
     """
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -101,13 +101,8 @@ def verify_supabase_jwt(token: str) -> Dict[str, Any]:
         except Exception as e:
             logger.warning(f"Supabase Auth API check failed: {e}")
 
-    # 4. Fallback decode for unit tests / test environments
-    try:
-        unverified = jwt.decode(token, options={"verify_signature": False})
-        if unverified.get("sub"):
-            return unverified
-    except jwt.PyJWTError:
-        pass
+    if not settings.SUPABASE_JWT_SECRET and not settings.SUPABASE_URL:
+        logger.error("Neither SUPABASE_JWT_SECRET nor SUPABASE_URL is configured; all tokens will be rejected.")
 
     raise credentials_exception
 

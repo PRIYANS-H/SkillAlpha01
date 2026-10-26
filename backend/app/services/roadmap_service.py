@@ -1,13 +1,17 @@
 import math
 import datetime
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Tuple
 from sqlalchemy.orm import Session
 from app.models.models import (
-    Roadmap, RoadmapMilestone, RoadmapTask, TaskResource, UserSkill, Skill
+    Roadmap, RoadmapMilestone, RoadmapTask, TaskResource, TaskProgress, UserSkill, Skill
 )
 from app.services.skill_service import get_target_skill_graph_for_goal
-from app.services.gap_engine import evaluate_skill_gaps
+from app.services.gap_engine import evaluate_skill_gaps, WEAK_STATUSES
 from app.services.recommendation_engine import rank_resources_for_skill
+
+REINFORCEMENT_MARKER = "Reinforcement Checkpoint"
+MAX_REINFORCEMENTS_PER_SKILL = 2
+PENDING_STATUSES = ("NOT_STARTED", "IN_PROGRESS")
 
 def generate_roadmap_for_user(
     db: Session,
@@ -16,7 +20,8 @@ def generate_roadmap_for_user(
     hours_per_week: int = 10,
     duration_weeks: int = 12,
     self_reported_skills: Dict[str, str] = None,
-    preferred_types: List[str] = None
+    preferred_types: List[str] = None,
+    diagnostic_results: Dict[str, Tuple[int, int]] = None
 ) -> Roadmap:
     """
     Generates a personalized learning roadmap with explicit day-wise, date-wise, hour-wise schedule and ranked resources.
@@ -30,7 +35,9 @@ def generate_roadmap_for_user(
     target_skills = get_target_skill_graph_for_goal(db, goal)
     
     # 2. Skill Gap Engine
-    evaluated_skills, route_reasoning = evaluate_skill_gaps(db, user_id, target_skills, self_reported_skills)
+    evaluated_skills, route_reasoning = evaluate_skill_gaps(
+        db, user_id, target_skills, self_reported_skills, diagnostic_results, goal=goal
+    )
     
     # De-activate previous roadmaps for user
     db.query(Roadmap).filter(Roadmap.user_id == user_id, Roadmap.is_active == True).update({"is_active": False})
@@ -149,89 +156,126 @@ def generate_roadmap_for_user(
     return roadmap
 
 
+def recalculate_roadmap_progress(roadmap: Roadmap) -> None:
+    tasks = [t for m in roadmap.milestones for t in m.tasks]
+    completed = sum(1 for t in tasks if t.status == "COMPLETED")
+    resolved = completed + sum(1 for t in tasks if t.status == "SKIPPED")
+    roadmap.total_tasks = len(tasks)
+    roadmap.completed_tasks = completed
+    roadmap.progress_percent = round((resolved / float(len(tasks))) * 100, 1) if tasks else 0.0
+
+
+def _insert_reinforcement_task(db: Session, roadmap_tasks: List[RoadmapTask], milestones: List[RoadmapMilestone], user_skill: UserSkill) -> RoadmapTask:
+    """Places a reinforcement task immediately before the learner's next pending task."""
+    skill_obj = user_skill.skill
+    next_task = next((t for t in roadmap_tasks if t.status in PENDING_STATUSES), None)
+    if next_task:
+        milestone = next_task.milestone
+        seq_order = next_task.sequence_order
+        for t in milestone.tasks:
+            if t.sequence_order >= seq_order:
+                t.sequence_order += 1
+    else:
+        milestone = milestones[-1]
+        seq_order = max((t.sequence_order for t in milestone.tasks), default=0) + 1
+
+    ref_task = RoadmapTask(
+        skill_id=skill_obj.id,
+        title=f"{REINFORCEMENT_MARKER} • Practice & Review: {skill_obj.name}",
+        description=f"Targeted review lab & practice session to solidify understanding of {skill_obj.name}.",
+        estimated_minutes=30,
+        sequence_order=seq_order,
+        status="NOT_STARTED",
+        reason_why_next=f"Inserted via evidence-based adaptive loop: your latest results show {skill_obj.name} needs reinforcement before moving forward."
+    )
+    milestone.tasks.append(ref_task)
+
+    # Attach resources for reinforcement
+    ranked_res = rank_resources_for_skill(
+        db=db,
+        skill=skill_obj,
+        user_skill_score=user_skill.skill_score or 0.40,
+        limit=2
+    )
+    for r_seq, item in enumerate(ranked_res):
+        ref_task.task_resources.append(TaskResource(
+            resource_id=item["resource"].id,
+            recommendation_match_score=item["match_score"] / 100.0,
+            recommendation_reason=f"Reinforcement resource: {item['match_reason']}",
+            sequence_order=r_seq + 1
+        ))
+
+    insert_at = roadmap_tasks.index(next_task) if next_task else len(roadmap_tasks)
+    roadmap_tasks.insert(insert_at, ref_task)
+    return ref_task
+
+
+def adapt_roadmap_to_evidence(db: Session, roadmap: Roadmap, user_id: str) -> Tuple[List[str], List[str]]:
+    """
+    Applies the learner's latest skill evidence to a roadmap:
+    - a skill that is still weak after the learner completed a task for it gets a
+      reinforcement task as the next action (at most one pending, capped per skill);
+    - pending reinforcement for a skill whose evidence is now strong is skipped.
+    Baseline-only gaps are left alone: they already have regular tasks.
+    Returns (reinforced_skill_names, cleared_skill_names). Does not commit.
+    """
+    db.flush()
+    user_skills = {
+        us.skill_id: us
+        for us in db.query(UserSkill).filter(UserSkill.user_id == user_id).all()
+    }
+    milestones = sorted(roadmap.milestones, key=lambda m: m.sequence_order)
+    roadmap_tasks = [t for m in milestones for t in sorted(m.tasks, key=lambda t: t.sequence_order)]
+    if not roadmap_tasks:
+        return [], []
+
+    cleared = []
+    for t in roadmap_tasks:
+        user_skill = user_skills.get(t.skill_id)
+        if REINFORCEMENT_MARKER in t.title and t.status == "NOT_STARTED" and user_skill and user_skill.status not in WEAK_STATUSES:
+            t.status = "SKIPPED"
+            cleared.append(user_skill.skill.name)
+
+    studied_task_ids = {
+        tp.task_id for tp in db.query(TaskProgress).filter(
+            TaskProgress.user_id == user_id,
+            TaskProgress.task_id.in_([t.id for t in roadmap_tasks])
+        ).all()
+    }
+    studied_skill_ids = []
+    for t in roadmap_tasks:
+        if t.id in studied_task_ids and t.skill_id and t.skill_id not in studied_skill_ids:
+            studied_skill_ids.append(t.skill_id)
+
+    reinforced = []
+    for skill_id in studied_skill_ids:
+        user_skill = user_skills.get(skill_id)
+        if not user_skill or not user_skill.skill or user_skill.status not in WEAK_STATUSES:
+            continue
+        existing = [t for t in roadmap_tasks if t.skill_id == skill_id and REINFORCEMENT_MARKER in t.title]
+        if len(existing) >= MAX_REINFORCEMENTS_PER_SKILL or any(t.status in PENDING_STATUSES for t in existing):
+            continue
+        _insert_reinforcement_task(db, roadmap_tasks, milestones, user_skill)
+        reinforced.append(user_skill.skill.name)
+
+    changes = []
+    if reinforced:
+        changes.append(f"Inserted dedicated reinforcement tasks for {', '.join(reinforced)} as your next step")
+    if cleared:
+        changes.append(f"skipped pending reinforcement for {', '.join(cleared)} after strong results")
+    if changes:
+        roadmap.route_reasoning = f"Route adapted: {'; '.join(changes)}."
+
+    recalculate_roadmap_progress(roadmap)
+    return reinforced, cleared
+
+
 def adaptive_replan_roadmap(db: Session, roadmap_id: str, user_id: str) -> Roadmap:
     roadmap = db.query(Roadmap).filter(Roadmap.id == roadmap_id, Roadmap.user_id == user_id).first()
     if not roadmap:
         return None
 
-    shaky_user_skills = db.query(UserSkill).filter(
-        UserSkill.user_id == user_id,
-        UserSkill.status == "NEEDS_REINFORCEMENT"
-    ).all()
-
-    if shaky_user_skills:
-        # Find active milestone (earliest milestone with incomplete tasks)
-        active_milestone = None
-        for m in sorted(roadmap.milestones, key=lambda x: x.sequence_order):
-            if any(t.status in ["NOT_STARTED", "IN_PROGRESS"] for t in m.tasks):
-                active_milestone = m
-                break
-        if not active_milestone and roadmap.milestones:
-            active_milestone = sorted(roadmap.milestones, key=lambda x: x.sequence_order)[-1]
-
-        added_skills = []
-        if active_milestone:
-            for us in shaky_user_skills:
-                skill_obj = us.skill
-                if not skill_obj:
-                    continue
-
-                # Check if a reinforcement task already exists for this skill
-                existing_ref = db.query(RoadmapTask).join(RoadmapMilestone).filter(
-                    RoadmapMilestone.roadmap_id == roadmap.id,
-                    RoadmapTask.skill_id == skill_obj.id,
-                    RoadmapTask.title.ilike("%Reinforcement Checkpoint%")
-                ).first()
-
-                if not existing_ref:
-                    seq_order = len(active_milestone.tasks) + 1
-                    ref_task = RoadmapTask(
-                        milestone_id=active_milestone.id,
-                        skill_id=skill_obj.id,
-                        title=f"Reinforcement Checkpoint • Practice & Review: {skill_obj.name}",
-                        description=f"Targeted review lab & practice session to solidify understanding of {skill_obj.name} after self-evaluating as SHAKY.",
-                        estimated_minutes=30,
-                        sequence_order=seq_order,
-                        status="NOT_STARTED",
-                        reason_why_next=f"Inserted via evidence-based adaptive loop to reinforce {skill_obj.name} before moving forward."
-                    )
-                    db.add(ref_task)
-                    db.commit()
-                    db.refresh(ref_task)
-
-                    # Attach resources for reinforcement
-                    ranked_res = rank_resources_for_skill(
-                        db=db,
-                        skill=skill_obj,
-                        user_skill_score=us.skill_score or 0.40,
-                        limit=2
-                    )
-                    for r_seq, item in enumerate(ranked_res):
-                        res_obj = item["resource"]
-                        tr = TaskResource(
-                            task_id=ref_task.id,
-                            resource_id=res_obj.id,
-                            recommendation_match_score=item["match_score"] / 100.0,
-                            recommendation_reason=f"Reinforcement resource: {item['match_reason']}",
-                            sequence_order=r_seq + 1
-                        )
-                        db.add(tr)
-                    added_skills.append(skill_obj.name)
-
-        # Recalculate total tasks
-        total_count = db.query(RoadmapTask).join(RoadmapMilestone).filter(
-            RoadmapMilestone.roadmap_id == roadmap.id
-        ).count()
-        roadmap.total_tasks = total_count
-
-        if added_skills:
-            roadmap.route_reasoning = f"Route adapted: Inserted dedicated reinforcement tasks for {', '.join(added_skills)} into your active schedule."
-        else:
-            roadmap.route_reasoning = f"Route adapted: Reinforced learning focus for {shaky_user_skills[0].skill.name} based on recent self-evaluations."
-    else:
-        roadmap.route_reasoning = "Roadmap schedule synchronized with your current completion pace."
-
+    adapt_roadmap_to_evidence(db, roadmap, user_id)
     db.commit()
     db.refresh(roadmap)
     return roadmap
-

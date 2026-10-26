@@ -4,14 +4,15 @@ import pytest
 from unittest.mock import patch, MagicMock
 from fastapi.testclient import TestClient
 
+from app.config import settings
 from app.main import app
 from app.models.db import SessionLocal
 from app.models.models import User, Profile
 
 client = TestClient(app)
 
-def create_mock_supabase_token(sub: str, email: str, full_name: str = "Test User") -> str:
-    """Creates a mock Supabase JWT token for automated testing."""
+def create_mock_supabase_token(sub: str, email: str, full_name: str = "Test User", secret: str = None) -> str:
+    """Creates a Supabase-style JWT signed with the test SUPABASE_JWT_SECRET (see conftest.py)."""
     payload = {
         "sub": sub,
         "email": email,
@@ -22,7 +23,7 @@ def create_mock_supabase_token(sub: str, email: str, full_name: str = "Test User
         "role": "authenticated",
         "aud": "authenticated"
     }
-    return jwt.encode(payload, "test_secret_for_unit_tests_only", algorithm="HS256")
+    return jwt.encode(payload, secret or settings.SUPABASE_JWT_SECRET, algorithm="HS256")
 
 
 def test_root_endpoint():
@@ -75,6 +76,11 @@ def test_supabase_auth_invalid_tokens():
     # 2. Malformed token
     resp_malformed = client.get("/api/auth/me", headers={"Authorization": "Bearer not-a-real-jwt"})
     assert resp_malformed.status_code == 401
+
+    # 3. Well-formed token signed with the wrong secret (forged identity)
+    forged = create_mock_supabase_token(str(uuid.uuid4()), "admin@skillalpha.com", secret="attacker-chosen-secret-0123456789abcdef")
+    resp_forged = client.get("/api/auth/me", headers={"Authorization": f"Bearer {forged}"})
+    assert resp_forged.status_code == 401
 
 
 def test_admin_role_gating():

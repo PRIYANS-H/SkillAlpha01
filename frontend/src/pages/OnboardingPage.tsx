@@ -130,28 +130,28 @@ export const OnboardingPage: React.FC = () => {
   const handleGenerateRoadmap = async () => {
     setIsSubmitting(true);
     setErrorMsg(null);
+    // Answered diagnostic questions calibrate the self-reported baseline for the skill they test
+    const diagnosticResults = diagnosticQuestions
+      .filter((q) => q.skill_name && quizAnswers[q.id] !== undefined)
+      .map((q) => ({ skill_name: q.skill_name, is_correct: quizAnswers[q.id] === q.correct_option_index }));
+    const roadmapRequest = {
+      goal,
+      known_skills: knownSkills,
+      diagnostic_results: diagnosticResults,
+      available_hours: hoursPerWeek,
+      duration_weeks: durationWeeks,
+      learning_preferences: preferences
+    };
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         // Save pending roadmap configuration and redirect to sign up
-        localStorage.setItem('skillalpha_pending_roadmap', JSON.stringify({
-          goal,
-          known_skills: knownSkills,
-          available_hours: hoursPerWeek,
-          duration_weeks: durationWeeks,
-          learning_preferences: preferences
-        }));
+        localStorage.setItem('skillalpha_pending_roadmap', JSON.stringify(roadmapRequest));
         navigate('/register?from=create');
         return;
       }
 
-      const res: any = await apiClient.post('/roadmaps', {
-        goal,
-        known_skills: knownSkills,
-        available_hours: hoursPerWeek,
-        duration_weeks: durationWeeks,
-        learning_preferences: preferences
-      });
+      const res: any = await apiClient.post('/roadmaps', roadmapRequest);
 
       navigate(`/roadmap/${res.id}`);
     } catch (err: any) {
