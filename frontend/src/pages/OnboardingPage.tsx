@@ -52,6 +52,31 @@ const GOAL_PRESETS = [
       { skill_name: "SQL & Analytical Queries", self_reported_level: "Advanced" },
       { skill_name: "Python Architecture", self_reported_level: "Intermediate" }
     ]
+  },
+  {
+    title: "Become a DevOps Engineer",
+    domain: "DevOps",
+    desc: "Master Linux, Docker, Kubernetes, infrastructure as code, and CI/CD pipelines.",
+    defaultSkills: [
+      { skill_name: "Linux Systems & Shell Scripting", self_reported_level: "Intermediate" },
+      { skill_name: "Docker & Containerization", self_reported_level: "Familiar" }
+    ]
+  },
+  {
+    title: "Become a Cybersecurity Analyst",
+    domain: "Security",
+    desc: "Master network security, the OWASP Top 10, cryptography, and penetration testing.",
+    defaultSkills: [
+      { skill_name: "Network Fundamentals & Security", self_reported_level: "Familiar" }
+    ]
+  },
+  {
+    title: "Become a Mobile App Developer",
+    domain: "Mobile",
+    desc: "Master mobile UI architecture, state management, API integration, and device security.",
+    defaultSkills: [
+      { skill_name: "Mobile UI Architecture", self_reported_level: "Familiar" }
+    ]
   }
 ];
 
@@ -205,7 +230,7 @@ export const OnboardingPage: React.FC = () => {
               <p className="text-sm text-on-surface-variant mt-1">Select a target career objective or type your custom learning goal.</p>
             </div>
 
-            <div className="space-y-3 mb-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
               {GOAL_PRESETS.map((preset) => {
                 const selected = goal === preset.title;
                 return (
@@ -218,9 +243,9 @@ export const OnboardingPage: React.FC = () => {
                         : 'border-outline-variant/60 hover:border-outline hover:bg-surface-container-low/30'
                     }`}
                   >
-                    <div className="flex items-center justify-between">
-                      <div className="font-bold text-sm text-on-surface">{preset.title}</div>
-                      <span className="text-[10px] font-semibold text-primary bg-primary-fixed/40 px-2 py-0.5 rounded">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="font-bold text-sm text-on-surface min-w-0">{preset.title}</div>
+                      <span className="shrink-0 whitespace-nowrap text-[10px] font-semibold text-primary bg-primary-fixed/40 px-2 py-0.5 rounded">
                         {preset.domain}
                       </span>
                     </div>

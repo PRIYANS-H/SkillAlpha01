@@ -29,7 +29,7 @@ const STATUS_META: Record<string, { label: string; chip: string; bar: string }> 
   MASTERED: { label: 'Mastered', chip: 'bg-primary-fixed text-on-primary-fixed', bar: 'bg-primary-container' },
   STRONG: { label: 'Strong', chip: 'bg-primary-fixed/50 text-primary', bar: 'bg-primary-container' },
   NEEDS_REINFORCEMENT: { label: 'Needs practice', chip: 'bg-secondary-fixed text-on-secondary-container', bar: 'bg-secondary-container' },
-  MISSING: { label: 'Not started', chip: 'bg-surface-container text-on-surface-variant', bar: 'bg-outline' },
+  MISSING: { label: 'Gap', chip: 'bg-surface-container text-on-surface-variant', bar: 'bg-outline' },
 };
 const STATUS_ORDER = ['NEEDS_REINFORCEMENT', 'MISSING', 'STRONG', 'MASTERED'];
 
@@ -229,7 +229,10 @@ export const ProgressPage: React.FC = () => {
                   <div className="flex items-center justify-between mb-3">
                     <h2 className="text-sm font-bold text-on-surface">Last 4 weeks</h2>
                     <span className="text-[11px] text-on-surface-variant">
-                      {activity.days.filter((d) => d.minutes + d.tasks + d.quizzes > 0).length} active days
+                      {(() => {
+                        const n = activity.days.filter((d) => d.minutes + d.tasks + d.quizzes > 0).length;
+                        return `${n} active day${n === 1 ? '' : 's'}`;
+                      })()}
                     </span>
                   </div>
                   <div className="grid grid-cols-7 gap-1.5" role="img" aria-label="Daily study activity for the last 28 days">
@@ -346,7 +349,7 @@ export const ProgressPage: React.FC = () => {
                             <ShieldCheck className="w-3.5 h-3.5 text-primary" />
                             {sk.evidence_count > 0
                               ? `${sk.evidence_count} checkpoint${sk.evidence_count === 1 ? '' : 's'} of evidence`
-                              : 'Self-reported, not yet verified'}
+                              : 'Estimated baseline, not yet verified'}
                           </span>
                           <span>{sk.evidence_count > 0 ? relativeDay(sk.last_assessed_at) : 'Take a quiz to verify'}</span>
                         </div>

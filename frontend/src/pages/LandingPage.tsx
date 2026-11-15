@@ -15,7 +15,7 @@ export const LandingPage: React.FC = () => {
 
         {/* Hero Section */}
         <section className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-20 lg:pt-16 lg:pb-28 w-full">
-          <div className="flex flex-col items-center text-center max-w-3xl mx-auto">
+          <div className="flex flex-col items-center text-center max-w-4xl mx-auto">
             {/* Eyebrow Pill */}
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-surface-container-low shadow-sm mb-6 border border-outline-variant/40">
               <span className="w-2 h-2 rounded-full bg-secondary-container animate-pulse" />
@@ -25,8 +25,8 @@ export const LandingPage: React.FC = () => {
             </div>
 
             {/* Main Headline */}
-            <h1 className="font-sans text-4xl sm:text-5xl lg:text-6xl font-extrabold text-on-surface tracking-tight mb-6 leading-[1.15]">
-              Everything you need to learn.<br className="hidden sm:inline" />
+            <h1 className="font-sans text-4xl sm:text-5xl lg:text-[3.5rem] font-extrabold text-on-surface tracking-tight mb-6 leading-[1.15]">
+              <span className="lg:whitespace-nowrap">Everything you need to learn.</span><br className="hidden sm:inline" />
               <span className="text-primary-container"> In the right order.</span>
             </h1>
 
@@ -175,7 +175,7 @@ export const LandingPage: React.FC = () => {
                   </div>
 
                   <div className="flex items-center justify-between pt-2">
-                    <span className="text-xs text-on-surface-variant">94% match rationale match</span>
+                    <span className="text-xs text-on-surface-variant">94% match for your current gap</span>
                     <Link
                       to="/learn"
                       className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-secondary-container text-on-primary text-xs font-bold hover:brightness-105 transition-all"
@@ -209,7 +209,7 @@ export const LandingPage: React.FC = () => {
               <div className="text-2xl font-bold text-outline-variant mb-2">01</div>
               <h3 className="text-base font-bold text-on-surface mb-2">Tell us your goal</h3>
               <p className="text-xs text-on-surface-variant leading-relaxed">
-                Specify a target job role, research paper, framework, or full-stack capstone project.
+                Pick a target role such as ML engineer, backend, DevOps or security, or type your own.
               </p>
             </div>
             <div className="mt-4 pt-3 flex items-center gap-1.5 text-primary text-xs font-semibold uppercase">
@@ -222,7 +222,7 @@ export const LandingPage: React.FC = () => {
               <div className="text-2xl font-bold text-outline-variant mb-2">02</div>
               <h3 className="text-base font-bold text-on-surface mb-2">Understand baseline</h3>
               <p className="text-xs text-on-surface-variant leading-relaxed">
-                Link your GitHub, past courses, or take a 6-minute adaptive code assessment.
+                Rate what you already know, then answer a short diagnostic that checks it.
               </p>
             </div>
             <div className="mt-4 pt-3 flex items-center gap-1.5 text-primary text-xs font-semibold uppercase">
@@ -261,7 +261,7 @@ export const LandingPage: React.FC = () => {
               <div className="text-2xl font-bold text-outline-variant mb-2">05</div>
               <h3 className="text-base font-bold text-on-surface mb-2">Learn and adapt</h3>
               <p className="text-xs text-on-surface-variant leading-relaxed">
-                Miss a day or breeze through a concept? The roadmap continuously repaces automatically.
+                Quiz results add or skip practice steps, and one tap re-paces your dates if you fall behind.
               </p>
             </div>
             <div className="mt-4 pt-3 flex items-center gap-1.5 text-primary text-xs font-semibold uppercase">
