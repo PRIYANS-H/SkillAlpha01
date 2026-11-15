@@ -6,6 +6,7 @@ from app.schemas.schemas import APIResponse, OnboardingRequest
 import json
 from app.security.auth import get_current_user
 from app.services.roadmap_service import generate_roadmap_for_user, adaptive_replan_roadmap
+from app.services.assessment_service import grade_diagnostic
 
 router = APIRouter(prefix="/roadmaps", tags=["Roadmaps"])
 
@@ -38,6 +39,7 @@ def serialize_roadmap(rm: Roadmap) -> dict:
                 "sequence_order": t.sequence_order,
                 "status": t.status,
                 "reason_why_next": t.reason_why_next,
+                "due_date": t.due_date.isoformat() if t.due_date else None,
                 "resources": resources_data
             })
         milestones_data.append({
@@ -73,7 +75,7 @@ def create_roadmap(req: OnboardingRequest, current_user: User = Depends(get_curr
         item.skill_name.lower(): item.self_reported_level
         for item in req.known_skills
     }
-    diagnostic = {}
+    diagnostic = grade_diagnostic(req.diagnostic_token, req.diagnostic_answers)
     for result in req.diagnostic_results:
         correct, total = diagnostic.get(result.skill_name.lower(), (0, 0))
         diagnostic[result.skill_name.lower()] = (correct + int(result.is_correct), total + 1)

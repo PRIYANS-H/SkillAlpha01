@@ -1,7 +1,7 @@
 import datetime
 import uuid
 from sqlalchemy import (
-    Column, String, Integer, Float, Boolean, Text, DateTime, ForeignKey, Enum as SQLEnum
+    Column, String, Integer, Float, Boolean, Text, Date, DateTime, ForeignKey, Enum as SQLEnum
 )
 from sqlalchemy.orm import relationship
 from app.models.db import Base
@@ -187,6 +187,7 @@ class RoadmapTask(Base):
     sequence_order = Column(Integer, nullable=False)
     status = Column(String(50), default="NOT_STARTED") # NOT_STARTED, IN_PROGRESS, COMPLETED, SKIPPED
     reason_why_next = Column(Text, nullable=True)
+    due_date = Column(Date, nullable=True)  # scheduled study day; shifted by POST /roadmaps/{id}/repace
     created_at = Column(DateTime, default=utc_now)
     updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
 
@@ -325,4 +326,14 @@ class AuditLog(Base):
     resource_type = Column(String(100), nullable=False)
     details = Column(Text, nullable=True)
     ip_address = Column(String(100), nullable=True)
+    created_at = Column(DateTime, default=utc_now)
+
+
+class ResourceMatchCache(Base):
+    """Persistent cache for resolved resource links (YouTube search etc.), shared by all workers."""
+    __tablename__ = "resource_match_cache"
+
+    cache_key = Column(String(255), primary_key=True)
+    payload_json = Column(Text, nullable=False)
+    expires_at = Column(DateTime, nullable=False)
     created_at = Column(DateTime, default=utc_now)

@@ -25,6 +25,10 @@ class Settings(BaseSettings):
     LLM_MODEL: str = os.getenv("LLM_MODEL", "llama-3.3-70b-versatile")
     LLM_API_KEY: str = os.getenv("LLM_API_KEY", "")
     
+    # CORS: comma-separated frontend origins, e.g. "https://skillalpha.vercel.app,https://skillalpha.com".
+    # When empty, any https:// origin is allowed (without credentials; auth is a bearer header).
+    FRONTEND_ORIGINS: str = os.getenv("FRONTEND_ORIGINS", "")
+
     # YouTube Integration
     YOUTUBE_DATA_API_KEY: str = os.getenv("YOUTUBE_DATA_API_KEY", "")
     

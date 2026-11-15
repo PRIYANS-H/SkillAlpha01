@@ -54,7 +54,7 @@ export const SkillAlphaLogo: React.FC<SkillAlphaLogoProps> = ({
       {/* Left Leg: Dark Slate Navy (#0F172A / #1E293B) */}
       <path
         d="M 45 12 L 53 26 L 27 88 L 11 88 Z"
-        fill="#111827"
+        className="fill-[#111827] dark:fill-white"
       />
 
       {/* Right Leg: Warm Amber / Gold Gradient */}

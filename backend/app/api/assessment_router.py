@@ -7,7 +7,7 @@ from app.models.models import Assessment, Skill, User, Roadmap
 from app.schemas.schemas import APIResponse, AssessmentAttemptRequest
 from app.security.auth import get_current_user
 from app.services.assessment_service import (
-    get_or_create_assessment_for_skill, evaluate_assessment_attempt, get_diagnostic_questions_for_goal
+    get_or_create_assessment_for_skill, evaluate_assessment_attempt, build_public_diagnostic
 )
 from app.services.roadmap_service import adapt_roadmap_to_evidence
 
@@ -15,11 +15,8 @@ router = APIRouter(prefix="/assessments", tags=["Assessments"])
 
 @router.get("/diagnostic-by-goal", response_model=APIResponse)
 def get_diagnostic_by_goal(goal: str = Query("Become a Machine Learning Engineer")):
-    questions = get_diagnostic_questions_for_goal(goal)
-    return APIResponse(data={
-        "goal": goal,
-        "questions": questions
-    })
+    # Answers stay on the server: the client gets a signed token to send back with its choices
+    return APIResponse(data=build_public_diagnostic(goal))
 
 
 @router.get("/by-skill/{skill_id}", response_model=APIResponse)
@@ -34,8 +31,7 @@ def get_assessment_for_skill(skill_id: str, db: Session = Depends(get_db)):
         {
             "id": q.id,
             "question_text": q.question_text,
-            "options": json.loads(q.options_json),
-            "explanation": q.explanation
+            "options": json.loads(q.options_json)
         }
         for q in assessment.questions
     ]
@@ -58,7 +54,7 @@ def submit_assessment_attempt(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
-    attempt, new_score, feedback = evaluate_assessment_attempt(
+    attempt, new_score, feedback, review = evaluate_assessment_attempt(
         db=db,
         user_id=current_user.id,
         assessment_id=assessment_id,
@@ -66,7 +62,7 @@ def submit_assessment_attempt(
     )
 
     if not attempt:
-        return APIResponse(error={"code": "NOT_FOUND", "message": "Assessment evaluation failed"})
+        return APIResponse(error={"code": "NOT_FOUND", "message": feedback or "Assessment evaluation failed"})
 
     # Quiz evidence can reinforce or clear steps on the learner's active route
     adaptation = None
@@ -91,5 +87,6 @@ def submit_assessment_attempt(
         "passed": attempt.passed,
         "new_skill_score": new_score,
         "feedback": feedback,
+        "review": review,
         "adaptation": adaptation
     })

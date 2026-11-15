@@ -1,10 +1,17 @@
-import React, { useEffect, useState } from 'react';
-import { Search, Filter, Bookmark, ExternalLink, Sparkles, Check } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { Search, Bookmark, BookmarkCheck, ExternalLink, X } from 'lucide-react';
 import { apiClient } from '../api/client';
 import { Resource } from '../types';
+import { Skeleton } from '../components/ui/Skeleton';
+import { useToast } from '../components/ui/Toast';
 
 export const ResourcesPage: React.FC = () => {
   const [resources, setResources] = useState<Resource[]>([]);
+  const toast = useToast();
+  const [searchParams] = useSearchParams();
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const [searchInput, setSearchInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedType, setSelectedType] = useState<string>('ALL');
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>('ALL');
@@ -21,8 +28,8 @@ export const ResourcesPage: React.FC = () => {
 
       const res: any = await apiClient.get(url);
       setResources(res || []);
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      toast.error(err.message || 'Could not load resources.');
     } finally {
       setLoading(false);
     }
@@ -32,17 +39,38 @@ export const ResourcesPage: React.FC = () => {
     fetchResources();
   }, [searchQuery, selectedType, selectedDifficulty]);
 
+  // Search as you type, but only hit the API once typing pauses
+  useEffect(() => {
+    const timer = window.setTimeout(() => setSearchQuery(searchInput.trim()), 300);
+    return () => window.clearTimeout(timer);
+  }, [searchInput]);
+
+  // The header search button and the "/" shortcut land here with ?focus=search
+  useEffect(() => {
+    if (searchParams.get('focus') === 'search') searchInputRef.current?.focus();
+  }, [searchParams]);
+
+  const hasFilters = searchInput !== '' || selectedType !== 'ALL';
+  const clearFilters = () => {
+    setSearchInput('');
+    setSearchQuery('');
+    setSelectedType('ALL');
+  };
+
   const handleToggleSave = async (resourceId: string, currentSaved: boolean) => {
+    // Optimistic: flip the bookmark immediately, roll back if the request fails
+    setSavedMap((m) => ({ ...m, [resourceId]: !currentSaved }));
     try {
-      if (currentSaved || savedMap[resourceId]) {
+      if (currentSaved) {
         await apiClient.delete(`/resources/${resourceId}/save`);
-        setSavedMap({ ...savedMap, [resourceId]: false });
+        toast.info('Removed from your saved resources.');
       } else {
         await apiClient.post(`/resources/${resourceId}/save`);
-        setSavedMap({ ...savedMap, [resourceId]: true });
+        toast.success('Saved to your library.');
       }
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      setSavedMap((m) => ({ ...m, [resourceId]: currentSaved }));
+      toast.error(err.message || 'Could not update your saved resources.');
     }
   };
 
@@ -53,11 +81,11 @@ export const ResourcesPage: React.FC = () => {
         {/* Header */}
         <div className="mb-8">
           <span className="text-xs uppercase tracking-wider text-primary font-bold block mb-1">
-            Curated Discovery Pipeline
+            Resource library
           </span>
-          <h1 className="text-3xl font-extrabold text-on-surface">Find what you need. Skip the fluff.</h1>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-on-surface">Find what you need. Skip the fluff.</h1>
           <p className="text-sm text-on-surface-variant mt-1 max-w-2xl">
-            Multi-source verified educational resources filtered for signal, accuracy, and topic relevance.
+Hand-picked videos, docs, courses and practice labs, ranked for your current skill gaps.
           </p>
         </div>
 
@@ -68,9 +96,11 @@ export const ResourcesPage: React.FC = () => {
           <div className="relative w-full md:w-96">
             <Search className="w-4 h-4 absolute left-3.5 top-3.5 text-on-surface-variant" />
             <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              ref={searchInputRef}
+              type="search"
+              aria-label="Search resources"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
               placeholder="Search by topic, skill, or provider (e.g. Scikit-Learn, Optuna)..."
               className="w-full h-10 pl-10 pr-4 rounded-xl border border-outline-variant/60 bg-surface-container-low text-xs text-on-surface focus:outline-none focus:border-primary"
             />
@@ -82,7 +112,8 @@ export const ResourcesPage: React.FC = () => {
               <button
                 key={t}
                 onClick={() => setSelectedType(t)}
-                className={`px-3 py-1.5 rounded-lg font-semibold transition-colors ${
+                aria-pressed={selectedType === t}
+                className={`px-3 py-1.5 rounded-lg font-semibold capitalize transition-colors ${
                   selectedType === t
                     ? 'bg-primary text-on-primary shadow-sm'
                     : 'bg-surface-container-low text-on-surface-variant hover:bg-surface-container'
@@ -96,17 +127,30 @@ export const ResourcesPage: React.FC = () => {
 
         {/* Resource Grid */}
         {loading ? (
-          <div className="text-center py-16 text-xs font-semibold text-on-surface-variant">
-            Loading curated resources...
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" role="status" aria-label="Loading resources">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <Skeleton key={i} className="h-56 rounded-2xl" />
+            ))}
           </div>
         ) : resources.length === 0 ? (
-          <div className="bg-surface-container-lowest rounded-2xl p-8 border border-outline-variant/60 text-center">
-            <p className="text-sm text-on-surface-variant">We couldn't find a strong match for your filter criteria.</p>
+          <div className="bg-surface-container-lowest rounded-2xl p-10 border border-outline-variant/60 text-center">
+            <Search className="w-8 h-8 text-outline mx-auto mb-3" />
+            <h2 className="text-base font-bold text-on-surface mb-1">No resources match</h2>
+            <p className="text-xs text-on-surface-variant mb-5">Try a broader search term or a different format.</p>
+            {hasFilters && (
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-surface-container-low text-on-surface text-xs font-bold hover:bg-surface-container transition-colors"
+              >
+                <X className="w-3.5 h-3.5" /> Clear filters
+              </button>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {resources.map((res) => {
-              const isSaved = savedMap[res.id] || res.is_saved;
+              const isSaved = savedMap[res.id] ?? !!res.is_saved;
               return (
                 <div
                   key={res.id}
@@ -118,9 +162,11 @@ export const ResourcesPage: React.FC = () => {
                       <span className="text-[10px] font-bold uppercase tracking-wider text-primary bg-primary-fixed/40 px-2 py-0.5 rounded">
                         {res.provider} • {res.resource_type}
                       </span>
-                      <span className="text-xs font-bold text-secondary-container bg-secondary-fixed/30 px-2 py-0.5 rounded">
-                        {res.match_score || 94}% match
-                      </span>
+                      {res.match_score ? (
+                        <span className="text-xs font-bold text-secondary bg-secondary-fixed/40 px-2 py-0.5 rounded whitespace-nowrap">
+                          {Math.round(res.match_score)}% match
+                        </span>
+                      ) : null}
                     </div>
 
                     <h3 className="text-base font-bold text-on-surface group-hover:text-primary transition-colors mb-2">
@@ -141,16 +187,18 @@ export const ResourcesPage: React.FC = () => {
                   {/* Card Actions */}
                   <div className="pt-4 border-t border-outline-variant/30 flex items-center justify-between">
                     <span className="text-xs text-on-surface-variant font-medium">
-                      {res.duration_minutes} min read
+                      {res.duration_minutes} min
                     </span>
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => handleToggleSave(res.id, !!isSaved)}
+                        aria-label={isSaved ? `Remove ${res.title} from saved` : `Save ${res.title}`}
+                        aria-pressed={!!isSaved}
                         className={`p-2 rounded-lg border border-outline-variant/60 hover:bg-surface-container-low transition-colors ${
                           isSaved ? 'text-primary bg-primary-fixed/30' : 'text-on-surface-variant'
                         }`}
                       >
-                        <Bookmark className="w-4 h-4" />
+                        {isSaved ? <BookmarkCheck className="w-4 h-4" /> : <Bookmark className="w-4 h-4" />}
                       </button>
                       <a
                         href={res.url}

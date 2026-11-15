@@ -2,13 +2,89 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Design tokens as "R G B" triplets so Tailwind opacity modifiers (bg-primary/10) keep working. */
+:root {
+  --c-surface: 246 251 245;
+  --c-surface-container-lowest: 255 255 255;
+  --c-surface-container-low: 240 245 239;
+  --c-surface-container: 234 239 234;
+  --c-surface-container-high: 229 233 228;
+  --c-surface-container-highest: 223 228 222;
+  --c-on-surface: 24 29 26;
+  --c-on-surface-variant: 64 73 67;
+  --c-outline: 112 121 115;
+  --c-outline-variant: 225 229 223;
+  --c-primary: 10 72 49;
+  --c-primary-container: 40 96 71;
+  --c-primary-fixed: 180 240 207;
+  --c-primary-fixed-dim: 152 212 180;
+  --c-on-primary: 255 255 255;
+  --c-on-primary-fixed: 0 33 20;
+  --c-secondary: 174 50 0;
+  --c-secondary-container: 255 91 34;
+  --c-secondary-fixed: 255 219 208;
+  --c-on-secondary-container: 82 19 0;
+  --c-error: 186 26 26;
+  --c-error-container: 255 218 214;
+  --c-on-error-container: 147 0 10;
+  color-scheme: light;
+}
+
+:root.dark {
+  --c-surface: 14 20 17;
+  --c-surface-container-lowest: 22 29 25;
+  --c-surface-container-low: 27 35 30;
+  --c-surface-container: 33 42 37;
+  --c-surface-container-high: 42 51 46;
+  --c-surface-container-highest: 52 62 56;
+  --c-on-surface: 225 230 224;
+  --c-on-surface-variant: 185 196 187;
+  --c-outline: 138 148 140;
+  --c-outline-variant: 44 54 47;
+  --c-primary: 138 216 176;
+  --c-primary-container: 63 154 114;
+  --c-primary-fixed: 20 60 44;
+  --c-primary-fixed-dim: 28 74 55;
+  --c-on-primary: 5 41 27;
+  --c-on-primary-fixed: 194 245 216;
+  --c-secondary: 255 181 156;
+  --c-secondary-container: 255 106 54;
+  --c-secondary-fixed: 77 30 13;
+  --c-on-secondary-container: 255 219 208;
+  --c-error: 255 180 171;
+  --c-error-container: 90 22 19;
+  --c-on-error-container: 255 218 214;
+  color-scheme: dark;
+}
+
 @layer base {
   html, body {
     margin: 0;
     padding: 0;
-    background-color: #f6fbf5;
-    color: #181d1a;
+    background-color: rgb(var(--c-surface));
+    color: rgb(var(--c-on-surface));
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+  }
+
+  /* Visible keyboard focus everywhere, without rings on mouse clicks */
+  :focus-visible {
+    outline: 2px solid rgb(var(--c-primary));
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+
+  input, select, textarea {
+    color: rgb(var(--c-on-surface));
+    background-color: rgb(var(--c-surface-container-lowest));
+  }
+  input::placeholder, textarea::placeholder {
+    color: rgb(var(--c-outline));
+  }
+}
+
+@layer components {
+  .skeleton {
+    @apply rounded-lg bg-surface-container-high/70 animate-pulse;
   }
 }
 
@@ -17,12 +93,21 @@
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #f0f5ef;
+  background: rgb(var(--c-surface-container-low));
 }
 ::-webkit-scrollbar-thumb {
-  background: #c0c9c1;
+  background: rgb(var(--c-outline) / 0.5);
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #707973;
+  background: rgb(var(--c-outline));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

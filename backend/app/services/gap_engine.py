@@ -91,8 +91,13 @@ def evaluate_skill_gaps(
     for skill in target_skills:
         skill_key = skill.name.lower()
         
-        # Calculate baseline score from self-report or DB
-        if skill_key in self_reported_skills:
+        # Calculate baseline score: earned evidence (quizzes, diagnostics, completed tasks)
+        # outranks a self-report, so regenerating a roadmap never erases verified progress.
+        stored = existing_user_skills.get(skill_key)
+        if stored is not None and (stored.evidence_count or 0) > 0:
+            score = stored.skill_score
+            confidence = stored.confidence_score
+        elif skill_key in self_reported_skills:
             lvl = self_reported_skills[skill_key].upper()
             score = LEVEL_SCORES.get(lvl, 0.40)
             confidence = 0.85
@@ -119,6 +124,8 @@ def evaluate_skill_gaps(
             confidence = user_skill.confidence_score
             if baseline_status in ["MASTERED", "STRONG"] and user_skill.status in WEAK_STATUSES:
                 calibrated_skills.append(skill.name)
+        elif user_skill is not None and (user_skill.evidence_count or 0) > 0:
+            pass  # keep evidence-derived score and status untouched
         elif not user_skill:
             user_skill = UserSkill(
                 user_id=user_id,

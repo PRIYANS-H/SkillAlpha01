@@ -85,6 +85,7 @@ def get_today_learning(
         "sequence_order": next_task.sequence_order,
         "status": next_task.status,
         "reason_why_next": next_task.reason_why_next,
+        "due_date": next_task.due_date.isoformat() if next_task.due_date else None,
         "resources": resources_data
     }
 
@@ -111,8 +112,10 @@ def start_learning_session(task_id: str, current_user: User = Depends(get_curren
             detail="Task not found or access denied."
         )
 
-    task.status = "IN_PROGRESS"
-    
+    # Re-opening a finished task to review it must not undo its completion
+    if task.status == "NOT_STARTED":
+        task.status = "IN_PROGRESS"
+
     session = LearningSession(
         user_id=current_user.id,
         task_id=task_id,
@@ -156,8 +159,8 @@ def update_learning_session(
     session.status = actual_status
     if actual_status == "COMPLETED":
         session.ended_at = datetime.datetime.now(datetime.timezone.utc)
-        if session.task:
-            session.task.status = "COMPLETED"
+        # Task completion (status, TaskProgress, skill evidence, adaptation) is owned by
+        # POST /tasks/{id}/complete; closing a timer session must not bypass that loop.
 
     db.commit()
     return APIResponse(data={"message": "Session updated successfully"})

@@ -1,5 +1,6 @@
-version: '3.8'
-
+# Local full stack: Postgres + API + built SPA.
+# Supabase keys come from your shell or a root .env file (see .env.example);
+# without SUPABASE_JWT_SECRET / SUPABASE_URL every API request returns 401.
 services:
   postgres:
     image: postgres:15-alpine
@@ -12,34 +13,39 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-
-  redis:
-    image: redis:7-alpine
-    container_name: skillalpha_redis
-    ports:
-      - "6379:6379"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U skillalpha_user -d skillalpha"]
+      interval: 5s
+      retries: 10
 
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile
     container_name: skillalpha_backend
     environment:
       DATABASE_URL: postgresql://skillalpha_user:skillalpha_password@postgres:5432/skillalpha
-      JWT_SECRET: production_jwt_secret_key_skillalpha_2026
+      SUPABASE_URL: ${SUPABASE_URL:-}
+      SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:-}
+      SUPABASE_JWT_SECRET: ${SUPABASE_JWT_SECRET:-}
+      GROQ_API_KEY: ${GROQ_API_KEY:-}
+      YOUTUBE_DATA_API_KEY: ${YOUTUBE_DATA_API_KEY:-}
+      FRONTEND_ORIGINS: http://localhost:5173
     ports:
       - "8000:8000"
     depends_on:
-      - postgres
-      - redis
+      postgres:
+        condition: service_healthy
 
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: http://localhost:8000
+        VITE_SUPABASE_URL: ${SUPABASE_URL:-}
+        VITE_SUPABASE_ANON_KEY: ${SUPABASE_ANON_KEY:-}
     container_name: skillalpha_frontend
     ports:
-      - "5173:5173"
+      - "5173:80"
     depends_on:
       - backend
 

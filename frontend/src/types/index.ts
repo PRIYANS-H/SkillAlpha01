@@ -77,6 +77,7 @@ export interface RoadmapTask {
   sequence_order: number;
   status: 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED' | 'SKIPPED';
   reason_why_next?: string;
+  due_date?: string | null;
   resources: RoadmapTaskResource[];
 }
 

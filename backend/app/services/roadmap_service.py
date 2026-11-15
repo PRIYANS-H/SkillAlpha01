@@ -85,11 +85,11 @@ def generate_roadmap_for_user(
         
         # Calculate start and end date for milestone
         m_start_date = start_date + datetime.timedelta(days=(week_num - 1) * 7)
-        m_end_date = m_start_date + datetime.timedelta(days=6)
         
+        # Dates live in RoadmapTask.due_date (rendered by the client) so they can shift on repace
         milestone = RoadmapMilestone(
             roadmap_id=roadmap.id,
-            title=f"Week {week_num:02d} ({m_start_date.strftime('%b %d')} - {m_end_date.strftime('%b %d')}) • {m_title}",
+            title=f"Week {week_num:02d} • {m_title}",
             description=f"Schedule Target: {hours_per_week} hrs/week ({daily_hours_target} hrs/day) • Master key dependencies for Week {week_num}.",
             week_number=week_num,
             sequence_order=m_idx + 1
@@ -108,21 +108,21 @@ def generate_roadmap_for_user(
             if not skill_obj:
                 continue
 
-            # Day-wise date computation
+            # Day-wise schedule: study days are spaced two days apart within the week
             task_date = m_start_date + datetime.timedelta(days=(t_seq * 2))
-            date_str = task_date.strftime("%a, %b %d")
 
-            reason_why = f"Day {current_day} ({date_str}) • Allocated {daily_hours_target} hrs. Required to bridge your {skill_item['skill_name']} gap."
+            reason_why = f"Day {current_day} of your plan • Allocated {daily_hours_target} hrs. Required to bridge your {skill_item['skill_name']} gap."
 
             task = RoadmapTask(
                 milestone_id=milestone.id,
                 skill_id=skill_obj.id,
-                title=f"Day {current_day} ({date_str}) • Master {skill_obj.name}",
+                title=f"Master {skill_obj.name}",
                 description=skill_obj.description or f"Complete curated readings, code labs, and checkpoints for {skill_obj.name}.",
                 estimated_minutes=int(daily_hours_target * 60),
                 sequence_order=t_seq + 1,
                 status="NOT_STARTED",
-                reason_why_next=reason_why
+                reason_why_next=reason_why,
+                due_date=task_date
             )
             db.add(task)
             db.commit()
@@ -186,6 +186,7 @@ def _insert_reinforcement_task(db: Session, roadmap_tasks: List[RoadmapTask], mi
         estimated_minutes=30,
         sequence_order=seq_order,
         status="NOT_STARTED",
+        due_date=max(next_task.due_date, datetime.date.today()) if next_task and next_task.due_date else datetime.date.today(),
         reason_why_next=f"Inserted via evidence-based adaptive loop: your latest results show {skill_obj.name} needs reinforcement before moving forward."
     )
     milestone.tasks.append(ref_task)
@@ -270,12 +271,38 @@ def adapt_roadmap_to_evidence(db: Session, roadmap: Roadmap, user_id: str) -> Tu
     return reinforced, cleared
 
 
+def shift_overdue_schedule(roadmap: Roadmap, today: Optional[datetime.date] = None) -> int:
+    """
+    If the learner has fallen behind, moves every pending task forward by the same number of
+    days so the earliest pending task is due today; spacing between tasks is preserved.
+    Returns the number of days shifted (0 when on schedule).
+    """
+    today = today or datetime.date.today()
+    pending = [
+        t for m in roadmap.milestones for t in m.tasks
+        if t.status in PENDING_STATUSES and t.due_date is not None
+    ]
+    if not pending:
+        return 0
+    earliest = min(t.due_date for t in pending)
+    if earliest >= today:
+        return 0
+    delta = today - earliest
+    for t in pending:
+        t.due_date = t.due_date + delta
+    return delta.days
+
+
 def adaptive_replan_roadmap(db: Session, roadmap_id: str, user_id: str) -> Roadmap:
     roadmap = db.query(Roadmap).filter(Roadmap.id == roadmap_id, Roadmap.user_id == user_id).first()
     if not roadmap:
         return None
 
+    shifted_days = shift_overdue_schedule(roadmap)
     adapt_roadmap_to_evidence(db, roadmap, user_id)
+    if shifted_days:
+        note = f"Schedule re-paced: pending tasks moved {shifted_days} day{'s' if shifted_days != 1 else ''} later so today's task is due today."
+        roadmap.route_reasoning = f"{roadmap.route_reasoning} {note}" if roadmap.route_reasoning and roadmap.route_reasoning.startswith("Route adapted") else note
     db.commit()
     db.refresh(roadmap)
     return roadmap

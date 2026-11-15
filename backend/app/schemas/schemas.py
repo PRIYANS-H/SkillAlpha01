@@ -113,6 +113,10 @@ class DiagnosticResult(BaseModel):
 class OnboardingRequest(BaseModel):
     goal: str
     known_skills: List[UserSkillUpdate] = []
+    # Preferred: answers graded on the server against the signed key from /assessments/diagnostic-by-goal
+    diagnostic_token: Optional[str] = None
+    diagnostic_answers: Dict[str, int] = {}
+    # Legacy: client-graded results (still accepted for older clients and tests)
     diagnostic_results: List[DiagnosticResult] = []
     available_hours: int = 10
     duration_weeks: int = 12

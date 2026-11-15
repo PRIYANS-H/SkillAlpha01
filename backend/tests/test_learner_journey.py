@@ -219,3 +219,147 @@ def test_onboarding_baseline_alone_does_not_trigger_reinforcement():
     replanned = ok(client.post(f"/api/roadmaps/{roadmap['id']}/repace", headers=headers))
     assert replanned["total_tasks"] == roadmap["total_tasks"]
     assert not any("Reinforcement" in t["title"] for t in all_tasks(replanned))
+
+
+def test_regenerating_roadmap_keeps_earned_evidence():
+    # A self-report on a later onboarding must not overwrite a diagnostic/quiz-verified score.
+    _, _, headers = new_learner()
+    create_calibrated_roadmap(headers)
+    before = skills_by_name(headers)[WEAK_SKILL]
+    assert before["evidence_count"] == 1
+
+    ok(client.post("/api/roadmaps", headers=headers, json={
+        "goal": GOAL,
+        "known_skills": [{"skill_name": WEAK_SKILL, "self_reported_level": "Expert"}],
+        "diagnostic_results": [],
+        "available_hours": 10,
+        "duration_weeks": 12,
+        "learning_preferences": ["VIDEO"],
+    }))
+    after = skills_by_name(headers)[WEAK_SKILL]
+    assert after["skill_score"] == before["skill_score"]
+    assert after["status"] == "NEEDS_REINFORCEMENT"
+
+
+def test_closing_a_session_does_not_complete_the_task():
+    # Only POST /tasks/{id}/complete records progress + evidence; a timer PATCH must not skip it.
+    _, _, headers = new_learner()
+    create_calibrated_roadmap(headers)
+    task = ok(client.get("/api/recommendations/today", headers=headers))["task"]
+    session_id = ok(client.post("/api/learning-sessions", params={"task_id": task["id"]}, headers=headers))["session_id"]
+    ok(client.patch(f"/api/learning-sessions/{session_id}", headers=headers,
+                    json={"duration_seconds": 60, "status": "COMPLETED"}))
+    assert ok(client.get("/api/recommendations/today", headers=headers))["task"]["id"] == task["id"]
+
+
+def test_diagnostic_is_graded_on_the_server():
+    diagnostic = ok(client.get("/api/assessments/diagnostic-by-goal", params={"goal": GOAL}))
+    questions = diagnostic["questions"]
+    assert questions and all("correct_option_index" not in q and "explanation" not in q for q in questions)
+
+    key = jwt.decode(diagnostic["diagnostic_token"], settings.JWT_SECRET, algorithms=["HS256"],
+                     audience="skillalpha-diagnostic")["key"]
+    assert len({correct for _, correct in key.values()}) > 1, "answers must not always be the same option"
+
+    # Answer every WEAK_SKILL question wrong and every other question right
+    answers = {
+        qid: (correct + 1) % 4 if skill == WEAK_SKILL else correct
+        for qid, (skill, correct) in key.items()
+    }
+    _, _, headers = new_learner()
+    ok(client.post("/api/roadmaps", headers=headers, json={
+        "goal": GOAL,
+        "known_skills": [{"skill_name": WEAK_SKILL, "self_reported_level": "Advanced"}],
+        "diagnostic_token": diagnostic["diagnostic_token"],
+        "diagnostic_answers": answers,
+        "available_hours": 10,
+        "duration_weeks": 12,
+        "learning_preferences": ["VIDEO"],
+    }))
+    weak = skills_by_name(headers)[WEAK_SKILL]
+    assert weak["status"] == "NEEDS_REINFORCEMENT" and weak["evidence_count"] == 1
+
+    # A tampered token grades nothing
+    _, _, headers = new_learner()
+    ok(client.post("/api/roadmaps", headers=headers, json={
+        "goal": GOAL,
+        "diagnostic_token": diagnostic["diagnostic_token"] + "x",
+        "diagnostic_answers": answers,
+    }))
+    assert skills_by_name(headers)[WEAK_SKILL]["evidence_count"] == 0
+
+
+def test_skill_quiz_hides_answers_until_submitted():
+    _, _, headers = new_learner()
+    create_calibrated_roadmap(headers)
+    task = ok(client.get("/api/recommendations/today", headers=headers))["task"]
+    quiz = ok(client.get(f"/api/assessments/by-skill/{task['skill_id']}"))
+    assert len(quiz["questions"]) == 3
+    assert all("explanation" not in q and "correct_option_index" not in q for q in quiz["questions"])
+    assert not any(q["question_text"].startswith("What is the core principle") for q in quiz["questions"])
+
+    result = ok(client.post(f"/api/assessments/{quiz['id']}/attempt", headers=headers,
+                            json={"answers": answers_for(quiz["id"], correct=True)}))
+    assert result["passed"] is True
+    assert len(result["review"]) == 3 and all(r["is_correct"] and r["explanation"] for r in result["review"])
+
+
+def test_tasks_have_due_dates_and_repace_shifts_overdue_schedule():
+    import datetime
+    from app.models.models import RoadmapTask, RoadmapMilestone
+
+    _, _, headers = new_learner()
+    roadmap = create_calibrated_roadmap(headers)
+    tasks = all_tasks(roadmap)
+    assert all(t["due_date"] for t in tasks)
+    assert not any(t["title"].startswith("Day ") for t in tasks)
+
+    # Simulate falling 10 days behind
+    db = SessionLocal()
+    try:
+        for t in db.query(RoadmapTask).join(RoadmapMilestone).filter(RoadmapMilestone.roadmap_id == roadmap["id"]):
+            t.due_date = t.due_date - datetime.timedelta(days=10)
+        db.commit()
+    finally:
+        db.close()
+
+    replanned = ok(client.post(f"/api/roadmaps/{roadmap['id']}/repace", headers=headers))
+    due = sorted(t["due_date"] for t in all_tasks(replanned) if t["status"] in ("NOT_STARTED", "IN_PROGRESS"))
+    assert due[0] == datetime.date.today().isoformat()
+    assert "re-paced" in replanned["route_reasoning"]
+
+
+def test_every_goal_skill_has_curated_questions():
+    from app.services.skill_service import GOAL_SKILL_GRAPHS, resolve_goal_family
+    from app.services.question_bank import QUESTION_BANK
+
+    for graph in GOAL_SKILL_GRAPHS.values():
+        for name, _, _ in graph:
+            assert len(QUESTION_BANK.get(name, [])) >= 3, name
+    assert resolve_goal_family("HTML & CSS developer") == "frontend"
+    assert resolve_goal_family("React Native developer") == "mobile"
+    assert resolve_goal_family("ML Engineer") == "machine_learning"
+
+
+def test_activity_reports_streak_and_totals():
+    _, _, headers = new_learner()
+    empty = ok(client.get("/api/users/me/activity", headers=headers))
+    assert empty["streak_days"] == 0 and empty["tasks_completed"] == 0 and len(empty["days"]) == 28
+
+    create_calibrated_roadmap(headers)
+    task = ok(client.get("/api/recommendations/today", headers=headers))["task"]
+    quiz = ok(client.get(f"/api/assessments/by-skill/{task['skill_id']}"))
+    ok(client.post(f"/api/assessments/{quiz['id']}/attempt", headers=headers,
+                   json={"answers": answers_for(quiz["id"], correct=True)}))
+    ok(client.post(f"/api/tasks/{task['id']}/complete", headers=headers,
+                   json={"time_spent_minutes": 42, "self_evaluation": "GOT_IT"}))
+
+    activity = ok(client.get("/api/users/me/activity", headers=headers))
+    assert activity["streak_days"] == 1 and activity["longest_streak"] == 1
+    assert activity["tasks_completed"] == 1 and activity["total_minutes"] == 42
+    assert activity["quizzes_taken"] == 1 and activity["quizzes_passed"] == 1
+    assert activity["days"][-1]["tasks"] == 1 and activity["days"][-1]["minutes"] == 42
+
+    # Another learner's activity is not visible
+    _, _, other = new_learner("Other")
+    assert ok(client.get("/api/users/me/activity", headers=other))["tasks_completed"] == 0

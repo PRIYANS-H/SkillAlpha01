@@ -7,9 +7,13 @@ import {
 import { apiClient } from '../api/client';
 import { TodayLearning } from '../types';
 import { ResourceCard } from '../components/resources/ResourceCard';
+import { formatDueDate, isOverdue } from '../utils/dates';
+import { PageSkeleton } from '../components/ui/Skeleton';
+import { useToast } from '../components/ui/Toast';
 
 export const TodayPage: React.FC = () => {
   const { taskId } = useParams<{ taskId?: string }>();
+  const toast = useToast();
   const [todayData, setTodayData] = useState<TodayLearning | null>(null);
   const [loading, setLoading] = useState(true);
   const [sessionActive, setSessionActive] = useState(false);
@@ -17,7 +21,8 @@ export const TodayPage: React.FC = () => {
   const [sessionId, setSessionId] = useState<string | null>(null);
   
   // Checkpoint & Feedback State
-  const [selfEval, setSelfEval] = useState<string>('GOT_IT');
+  const [selfEval, setSelfEval] = useState<string>('');
+  const [completing, setCompleting] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
   const [feedbackSubmitted, setFeedbackSubmitted] = useState<Record<string, boolean>>({});
 
@@ -95,6 +100,9 @@ export const TodayPage: React.FC = () => {
     setSessionActive(false);
   };
 
+  const quizReview: Record<string, { is_correct: boolean; correct_option_index: number; explanation?: string }> =
+    Object.fromEntries(((quizResult?.review as any[]) || []).map((r: any) => [r.question_id, r]));
+
   const handleVerifyQuiz = async () => {
     if (!assessment) return;
     setQuizError(null);
@@ -110,8 +118,9 @@ export const TodayPage: React.FC = () => {
   };
 
   const handleCompleteTask = async () => {
-    if (!todayData?.task) return;
+    if (!todayData?.task || !selfEval || completing) return;
     setCompleteError(null);
+    setCompleting(true);
     try {
       if (sessionId) {
         await apiClient.patch(`/learning-sessions/${sessionId}`, {
@@ -128,6 +137,8 @@ export const TodayPage: React.FC = () => {
       setSessionActive(false);
     } catch (err: any) {
       setCompleteError(err.message || 'Could not save your progress. Please try again.');
+    } finally {
+      setCompleting(false);
     }
   };
 
@@ -136,7 +147,7 @@ export const TodayPage: React.FC = () => {
     setSecondsElapsed(0);
     setSessionId(null);
     setSessionActive(false);
-    setSelfEval('GOT_IT');
+    setSelfEval('');
     setAssessment(null);
     setQuizAnswers({});
     setQuizSubmitted(false);
@@ -151,8 +162,9 @@ export const TodayPage: React.FC = () => {
     try {
       await apiClient.post(`/resources/${resourceId}/feedback`, { is_useful: isUseful });
       setFeedbackSubmitted({ ...feedbackSubmitted, [resourceId]: true });
-    } catch (err) {
-      console.error(err);
+      toast.success('Thanks! Your feedback tunes future recommendations.');
+    } catch (err: any) {
+      toast.error(err.message || 'Could not send your feedback.');
     }
   };
 
@@ -162,16 +174,7 @@ export const TodayPage: React.FC = () => {
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
   };
 
-  if (loading) {
-    return (
-      <div className="w-full pt-28 pb-16 flex items-center justify-center min-h-screen">
-        <div className="text-sm font-semibold text-on-surface-variant flex items-center gap-2">
-          <Sparkles className="w-4 h-4 text-primary animate-spin" />
-          <span>Curating today's optimal learning queue...</span>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <PageSkeleton variant="article" label="Loading today's task" />;
 
   const task = todayData?.task;
 
@@ -233,12 +236,13 @@ export const TodayPage: React.FC = () => {
     return (
       <div className="w-full pt-28 pb-16 max-w-3xl mx-auto px-4 text-center">
         <div className="bg-surface-container-lowest rounded-2xl p-8 border border-outline-variant/60 shadow-sm">
-          <div className="w-12 h-12 rounded-full bg-primary-fixed/50 text-primary flex items-center justify-center mx-auto mb-4">
-            <CheckCircle2 className="w-6 h-6" />
+          <div className="w-14 h-14 rounded-full bg-primary-fixed/50 text-primary flex items-center justify-center mx-auto mb-4 animate-pop">
+            <CheckCircle2 className="w-7 h-7" />
           </div>
-          <h1 className="text-2xl font-bold text-on-surface mb-2">Today's Learning Completed!</h1>
+          <h1 className="text-2xl font-bold text-on-surface mb-2">Task complete. Nice work!</h1>
           <p className="text-xs text-on-surface-variant max-w-md mx-auto mb-6 leading-relaxed">
-            Your evidence profile and skill scores have been updated based on your self-evaluation. Take a break or continue to the next scheduled task.
+            {secondsElapsed >= 60 ? `You studied for ${Math.round(secondsElapsed / 60)} minutes. ` : ''}
+            Your skill scores have been updated. Take a break, or keep your momentum going with the next task.
           </p>
           {adaptation?.route_reasoning && (
             <div className="p-4 rounded-xl bg-surface-container-low border-l-4 border-secondary-container text-xs text-on-surface text-left mb-6">
@@ -251,7 +255,7 @@ export const TodayPage: React.FC = () => {
               onClick={handleNextTask}
               className="px-5 py-2.5 rounded-xl bg-secondary-container text-on-primary font-bold text-xs hover:brightness-105"
             >
-              Check Next Task
+              Next task
             </button>
             <Link
               to={`/roadmap/${todayData?.roadmap_id || 'active'}`}
@@ -307,6 +311,13 @@ export const TodayPage: React.FC = () => {
           </div>
 
           <h1 className="text-2xl sm:text-3xl font-extrabold text-on-surface mb-2">{task.title}</h1>
+          {task.due_date && (
+            <p className={`text-xs font-semibold mb-2 ${isOverdue(task.due_date, task.status) ? 'text-on-error-container' : 'text-primary'}`}>
+              {isOverdue(task.due_date, task.status)
+                ? `Was due ${formatDueDate(task.due_date)}. Use "Re-pace Plan" on your roadmap to shift your schedule.`
+                : `Due ${formatDueDate(task.due_date)}`}
+            </p>
+          )}
           <p className="text-sm text-on-surface-variant mb-6 leading-relaxed">{task.description}</p>
 
           {/* Rationale Statement */}
@@ -337,10 +348,12 @@ export const TodayPage: React.FC = () => {
             <div className="pt-6 border-t border-outline-variant/40 mb-6">
               <div className="flex items-center justify-between mb-3">
                 <h2 className="text-xs uppercase tracking-wider font-bold text-primary flex items-center gap-1.5">
-                  <HelpCircle className="w-4 h-4" /> Quick Self-Check Verification
+                  <HelpCircle className="w-4 h-4" /> Quick skill check
                 </h2>
                 <span className="text-[10px] text-on-surface-variant font-semibold">
-                  Benchmark: {assessment.skill_name}
+                  {quizSubmitted
+                    ? `${quizResult?.score ?? 0}/${quizResult?.max_score ?? quizQuestions.length} correct`
+                    : `${quizQuestions.filter((q) => quizAnswers[q.id] !== undefined).length}/${quizQuestions.length} answered`}
                 </span>
               </div>
 
@@ -371,9 +384,18 @@ export const TodayPage: React.FC = () => {
                       </label>
                     ))}
                   </div>
-                  {quizSubmitted && question.explanation && (
-                    <p className="mt-3 text-xs text-on-surface-variant leading-relaxed">{question.explanation}</p>
-                  )}
+                  {quizSubmitted && (() => {
+                    const r = quizReview[question.id];
+                    if (!r) return null;
+                    return (
+                      <div className="mt-3 text-xs leading-relaxed">
+                        <span className={`font-bold ${r.is_correct ? 'text-primary' : 'text-on-error-container'}`}>
+                          {r.is_correct ? '✓ Correct' : `✗ Correct answer: ${question.options[r.correct_option_index]}`}
+                        </span>
+                        {r.explanation && <p className="text-on-surface-variant mt-1">{r.explanation}</p>}
+                      </div>
+                    );
+                  })()}
                 </div>
               ))}
 
@@ -385,7 +407,7 @@ export const TodayPage: React.FC = () => {
                     disabled={!allQuestionsAnswered}
                     className="px-4 py-2 rounded-lg bg-primary text-on-primary text-xs font-semibold hover:bg-primary-container disabled:opacity-50 transition-colors"
                   >
-                    Verify Answers
+                    Check my answers
                   </button>
                   {quizError && (
                     <p className="mt-2 text-xs text-on-error-container bg-error-container rounded-lg p-2.5">{quizError}</p>
@@ -405,6 +427,20 @@ export const TodayPage: React.FC = () => {
             </div>
           )}
 
+          {task.status === 'COMPLETED' || task.status === 'SKIPPED' ? (
+            <div className="pt-6 border-t border-outline-variant/40 flex flex-wrap items-center justify-between gap-3">
+              <span className="inline-flex items-center gap-2 text-xs font-bold text-primary">
+                <CheckCircle2 className="w-4 h-4" /> You've already finished this task. Review it any time.
+              </span>
+              <Link
+                to="/learn"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-secondary-container text-on-primary font-bold text-xs hover:brightness-105 transition-all"
+              >
+                Go to my next task <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+          ) : (
+          <>
           {/* Reflection Checkpoint */}
           <div className="pt-6 border-t border-outline-variant/40">
             <h2 className="text-xs uppercase tracking-wider font-bold text-on-surface-variant mb-3">
@@ -413,16 +449,18 @@ export const TodayPage: React.FC = () => {
 
             <div className="flex flex-wrap items-center justify-between gap-4 bg-surface-container-low p-4 rounded-xl mb-6">
               <span className="text-xs font-semibold text-on-surface">How confident do you feel after this session?</span>
-              <div className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center gap-2" role="radiogroup" aria-label="Confidence after this session">
                 {[
-                  { key: 'GOT_IT', label: 'Got it (Solid)' },
-                  { key: 'SHAKY', label: 'Shaky (Needs review)' },
-                  { key: 'LOST', label: 'Lost (Reinforce)' }
+                  { key: 'GOT_IT', label: 'Got it' },
+                  { key: 'SHAKY', label: 'Still shaky' },
+                  { key: 'LOST', label: 'Lost' }
                 ].map((opt) => (
                   <button
                     key={opt.key}
                     type="button"
                     onClick={() => setSelfEval(opt.key)}
+                    role="radio"
+                    aria-checked={selfEval === opt.key}
                     className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
                       selfEval === opt.key
                         ? 'bg-primary text-on-primary shadow-sm'
@@ -441,12 +479,18 @@ export const TodayPage: React.FC = () => {
 
             <button
               onClick={handleCompleteTask}
-              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-secondary-container text-on-primary font-bold text-sm hover:brightness-105 transition-all shadow-sm"
+              disabled={!selfEval || completing}
+              className="w-full flex items-center justify-center gap-2 py-3.5 rounded-xl bg-secondary-container text-on-primary font-bold text-sm hover:brightness-105 transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <CheckCircle2 className="w-4 h-4" />
-              <span>Complete Task & Update Skill Baseline</span>
+              <span>{completing ? 'Saving…' : 'Complete task'}</span>
             </button>
+            {!selfEval && (
+              <p className="text-[11px] text-on-surface-variant text-center mt-2">Choose how confident you feel to finish this task.</p>
+            )}
           </div>
+          </>
+          )}
 
         </div>
 

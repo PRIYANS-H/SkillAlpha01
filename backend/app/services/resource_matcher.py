@@ -1,32 +1,97 @@
 import time
 import re
+import json
+import hashlib
+import logging
+import datetime
 import urllib.parse
 from typing import Dict, Any, Optional, List
 import httpx
 from app.config import settings
 
-# In-memory TTL cache with 7-day expiration
+# Two-tier TTL cache (7 days): an in-process dict in front of the resource_match_cache table,
+# so YouTube API quota is not spent again after a restart or on another worker.
 _CACHE: Dict[str, Dict[str, Any]] = {}
 CACHE_TTL_SECONDS = 7 * 24 * 3600 # 7 days
+logger = logging.getLogger("skillalpha.resource_matcher")
+
+
+def _db_key(cache_key: str) -> str:
+    if len(cache_key) <= 200:
+        return cache_key
+    return "sha256_" + hashlib.sha256(cache_key.encode("utf-8")).hexdigest()
+
+
+def _utcnow_naive() -> datetime.datetime:
+    return datetime.datetime.now(datetime.timezone.utc).replace(tzinfo=None)
+
 
 def get_from_cache(cache_key: str) -> Optional[Any]:
     entry = _CACHE.get(cache_key)
-    if not entry:
-        return None
-    if time.time() > entry["expires_at"]:
+    if entry:
+        if time.time() <= entry["expires_at"]:
+            return entry["value"]
         _CACHE.pop(cache_key, None)
+
+    try:
+        from app.models.db import SessionLocal
+        from app.models.models import ResourceMatchCache
+        db = SessionLocal()
+        try:
+            row = db.query(ResourceMatchCache).filter(ResourceMatchCache.cache_key == _db_key(cache_key)).first()
+            if row is None:
+                return None
+            if row.expires_at <= _utcnow_naive():
+                db.delete(row)
+                db.commit()
+                return None
+            value = json.loads(row.payload_json)
+            remaining = (row.expires_at - _utcnow_naive()).total_seconds()
+            _CACHE[cache_key] = {"value": value, "expires_at": time.time() + remaining}
+            return value
+        finally:
+            db.close()
+    except Exception as e:
+        logger.warning(f"Resource cache read failed: {e}")
         return None
-    return entry["value"]
+
 
 def set_in_cache(cache_key: str, value: Any, ttl: int = CACHE_TTL_SECONDS):
     _CACHE[cache_key] = {
         "value": value,
         "expires_at": time.time() + ttl
     }
+    try:
+        from app.models.db import SessionLocal
+        from app.models.models import ResourceMatchCache
+        db = SessionLocal()
+        try:
+            db.merge(ResourceMatchCache(
+                cache_key=_db_key(cache_key),
+                payload_json=json.dumps(value),
+                expires_at=_utcnow_naive() + datetime.timedelta(seconds=ttl),
+            ))
+            db.commit()
+        finally:
+            db.close()
+    except Exception as e:
+        logger.warning(f"Resource cache write failed: {e}")
+
 
 def clear_cache():
-    """Utility for testing cache invalidation."""
+    """Clears both cache tiers (used by tests)."""
     _CACHE.clear()
+    try:
+        from app.models.db import SessionLocal
+        from app.models.models import ResourceMatchCache
+        db = SessionLocal()
+        try:
+            db.query(ResourceMatchCache).delete()
+            db.commit()
+        finally:
+            db.close()
+    except Exception as e:
+        logger.warning(f"Resource cache clear failed: {e}")
 
 KNOWN_DOMAINS = {
     "fastapi": "fastapi.tiangolo.com",

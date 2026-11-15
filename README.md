@@ -14,13 +14,16 @@ SkillAlpha is a real, production-oriented startup MVP that understands a learner
 - **Today's Learning Workspace**: Actionable daily task queue with active learning session timer, curated resource stack, and reflection checkpoint.
 - **Adaptive Replanning**: Re-calculates roadmap order and inserts reinforcement checkpoints when assessment scores or self-evaluations change.
 - **Evidence-Based Progress Dashboard**: Displays verified skill score bars, confidence ratings, active habit streaks, and assessment logs.
+- **Light & Dark Themes, Mobile-First Navigation**: Theme toggle that follows the OS by default, bottom tab bar on phones, skeleton loading states, toast feedback, and keyboard shortcut `/` to search resources.
+- **Real Activity Tracking**: Study streak, weekly hours against your goal, and a 4-week activity heatmap computed from completed tasks and quizzes.
 - **Operational Admin Console**: System metrics (active users, roadmaps created, recommendation CTR), resource verification toggle, skill graph editor, CMS content editor, and audit logging.
 
 ---
 
 ## Tech Stack
 
-- **Backend**: Python (FastAPI 3.12+), SQLAlchemy 2.0 ORM, SQLite / PostgreSQL, Alembic migrations, Pydantic v2 schemas, PyJWT authentication, Pytest test suite.
+- **Backend**: Python 3.12+ / FastAPI, SQLAlchemy 2.0 ORM, SQLite (local) / Supabase PostgreSQL, Alembic migrations, Pydantic v2 schemas, Supabase Auth JWT verification (PyJWT), Pytest test suite.
+- **Auth**: Supabase Auth (email/password + Google OAuth) — the backend issues no tokens of its own.
 - **Frontend**: React 18, TypeScript, Vite, Tailwind CSS, Lucide Icons, React Query (TanStack Query), Axios, Recharts.
 - **Design System**: Modern Learning Intelligence system (`#F6FBF5` base, `#0A4831` primary green, `#FF5B22` action orange, Plus Jakarta Sans typography).
 
@@ -33,6 +36,7 @@ Copy `.env.example` to `backend/.env` (or configure your keys):
 ```bash
 cp .env.example backend/.env
 ```
+* **Supabase** (required for login): set `SUPABASE_URL`, `SUPABASE_ANON_KEY` and `SUPABASE_JWT_SECRET` in `backend/.env`, and `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` in `frontend/.env`. Without `SUPABASE_JWT_SECRET` or `SUPABASE_URL` every API request returns 401.
 * **YouTube Data API v3** (optional but recommended for dynamic videos): Set `YOUTUBE_DATA_API_KEY="AIza..."`
 * **Groq API Key** (optional for dynamic AI diagnostic questions): Set `GROQ_API_KEY="gsk_..."`
 
@@ -48,7 +52,7 @@ python -m uvicorn app.main:app --reload --port 8000
 ### 3. Run Backend Tests
 ```bash
 cd backend
-python -m pytest tests/test_api.py
+python -m pytest tests          # includes the end-to-end learner journey test
 ```
 
 ### 4. Run Frontend Development Server
@@ -61,6 +65,15 @@ npm run dev
 
 ---
 
+## Docker (full local stack)
+
+```bash
+docker compose up --build   # Postgres :5432, API :8000, app :5173
+```
+Export `SUPABASE_URL`, `SUPABASE_ANON_KEY` and `SUPABASE_JWT_SECRET` (or put them in a root `.env`) first.
+
+---
+
 ## Deployment (Vercel + Render)
 
 ### Backend on Render
@@ -68,8 +81,10 @@ npm run dev
 - **Build Command**: `pip install -r requirements.txt`
 - **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
 - **Environment Variables**:
-  - `JWT_SECRET`: your secret key
-  - `DATABASE_URL`: `sqlite:///./skillalpha.db` (or PostgreSQL connection string)
+  - `DATABASE_URL`: Supabase PostgreSQL connection string (SQLite on Render's disk is wiped on every deploy)
+  - `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_JWT_SECRET`: from Supabase → Project Settings → API
+  - `FRONTEND_ORIGINS`: comma-separated frontend URLs allowed by CORS (e.g. `https://skillalpha.vercel.app,https://yourdomain.com`)
+  - `JWT_SECRET`: a long random string (signs onboarding diagnostic answer keys)
   - `YOUTUBE_DATA_API_KEY`: your Google Cloud API key
   - `GROQ_API_KEY`: your Groq API key (optional)
 
@@ -80,11 +95,15 @@ npm run dev
 - **Output Directory**: `dist`
 - **Environment Variables**:
   - `VITE_API_URL`: your live Render backend URL (e.g. `https://skillalpha-api.onrender.com`)
+  - `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`: same Supabase project as the backend
+- In Supabase → Authentication → URL Configuration, add your Vercel domain to the redirect allow-list so Google sign-in can return to it.
 
 ---
 
-## Pre-seeded Credentials
+## Accounts & Admin Access
 
-- **Learner User**: `learner@skillalpha.com` / `learner123`
-- **Admin User**: `admin@skillalpha.com` / `admin123`
+There are no pre-seeded logins: sign up through the app (email or Google) and the backend provisions your learner account on the first request. To make yourself an admin, set the role directly in the database:
 
+```sql
+update users set role = 'admin' where email = 'you@example.com';
+```

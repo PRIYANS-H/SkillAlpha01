@@ -7,19 +7,21 @@ import {
 } from 'lucide-react';
 import { apiClient } from '../api/client';
 import { Roadmap, RoadmapMilestone, RoadmapTask } from '../types';
+import { formatDueDate, formatDateRange, isOverdue } from '../utils/dates';
+import { PageSkeleton } from '../components/ui/Skeleton';
+import { useToast } from '../components/ui/Toast';
 
 export const RoadmapPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const toast = useToast();
   const [roadmap, setRoadmap] = useState<Roadmap | null>(null);
   const [loading, setLoading] = useState(true);
   const [replanning, setReplanning] = useState(false);
   const [expandedMilestoneId, setExpandedMilestoneId] = useState<string | null>(null);
   const [selectedTask, setSelectedTask] = useState<RoadmapTask | null>(null);
 
-  // Active Resource Preferences Corner State
-  const [resourcePreferences, setResourcePreferences] = useState<string[]>([
-    'VIDEO', 'DOCUMENTATION', 'PRACTICE'
-  ]);
+  // Format filter for the "resources in your roadmap" list (empty = show every format)
+  const [resourcePreferences, setResourcePreferences] = useState<string[]>([]);
 
   const togglePreference = (pref: string) => {
     if (resourcePreferences.includes(pref)) {
@@ -29,26 +31,33 @@ export const RoadmapPage: React.FC = () => {
     }
   };
 
+  /** Opens the week that holds the learner's next task and selects that task. */
+  const focusNextTask = (rm: Roadmap) => {
+    const milestones = rm.milestones || [];
+    const current = milestones.find((m) => m.tasks.some((t) => t.status === 'NOT_STARTED' || t.status === 'IN_PROGRESS'));
+    const target = current || milestones[0];
+    setExpandedMilestoneId(target ? target.id : null);
+    const next = current?.tasks.find((t) => t.status === 'NOT_STARTED' || t.status === 'IN_PROGRESS') || null;
+    setSelectedTask(next);
+  };
+
   const fetchRoadmap = async () => {
     setLoading(true);
     try {
       if (id === 'active' || !id) {
         const roadmaps: any = await apiClient.get('/roadmaps');
         if (roadmaps && roadmaps.length > 0) {
-          setRoadmap(roadmaps[0]);
-          if (roadmaps[0].milestones && roadmaps[0].milestones.length > 0) {
-            setExpandedMilestoneId(roadmaps[0].milestones[0].id);
-          }
+          const current = roadmaps.find((r: Roadmap) => r.is_active) || roadmaps[0];
+          setRoadmap(current);
+          focusNextTask(current);
         }
       } else {
         const res: any = await apiClient.get(`/roadmaps/${id}`);
         setRoadmap(res);
-        if (res.milestones && res.milestones.length > 0) {
-          setExpandedMilestoneId(res.milestones[0].id);
-        }
+        focusNextTask(res);
       }
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      toast.error(err.message || 'Could not load your roadmap.');
     } finally {
       setLoading(false);
     }
@@ -64,30 +73,26 @@ export const RoadmapPage: React.FC = () => {
     try {
       const res: any = await apiClient.post(`/roadmaps/${roadmap.id}/repace`);
       setRoadmap(res);
-    } catch (err) {
-      console.error(err);
+      focusNextTask(res);
+      toast.success('Plan re-paced. Your next task is due today.');
+    } catch (err: any) {
+      toast.error(err.message || 'Could not re-pace your plan. Please try again.');
     } finally {
       setReplanning(false);
     }
   };
 
-  if (loading) {
-    return (
-      <div className="w-full pt-28 pb-16 flex items-center justify-center min-h-screen text-on-surface-variant">
-        <div className="flex items-center gap-3">
-          <RefreshCw className="w-5 h-5 animate-spin text-primary" />
-          <span className="text-sm font-semibold">Loading your day-by-day personalized roadmap...</span>
-        </div>
-      </div>
-    );
-  }
+  if (loading) return <PageSkeleton variant="list" label="Loading your roadmap" />;
 
   if (!roadmap) {
     return (
       <div className="w-full pt-28 pb-16 max-w-3xl mx-auto px-4 text-center">
         <div className="bg-surface-container-lowest rounded-2xl p-8 border border-outline-variant/60 shadow-sm">
-          <h2 className="text-xl font-bold text-on-surface mb-2">No active roadmap found</h2>
-          <p className="text-sm text-on-surface-variant mb-6">Create a new personalized path to get started.</p>
+          <Flag className="w-10 h-10 text-primary mx-auto mb-3" />
+          <h2 className="text-xl font-bold text-on-surface mb-2">You don't have a roadmap yet</h2>
+          <p className="text-sm text-on-surface-variant mb-6 max-w-md mx-auto">
+            Tell us your goal and what you already know. In about two minutes you'll get a week-by-week plan that skips what you've mastered.
+          </p>
           <Link
             to="/create"
             className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-secondary-container text-on-primary font-bold text-sm"
@@ -99,10 +104,11 @@ export const RoadmapPage: React.FC = () => {
     );
   }
 
-  // Calculate dates for header schedule banner
-  const startDate = roadmap.created_at ? new Date(roadmap.created_at) : new Date();
-  const endDate = new Date(startDate.getTime());
-  endDate.setDate(startDate.getDate() + (roadmap.duration_weeks * 7));
+  const allTasks = roadmap.milestones.flatMap((m) => m.tasks);
+  const nextTask = allTasks.find((t) => t.status === 'NOT_STARTED' || t.status === 'IN_PROGRESS') || null;
+  const overdueCount = allTasks.filter((t) => isOverdue(t.due_date, t.status)).length;
+  const scheduleWindow = formatDateRange(allTasks.map((t) => t.due_date));
+  const progressPct = Math.round(roadmap.progress_percent || 0);
 
   const dailyHours = (roadmap.hours_per_week / 5.0).toFixed(1);
 
@@ -119,6 +125,10 @@ export const RoadmapPage: React.FC = () => {
       }
     });
   });
+
+  const visibleResources = resourcePreferences.length
+    ? allActiveResources.filter((r) => resourcePreferences.includes(r.resource_type))
+    : allActiveResources;
 
   return (
     <div className="w-full pt-20 pb-16 bg-surface min-h-screen">
@@ -153,15 +163,62 @@ export const RoadmapPage: React.FC = () => {
             </div>
           </div>
 
+          {/* Progress + next action */}
+          <div className="mt-4 flex flex-col sm:flex-row sm:items-center gap-4">
+            <div className="flex-1">
+              <div className="flex items-center justify-between text-xs mb-1.5">
+                <span className="font-bold text-on-surface">{progressPct}% complete</span>
+                <span className="text-on-surface-variant">{roadmap.completed_tasks} of {roadmap.total_tasks} tasks done</span>
+              </div>
+              <div
+                className="h-2.5 w-full bg-surface-container-highest rounded-full overflow-hidden"
+                role="progressbar"
+                aria-valuenow={progressPct}
+                aria-valuemin={0}
+                aria-valuemax={100}
+                aria-label="Roadmap progress"
+              >
+                <div className="h-full rounded-full bg-primary-container transition-all duration-500" style={{ width: `${progressPct}%` }} />
+              </div>
+            </div>
+            {nextTask ? (
+              <Link
+                to={`/learn/${nextTask.id}`}
+                className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-secondary-container text-on-primary font-bold text-xs hover:brightness-105 transition-all shadow-sm sm:max-w-xs"
+              >
+                <Play className="w-4 h-4 flex-shrink-0" />
+                <span className="truncate">{nextTask.status === 'IN_PROGRESS' ? 'Resume' : 'Start'}: {nextTask.title}</span>
+              </Link>
+            ) : (
+              <span className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-primary-fixed/50 text-primary font-bold text-xs">
+                <CheckCircle className="w-4 h-4" /> Roadmap complete
+              </span>
+            )}
+          </div>
+
+          {overdueCount > 0 && (
+            <div className="mt-4 p-3 rounded-xl bg-error-container/60 text-on-error-container text-xs flex flex-wrap items-center justify-between gap-2">
+              <span className="font-semibold">
+                {overdueCount} task{overdueCount === 1 ? ' is' : 's are'} behind schedule. Re-pacing moves your whole plan forward without losing progress.
+              </span>
+              <button
+                type="button"
+                onClick={handleRepace}
+                disabled={replanning}
+                className="px-3 py-1.5 rounded-lg bg-surface-container-lowest text-on-surface font-bold hover:brightness-95 transition-all"
+              >
+                {replanning ? 'Re-pacing…' : 'Re-pace now'}
+              </button>
+            </div>
+          )}
+
           {/* Schedule Metrics Grid: Day-wise, Date-wise, Hour-wise */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4 pt-1">
             <div className="p-3 rounded-xl bg-surface-container-low border border-outline-variant/30 flex items-center gap-2.5">
               <Calendar className="w-4 h-4 text-primary" />
               <div className="text-xs">
                 <span className="text-on-surface-variant block text-[10px] font-bold uppercase">Schedule Window</span>
-                <span className="font-bold text-on-surface">
-                  {startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} – {endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                </span>
+                <span className="font-bold text-on-surface">{scheduleWindow || `${roadmap.duration_weeks} weeks`}</span>
               </div>
             </div>
 
@@ -176,8 +233,10 @@ export const RoadmapPage: React.FC = () => {
             <div className="p-3 rounded-xl bg-surface-container-low border border-outline-variant/30 flex items-center gap-2.5">
               <TrendingUp className="w-4 h-4 text-primary" />
               <div className="text-xs">
-                <span className="text-on-surface-variant block text-[10px] font-bold uppercase">Overall Completion</span>
-                <span className="font-bold text-primary">{roadmap.progress_percent}% ({roadmap.completed_tasks}/{roadmap.total_tasks} tasks done)</span>
+                <span className="text-on-surface-variant block text-[10px] font-bold uppercase">Time Remaining</span>
+                <span className="font-bold text-on-surface">
+                  ~{(allTasks.filter((t) => t.status === 'NOT_STARTED' || t.status === 'IN_PROGRESS').reduce((acc, t) => acc + t.estimated_minutes, 0) / 60).toFixed(1)} hrs of study left
+                </span>
               </div>
             </div>
           </div>
@@ -200,11 +259,13 @@ export const RoadmapPage: React.FC = () => {
           {/* Milestones Column (8 cols) */}
           <div className="lg:col-span-8 space-y-4">
             <h2 className="text-sm uppercase tracking-wider font-bold text-on-surface-variant mb-2">
-              Day-by-Day Curriculum Sequence ({roadmap.milestones.length} Milestones)
+Your plan, week by week
             </h2>
 
             {roadmap.milestones.map((milestone) => {
               const isExpanded = expandedMilestoneId === milestone.id;
+              const doneCount = milestone.tasks.filter((t) => t.status === 'COMPLETED' || t.status === 'SKIPPED').length;
+              const allDone = milestone.tasks.length > 0 && doneCount === milestone.tasks.length;
               return (
                 <div
                   key={milestone.id}
@@ -213,22 +274,41 @@ export const RoadmapPage: React.FC = () => {
                   {/* Milestone Header */}
                   <div
                     onClick={() => setExpandedMilestoneId(isExpanded ? null : milestone.id)}
-                    className="p-5 flex items-center justify-between cursor-pointer hover:bg-surface-container-low/40 transition-colors"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setExpandedMilestoneId(isExpanded ? null : milestone.id);
+                      }
+                    }}
+                    role="button"
+                    tabIndex={0}
+                    aria-expanded={isExpanded}
+                    className="p-5 flex items-center justify-between gap-3 cursor-pointer hover:bg-surface-container-low/40 transition-colors"
                   >
                     <div className="flex items-center gap-3">
-                      <div className={`w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs ${
-                        milestone.is_completed 
+                      <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center font-bold text-xs ${
+                        allDone 
                           ? 'bg-primary text-on-primary' 
                           : 'bg-primary-fixed/50 text-primary'
                       }`}>
-                        {milestone.week_number}
+                        {allDone ? <CheckCircle className="w-4 h-4" /> : milestone.week_number}
                       </div>
                       <div>
                         <div className="text-base font-bold text-on-surface">{milestone.title}</div>
-                        <p className="text-xs text-on-surface-variant">{milestone.description}</p>
+                        {formatDateRange(milestone.tasks.map((t) => t.due_date)) && (
+                          <div className="text-[11px] font-semibold text-primary flex items-center gap-1">
+                            <Calendar className="w-3 h-3" /> {formatDateRange(milestone.tasks.map((t) => t.due_date))}
+                          </div>
+                        )}
+                        <p className="hidden sm:block text-xs text-on-surface-variant">{milestone.description}</p>
                       </div>
                     </div>
-                    {isExpanded ? <ChevronUp className="w-4 h-4 text-on-surface-variant" /> : <ChevronDown className="w-4 h-4 text-on-surface-variant" />}
+                    <div className="flex items-center gap-3 flex-shrink-0">
+                      <span className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${allDone ? 'bg-primary-fixed/60 text-primary' : 'bg-surface-container text-on-surface-variant'}`}>
+                        {doneCount}/{milestone.tasks.length}
+                      </span>
+                      {isExpanded ? <ChevronUp className="w-4 h-4 text-on-surface-variant" /> : <ChevronDown className="w-4 h-4 text-on-surface-variant" />}
+                    </div>
                   </div>
 
                   {/* Tasks List */}
@@ -239,23 +319,34 @@ export const RoadmapPage: React.FC = () => {
                           key={task.id}
                           onClick={() => setSelectedTask(task)}
                           className={`p-4 rounded-xl border transition-all cursor-pointer ${
-                            task.status === 'COMPLETED'
+                            selectedTask?.id === task.id ? 'ring-2 ring-primary/40 ' : ''
+                          }${
+                            task.status === 'COMPLETED' || task.status === 'SKIPPED'
                               ? 'bg-surface-container-low/50 border-outline-variant/40 opacity-75'
-                              : task.status === 'IN_PROGRESS'
+                              : task.id === nextTask?.id
                               ? 'bg-secondary-fixed/20 border-secondary-container'
                               : 'bg-surface-container-lowest border-outline-variant/60 hover:border-outline'
                           }`}
                         >
                           <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-                            <div className="flex items-center gap-2">
-                              <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase whitespace-nowrap ${
                                 task.status === 'COMPLETED' ? 'bg-primary/10 text-primary' :
-                                task.status === 'IN_PROGRESS' ? 'bg-secondary-container text-on-primary' :
+                                task.id === nextTask?.id ? 'bg-secondary-container text-on-primary' :
                                 'bg-surface-container text-on-surface-variant'
                               }`}>
-                                {task.status.replace('_', ' ')}
+                                {task.status === 'COMPLETED' ? 'Done' : task.status === 'SKIPPED' ? 'Skipped' : task.id === nextTask?.id ? (task.status === 'IN_PROGRESS' ? 'In progress' : 'Up next') : 'Upcoming'}
                               </span>
                               <span className="text-xs font-bold text-on-surface">{task.title}</span>
+                              {task.due_date && (
+                                <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                                  isOverdue(task.due_date, task.status)
+                                    ? 'bg-error-container text-on-error-container'
+                                    : 'bg-surface-container text-on-surface-variant'
+                                }`}>
+                                  {isOverdue(task.due_date, task.status) ? 'Overdue · ' : 'Due '}{formatDueDate(task.due_date)}
+                                </span>
+                              )}
                             </div>
                             <span className="text-xs text-on-surface-variant font-semibold flex items-center gap-1 bg-surface-container-low px-2 py-0.5 rounded">
                               <Clock className="w-3.5 h-3.5 text-primary" /> {task.estimated_minutes} min (~{(task.estimated_minutes / 60.0).toFixed(1)} hrs)
@@ -267,10 +358,14 @@ export const RoadmapPage: React.FC = () => {
                           {/* Task Resources Bar */}
                           {task.resources && task.resources.length > 0 && (
                             <div className="flex items-center justify-between text-[11px] text-on-surface-variant pt-2 border-t border-outline-variant/30">
-                              <span>{task.resources.length} Curated Resources</span>
-                              <span className="text-primary font-semibold flex items-center gap-1">
-                                Inspect Task Resources <ExternalLink className="w-3 h-3" />
-                              </span>
+                              <span>{task.resources.length} curated resource{task.resources.length === 1 ? '' : 's'}</span>
+                              <Link
+                                to={`/learn/${task.id}`}
+                                onClick={(e) => e.stopPropagation()}
+                                className="text-primary font-bold flex items-center gap-1 hover:underline"
+                              >
+                                {task.status === 'COMPLETED' || task.status === 'SKIPPED' ? 'Review' : task.status === 'IN_PROGRESS' ? 'Resume' : 'Start'} <Play className="w-3 h-3" />
+                              </Link>
                             </div>
                           )}
                         </div>
@@ -283,12 +378,12 @@ export const RoadmapPage: React.FC = () => {
           </div>
 
           {/* Active Resources & Preferences Corner (4 cols) */}
-          <div className="lg:col-span-4 space-y-6">
+          <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-20 lg:self-start">
             
             {/* Selected Task Inspection Drawer */}
             <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/60 shadow-sm p-6">
               <h3 className="text-xs uppercase tracking-wider font-bold text-primary mb-3">
-                Selected Task Inspection
+                {selectedTask && selectedTask.id === nextTask?.id ? 'Your next task' : 'Task details'}
               </h3>
 
               {selectedTask ? (
@@ -298,7 +393,8 @@ export const RoadmapPage: React.FC = () => {
 
                   {selectedTask.reason_why_next && (
                     <div className="p-3 rounded-xl bg-surface-container-low text-xs text-on-surface-variant mb-4">
-                      <strong className="text-primary block mb-0.5">Day & Hour Schedule:</strong>
+                      <strong className="text-primary block mb-0.5">Schedule</strong>
+                      {selectedTask.due_date && <span className="block font-semibold text-on-surface">Due {formatDueDate(selectedTask.due_date)}</span>}
                       {selectedTask.reason_why_next}
                     </div>
                   )}
@@ -332,13 +428,13 @@ export const RoadmapPage: React.FC = () => {
                     className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-xl bg-secondary-container text-on-primary font-bold text-xs hover:brightness-105 transition-all shadow-sm"
                   >
                     <Play className="w-4 h-4" />
-                    <span>Start Learning Session</span>
+                    <span>{selectedTask.status === 'COMPLETED' || selectedTask.status === 'SKIPPED' ? 'Review this task' : 'Start learning session'}</span>
                   </Link>
                 </div>
               ) : (
                 <div className="text-center py-6 text-xs text-on-surface-variant">
                   <BookOpen className="w-7 h-7 text-outline mx-auto mb-2" />
-                  <p>Click any task in the sequence to inspect its day/hour schedule and resources.</p>
+                  <p>Select a task to see its schedule and resources.</p>
                 </div>
               )}
             </div>
@@ -347,14 +443,14 @@ export const RoadmapPage: React.FC = () => {
             <div className="bg-surface-container-lowest rounded-2xl border border-outline-variant/60 shadow-sm p-6">
               <div className="flex items-center justify-between mb-3 border-b border-outline-variant/40 pb-3">
                 <h3 className="text-xs uppercase tracking-wider font-bold text-primary flex items-center gap-1.5">
-                  <Bookmark className="w-4 h-4" /> Resource Stack & Preferences Corner
+                  <Bookmark className="w-4 h-4" /> Resources in your roadmap
                 </h3>
               </div>
 
               {/* Format Preference Toggles */}
               <div className="mb-4">
                 <span className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider block mb-2">
-                  Active Resource Preferences
+                  Filter by format
                 </span>
                 <div className="flex flex-wrap gap-1.5">
                   {[
@@ -368,6 +464,7 @@ export const RoadmapPage: React.FC = () => {
                       <button
                         key={key}
                         onClick={() => togglePreference(key)}
+                        aria-pressed={active}
                         className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-colors ${
                           active
                             ? 'bg-primary text-on-primary shadow-sm'
@@ -384,10 +481,13 @@ export const RoadmapPage: React.FC = () => {
               {/* Active Resources Being Used Across Roadmap */}
               <div>
                 <span className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider block mb-2">
-                  Curated Resources in Your Roadmap ({allActiveResources.length})
+                  {visibleResources.length} of {allActiveResources.length} resources
                 </span>
                 <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
-                  {allActiveResources.map((res) => (
+                  {visibleResources.length === 0 && (
+                    <p className="text-xs text-on-surface-variant py-3">No resources in the selected formats.</p>
+                  )}
+                  {visibleResources.map((res) => (
                     <a
                       key={res.resource_id}
                       href={res.url}

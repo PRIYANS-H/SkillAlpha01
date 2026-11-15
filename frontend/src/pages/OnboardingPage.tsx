@@ -74,6 +74,7 @@ export const OnboardingPage: React.FC = () => {
 
   // Goal-Specific Diagnostic Questions State
   const [diagnosticQuestions, setDiagnosticQuestions] = useState<any[]>([]);
+  const [diagnosticToken, setDiagnosticToken] = useState<string | null>(null);
   const [quizAnswers, setQuizAnswers] = useState<Record<string, number>>({});
   const [loadingQuiz, setLoadingQuiz] = useState(false);
 
@@ -96,6 +97,8 @@ export const OnboardingPage: React.FC = () => {
     try {
       const res: any = await apiClient.get(`/assessments/diagnostic-by-goal?goal=${encodeURIComponent(goal)}`);
       setDiagnosticQuestions(res.questions || []);
+      setDiagnosticToken(res.diagnostic_token || null);
+      setQuizAnswers({});
     } catch (err) {
       console.error(err);
     } finally {
@@ -130,14 +133,13 @@ export const OnboardingPage: React.FC = () => {
   const handleGenerateRoadmap = async () => {
     setIsSubmitting(true);
     setErrorMsg(null);
-    // Answered diagnostic questions calibrate the self-reported baseline for the skill they test
-    const diagnosticResults = diagnosticQuestions
-      .filter((q) => q.skill_name && quizAnswers[q.id] !== undefined)
-      .map((q) => ({ skill_name: q.skill_name, is_correct: quizAnswers[q.id] === q.correct_option_index }));
+    // Diagnostic answers are graded on the server against the signed answer key in diagnosticToken;
+    // they calibrate the self-reported baseline for the skill each question tests.
     const roadmapRequest = {
       goal,
       known_skills: knownSkills,
-      diagnostic_results: diagnosticResults,
+      diagnostic_token: diagnosticToken,
+      diagnostic_answers: quizAnswers,
       available_hours: hoursPerWeek,
       duration_weeks: durationWeeks,
       learning_preferences: preferences

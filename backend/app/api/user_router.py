@@ -1,8 +1,9 @@
 import json
+import datetime
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.models.db import get_db
-from app.models.models import User, Profile, UserSkill
+from app.models.models import User, Profile, UserSkill, TaskProgress, AssessmentAttempt
 from app.schemas.schemas import ProfileUpdateRequest, APIResponse, ProfileResponse, UserSkillResponse
 from app.security.auth import get_current_user
 
@@ -82,3 +83,69 @@ def get_user_skills(current_user: User = Depends(get_current_user), db: Session 
         for us in user_skills
     ]
     return APIResponse(data=res)
+
+
+def _compute_streaks(active_days: set, today: datetime.date) -> tuple:
+    """Returns (current_streak, longest_streak). The current streak survives until a full day is missed."""
+    longest = run = 0
+    previous = None
+    for day in sorted(active_days):
+        run = run + 1 if previous is not None and (day - previous).days == 1 else 1
+        longest = max(longest, run)
+        previous = day
+
+    current = 0
+    cursor = today if today in active_days else today - datetime.timedelta(days=1)
+    while cursor in active_days:
+        current += 1
+        cursor -= datetime.timedelta(days=1)
+    return current, longest
+
+
+@router.get("/me/activity", response_model=APIResponse)
+def get_user_activity(
+    days: int = 28,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """
+    Real learning activity for the progress dashboard: study streak, totals, and a per-day
+    series (minutes studied, tasks completed, quizzes taken) for the last `days` days (UTC).
+    """
+    days = max(7, min(days, 120))
+    today = datetime.datetime.now(datetime.timezone.utc).date()
+
+    progress = db.query(TaskProgress).filter(TaskProgress.user_id == current_user.id).all()
+    attempts = db.query(AssessmentAttempt).filter(AssessmentAttempt.user_id == current_user.id).all()
+
+    per_day = {}
+
+    def bucket(moment) -> dict:
+        return per_day.setdefault(moment.date(), {"minutes": 0, "tasks": 0, "quizzes": 0})
+
+    for entry in progress:
+        if entry.completed_at:
+            b = bucket(entry.completed_at)
+            b["tasks"] += 1
+            b["minutes"] += entry.time_spent_minutes or 0
+    for attempt in attempts:
+        if attempt.completed_at:
+            bucket(attempt.completed_at)["quizzes"] += 1
+
+    current_streak, longest_streak = _compute_streaks(set(per_day), today)
+    series = []
+    for offset in range(days - 1, -1, -1):
+        day = today - datetime.timedelta(days=offset)
+        stats = per_day.get(day, {"minutes": 0, "tasks": 0, "quizzes": 0})
+        series.append({"date": day.isoformat(), **stats})
+
+    return APIResponse(data={
+        "streak_days": current_streak,
+        "longest_streak": longest_streak,
+        "active_days": len(per_day),
+        "total_minutes": sum(d["minutes"] for d in per_day.values()),
+        "tasks_completed": sum(d["tasks"] for d in per_day.values()),
+        "quizzes_taken": sum(d["quizzes"] for d in per_day.values()),
+        "quizzes_passed": sum(1 for a in attempts if a.passed),
+        "days": series,
+    })

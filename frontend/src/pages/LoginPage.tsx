@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { ArrowRight, Lock, Mail } from 'lucide-react';
 import { SkillAlphaLogo } from '../components/brand/SkillAlphaLogo';
 import { supabase } from '../api/supabase';
@@ -7,6 +7,8 @@ import { apiClient } from '../api/client';
 
 export const LoginPage: React.FC<{ onLoginSuccess?: (user: any) => void }> = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const returnTo: string = (location.state as any)?.from || '/roadmap/active';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -41,7 +43,7 @@ export const LoginPage: React.FC<{ onLoginSuccess?: (user: any) => void }> = () 
             console.error('Failed to submit pending roadmap', e);
           }
         }
-        navigate('/roadmap/active');
+        navigate(returnTo);
       }
     } catch (err: any) {
       setError(err.message || 'Login failed. Please verify credentials.');
