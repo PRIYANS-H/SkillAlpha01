@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { 
   Flag, Clock as Schedule, TrendingUp, CheckCircle, Clock, BookOpen, 
   ExternalLink, RefreshCw, ChevronDown, ChevronUp, Play, Sparkles, 
-  Calendar, Layers, Video, Code, FileText, Settings, Bookmark 
+  Calendar, Layers, Video, Code, FileText, Settings, Bookmark, Coffee, Hammer, Dumbbell
 } from 'lucide-react';
 import { apiClient } from '../api/client';
 import { Roadmap, RoadmapMilestone, RoadmapTask } from '../types';
@@ -17,6 +17,8 @@ export const RoadmapPage: React.FC = () => {
   const [roadmap, setRoadmap] = useState<Roadmap | null>(null);
   const [loading, setLoading] = useState(true);
   const [replanning, setReplanning] = useState(false);
+  const [breakDays, setBreakDays] = useState<number>(3);
+  const [breakBusy, setBreakBusy] = useState(false);
   const [expandedMilestoneId, setExpandedMilestoneId] = useState<string | null>(null);
   const [selectedTask, setSelectedTask] = useState<RoadmapTask | null>(null);
 
@@ -82,6 +84,25 @@ export const RoadmapPage: React.FC = () => {
     }
   };
 
+  const handleBreak = async (resume: boolean) => {
+    if (!roadmap) return;
+    setBreakBusy(true);
+    try {
+      const res: any = resume
+        ? await apiClient.post(`/roadmaps/${roadmap.id}/resume`)
+        : await apiClient.post(`/roadmaps/${roadmap.id}/break`, { days: breakDays });
+      setRoadmap(res);
+      focusNextTask(res);
+      toast.success(resume
+        ? 'Welcome back. Your next task is due today.'
+        : `Break set for ${breakDays} days. Everything pending moved later and nothing is overdue.`);
+    } catch (err: any) {
+      toast.error(err.message || 'Could not update your break.');
+    } finally {
+      setBreakBusy(false);
+    }
+  };
+
   if (loading) return <PageSkeleton variant="list" label="Loading your roadmap" />;
 
   if (!roadmap) {
@@ -110,7 +131,11 @@ export const RoadmapPage: React.FC = () => {
   const scheduleWindow = formatDateRange(allTasks.map((t) => t.due_date));
   const progressPct = Math.round(roadmap.progress_percent || 0);
 
-  const dailyHours = (roadmap.hours_per_week / 5.0).toFixed(1);
+  const schedule = roadmap.schedule;
+  const studyDays = schedule?.study_days_per_week || 5;
+  const minutesPerDay = schedule?.minutes_per_day || Math.round((roadmap.hours_per_week * 60) / studyDays);
+  const onBreak = !!schedule?.break_until;
+  const DAY_LETTER: Record<string, string> = { LEARN: 'Learn', PRACTICE: 'Practice', BUILD: 'Build', REVIEW: 'Review' };
 
   // Extract all active resources across roadmap tasks
   const allActiveResources: any[] = [];
@@ -196,7 +221,24 @@ export const RoadmapPage: React.FC = () => {
             )}
           </div>
 
-          {overdueCount > 0 && (
+          {onBreak && (
+            <div className="mt-4 p-3 rounded-xl bg-primary-fixed/40 text-on-surface text-xs flex flex-wrap items-center justify-between gap-2">
+              <span className="font-semibold flex items-center gap-2">
+                <Coffee className="w-4 h-4 text-primary" />
+                You are on a break until {formatDueDate(schedule?.break_until)}. Your plan resumes that day and nothing is overdue.
+              </span>
+              <button
+                type="button"
+                onClick={() => handleBreak(true)}
+                disabled={breakBusy}
+                className="px-3 py-1.5 rounded-lg bg-surface-container-lowest text-on-surface font-bold hover:brightness-95 transition-all"
+              >
+                {breakBusy ? 'Resuming…' : 'Resume today'}
+              </button>
+            </div>
+          )}
+
+          {overdueCount > 0 && !onBreak && (
             <div className="mt-4 p-3 rounded-xl bg-error-container/60 text-on-error-container text-xs flex flex-wrap items-center justify-between gap-2">
               <span className="font-semibold">
                 {overdueCount} task{overdueCount === 1 ? ' is' : 's are'} behind schedule. Re-pacing moves your whole plan forward without losing progress.
@@ -226,7 +268,7 @@ export const RoadmapPage: React.FC = () => {
               <Clock className="w-4 h-4 text-secondary-container" />
               <div className="text-xs">
                 <span className="text-on-surface-variant block text-[10px] font-bold uppercase">Daily Target</span>
-                <span className="font-bold text-on-surface">{dailyHours} hrs/day (5 study days/wk)</span>
+                <span className="font-bold text-on-surface">{minutesPerDay} min on {studyDays} study days · {7 - studyDays} rest day{7 - studyDays === 1 ? '' : 's'}</span>
               </div>
             </div>
 
@@ -240,6 +282,45 @@ export const RoadmapPage: React.FC = () => {
               </div>
             </div>
           </div>
+
+          {/* Pace check and breaks */}
+          {schedule && (
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl bg-surface-container-low border border-outline-variant/30">
+              <div className="text-xs text-on-surface min-w-0">
+                <span className={`font-bold mr-1 ${schedule.fits_target ? 'text-primary' : 'text-on-error-container'}`}>
+                  {schedule.fits_target ? 'On pace.' : 'Tight pace.'}
+                </span>
+                {schedule.note}
+                {schedule.projected_finish && (
+                  <span className="text-on-surface-variant"> {schedule.study_days_left} study days left; projected finish {formatDueDate(schedule.projected_finish)}.</span>
+                )}
+              </div>
+              {!onBreak && nextTask && (
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <label htmlFor="break-days" className="sr-only">Break length</label>
+                  <select
+                    id="break-days"
+                    value={breakDays}
+                    onChange={(e) => setBreakDays(Number(e.target.value))}
+                    className="h-8 px-2 rounded-lg border border-outline-variant/60 text-xs text-on-surface bg-surface-container-lowest"
+                  >
+                    <option value={2}>2 days</option>
+                    <option value={3}>3 days</option>
+                    <option value={7}>1 week</option>
+                    <option value={14}>2 weeks</option>
+                  </select>
+                  <button
+                    type="button"
+                    onClick={() => handleBreak(false)}
+                    disabled={breakBusy}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container-lowest border border-outline-variant/60 text-on-surface text-xs font-semibold hover:bg-surface-container"
+                  >
+                    <Coffee className="w-3.5 h-3.5" /> {breakBusy ? 'Saving…' : 'Take a break'}
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Route Reasoning Explanation Banner */}
           {roadmap.route_reasoning && (
@@ -261,6 +342,14 @@ export const RoadmapPage: React.FC = () => {
             <h2 className="text-sm uppercase tracking-wider font-bold text-on-surface-variant mb-2">
 Your plan, week by week
             </h2>
+            <div className="flex flex-wrap gap-2 mb-1">
+              <Link to="/practice" className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container-lowest border border-outline-variant/60 text-xs font-semibold text-on-surface hover:bg-surface-container">
+                <Dumbbell className="w-3.5 h-3.5 text-primary" /> Practice problems for this path
+              </Link>
+              <Link to="/projects" className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-surface-container-lowest border border-outline-variant/60 text-xs font-semibold text-on-surface hover:bg-surface-container">
+                <Hammer className="w-3.5 h-3.5 text-primary" /> Projects for this path
+              </Link>
+            </div>
 
             {roadmap.milestones.map((milestone) => {
               const isExpanded = expandedMilestoneId === milestone.id;
@@ -337,6 +426,12 @@ Your plan, week by week
                               }`}>
                                 {task.status === 'COMPLETED' ? 'Done' : task.status === 'SKIPPED' ? 'Skipped' : task.id === nextTask?.id ? (task.status === 'IN_PROGRESS' ? 'In progress' : 'Up next') : 'Upcoming'}
                               </span>
+                              {task.kind === 'PROJECT' && (
+                                <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-primary-fixed/50 text-primary inline-flex items-center gap-1"><Hammer className="w-3 h-3" /> Project</span>
+                              )}
+                              {task.kind === 'MILESTONE_CHECK' && (
+                                <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-primary-fixed/50 text-primary inline-flex items-center gap-1"><Flag className="w-3 h-3" /> Milestone</span>
+                              )}
                               <span className="text-xs font-bold text-on-surface">{task.title}</span>
                               {task.due_date && (
                                 <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
@@ -344,21 +439,45 @@ Your plan, week by week
                                     ? 'bg-error-container text-on-error-container'
                                     : 'bg-surface-container text-on-surface-variant'
                                 }`}>
-                                  {isOverdue(task.due_date, task.status) ? 'Overdue · ' : 'Due '}{formatDueDate(task.due_date)}
+                                  {isOverdue(task.due_date, task.status) ? 'Overdue · ' : (task.day_count || 1) > 1 ? 'Starts ' : 'Due '}{formatDueDate(task.due_date)}
                                 </span>
                               )}
                             </div>
                             <span className="text-xs text-on-surface-variant font-semibold flex items-center gap-1 bg-surface-container-low px-2 py-0.5 rounded">
-                              <Clock className="w-3.5 h-3.5 text-primary" /> {task.estimated_minutes} min (~{(task.estimated_minutes / 60.0).toFixed(1)} hrs)
+                              <Clock className="w-3.5 h-3.5 text-primary" /> {(task.day_count || 1) > 1 ? `${task.day_count} study days · ` : ''}~{(task.estimated_minutes / 60.0).toFixed(1)} hrs
                             </span>
                           </div>
 
                           <p className="text-xs text-on-surface-variant mb-3">{task.description}</p>
 
+                          {/* Day-by-day chips */}
+                          {task.days && task.days.length > 0 && (
+                            <div className="flex flex-wrap gap-1.5 mb-3">
+                              {task.days.map((day) => (
+                                <span
+                                  key={day.index}
+                                  className={`px-2 py-1 rounded-lg text-[10px] font-semibold border ${
+                                    day.done
+                                      ? 'bg-primary/10 text-primary border-transparent'
+                                      : 'bg-surface-container-low text-on-surface-variant border-outline-variant/40'
+                                  }`}
+                                >
+                                  {day.done ? '✓ ' : ''}{formatDueDate(day.date)} · {DAY_LETTER[day.kind] || day.kind}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+
                           {/* Task Resources Bar */}
-                          {task.resources && task.resources.length > 0 && (
+                          {(
                             <div className="flex items-center justify-between text-[11px] text-on-surface-variant pt-2 border-t border-outline-variant/30">
-                              <span>{task.resources.length} curated resource{task.resources.length === 1 ? '' : 's'}</span>
+                              <span>
+                                {task.kind === 'PROJECT'
+                                  ? 'Brief, dataset and checklist'
+                                  : task.kind === 'MILESTONE_CHECK'
+                                  ? `Mixed quiz · pass at ${task.milestone_check?.pass_percent ?? 70}%`
+                                  : `${task.resources.length} curated resource${task.resources.length === 1 ? '' : 's'}`}
+                              </span>
                               <Link
                                 to={`/learn/${task.id}`}
                                 onClick={(e) => e.stopPropagation()}
@@ -399,7 +518,32 @@ Your plan, week by week
                     </div>
                   )}
 
-                  <h4 className="text-xs font-bold text-on-surface uppercase mb-2">Curated Resources</h4>
+                  {selectedTask.days && selectedTask.days.length > 0 && (
+                    <>
+                      <h4 className="text-xs font-bold text-on-surface uppercase mb-2">Day by day</h4>
+                      <ol className="space-y-1.5 mb-4">
+                        {selectedTask.days.map((day) => (
+                          <li key={day.index} className="p-2.5 rounded-xl bg-surface-container-low text-xs">
+                            <div className="flex items-center justify-between gap-2 font-semibold text-on-surface">
+                              <span>{day.done ? '✓ ' : ''}Day {day.index + 1}: {day.title}</span>
+                              <span className="text-[10px] text-on-surface-variant whitespace-nowrap">{formatDueDate(day.date)}</span>
+                            </div>
+                            <div className="text-[11px] text-on-surface-variant mt-0.5">{day.steps[0]}</div>
+                          </li>
+                        ))}
+                      </ol>
+                    </>
+                  )}
+
+                  {selectedTask.kind === 'MILESTONE_CHECK' && selectedTask.milestone_check && (
+                    <p className="text-xs text-on-surface-variant mb-4">
+                      Covers {selectedTask.milestone_check.skills.join(', ')}.
+                    </p>
+                  )}
+
+                  {selectedTask.resources.length > 0 && (
+                    <h4 className="text-xs font-bold text-on-surface uppercase mb-2">Curated Resources</h4>
+                  )}
                   <div className="space-y-2 mb-4">
                     {selectedTask.resources.map((res) => (
                       <a
@@ -428,7 +572,7 @@ Your plan, week by week
                     className="w-full inline-flex items-center justify-center gap-2 py-3 rounded-xl bg-secondary-container text-on-primary font-bold text-xs hover:brightness-105 transition-all shadow-sm"
                   >
                     <Play className="w-4 h-4" />
-                    <span>{selectedTask.status === 'COMPLETED' || selectedTask.status === 'SKIPPED' ? 'Review this task' : 'Start learning session'}</span>
+                    <span>{selectedTask.status === 'COMPLETED' || selectedTask.status === 'SKIPPED' ? 'Review this task' : selectedTask.kind === 'MILESTONE_CHECK' ? 'Take the milestone check' : selectedTask.kind === 'PROJECT' ? 'Open the project' : 'Start learning session'}</span>
                   </Link>
                 </div>
               ) : (

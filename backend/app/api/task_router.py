@@ -1,12 +1,13 @@
 import datetime
+import json
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.models.db import get_db
 from app.models.models import RoadmapTask, TaskProgress, Roadmap, RoadmapMilestone, User, UserSkill
-from app.schemas.schemas import APIResponse, TaskCompleteRequest
+from app.schemas.schemas import APIResponse, TaskCompleteRequest, TaskStepRequest
 from app.security.auth import get_current_user
 from app.services.gap_engine import record_skill_evidence
-from app.services.roadmap_service import adapt_roadmap_to_evidence
+from app.services.roadmap_service import adapt_roadmap_to_evidence, task_plan, task_steps_done
 
 router = APIRouter(prefix="/tasks", tags=["Tasks"])
 
@@ -27,6 +28,19 @@ def complete_task(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Task not found or access denied."
+        )
+
+    # Milestone checks and projects are finished by passing the quiz / submitting the work
+    kind = task.kind or "SKILL"
+    if kind == "MILESTONE_CHECK" and task.status != "COMPLETED":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Pass the milestone check quiz to complete this task."
+        )
+    if kind == "PROJECT" and task.status != "COMPLETED":
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Submit your project link and checklist to complete this task."
         )
 
     # Idempotent: a repeated submission must not count the same evidence twice
@@ -78,3 +92,36 @@ def complete_task(
 
     db.commit()
     return APIResponse(data={"message": "Task completed successfully", "status": "COMPLETED", "adaptation": adaptation})
+
+
+@router.post("/{task_id}/steps", response_model=APIResponse)
+def set_task_step(
+    task_id: str,
+    req: TaskStepRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Ticks one day of a task's day-by-day plan on or off. Does not complete the task."""
+    from app.api.roadmap_router import serialize_task
+
+    task = db.query(RoadmapTask).join(RoadmapMilestone).join(Roadmap).filter(
+        RoadmapTask.id == task_id,
+        Roadmap.user_id == current_user.id
+    ).first()
+    if not task:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Task not found or access denied.")
+
+    day_total = len(task_plan(task).get("days") or [])
+    if req.index >= day_total:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="This task has no such study day.")
+
+    done = set(task_steps_done(task))
+    if req.done:
+        done.add(req.index)
+    else:
+        done.discard(req.index)
+    task.steps_done = json.dumps(sorted(done))
+    if task.status == "NOT_STARTED" and done:
+        task.status = "IN_PROGRESS"
+    db.commit()
+    return APIResponse(data=serialize_task(task))

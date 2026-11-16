@@ -123,6 +123,23 @@ def extract_domain(url: str, provider: str) -> str:
             return domain
     return "docs.python.org"
 
+def extract_youtube_video_id(url: Optional[str]) -> Optional[str]:
+    """Video id from a watch or youtu.be URL; None for playlists, channels and non-YouTube URLs."""
+    if not url:
+        return None
+    try:
+        parsed = urllib.parse.urlparse(url)
+    except ValueError:
+        return None
+    host = (parsed.netloc or "").lower()
+    video_id = None
+    if host.endswith("youtu.be"):
+        video_id = parsed.path.strip("/")
+    elif "youtube.com" in host and parsed.path == "/watch":
+        video_id = (urllib.parse.parse_qs(parsed.query).get("v") or [None])[0]
+    return video_id if video_id and re.fullmatch(r"[A-Za-z0-9_-]{11}", video_id) else None
+
+
 def search_youtube_videos(query: str, api_key: Optional[str] = None) -> List[Dict[str, Any]]:
     key = api_key if api_key is not None else settings.YOUTUBE_DATA_API_KEY
     if not key:
@@ -205,6 +222,36 @@ def resolve_resource_matches(
     )
 
     if is_youtube:
+        # A curated resource that points at one specific video plays exactly that video:
+        # no search, no API quota, and the learner sees what the plan promised.
+        direct_id = extract_youtube_video_id(url)
+        if direct_id:
+            return {
+                "resource_id": resource_id,
+                "type": "youtube",
+                "title": title,
+                "provider": provider or "YouTube",
+                "matches": [{
+                    "video_id": direct_id,
+                    "title": title,
+                    "thumbnail_url": f"https://img.youtube.com/vi/{direct_id}/hqdefault.jpg",
+                    "channel_title": provider or "YouTube",
+                    "duration": ""
+                }],
+                "fallback": False
+            }
+        if "list=" in (url or ""):
+            # Playlists open on YouTube rather than being replaced by a search result
+            return {
+                "resource_id": resource_id,
+                "type": "fallback",
+                "title": title,
+                "provider": provider,
+                "url": url,
+                "resource_type": resource_type,
+                "matches": [],
+                "fallback": False
+            }
         search_query = f"{provider} {hint}" if "youtube" not in provider_lower and provider else hint
         videos = search_youtube_videos(search_query, api_key=api_key)
         if videos:

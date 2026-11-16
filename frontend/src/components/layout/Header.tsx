@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Search, Bell, User, LogOut, Shield, Compass, 
-  Map, BookOpen, BookmarkCheck, BarChart3, Menu, X, Sun, Moon 
+  Map, BookOpen, BookmarkCheck, BarChart3, Menu, X, Sun, Moon, Dumbbell, Hammer
 } from 'lucide-react';
 import { SkillAlphaLogo } from '../brand/SkillAlphaLogo';
 import { useTheme } from '../../hooks/useTheme';
@@ -60,7 +60,9 @@ export const Header: React.FC<HeaderProps> = ({ user, onLogout }) => {
 
   const appLinks = [
     { label: 'Roadmap', path: '/roadmap/active', icon: Map },
-    { label: 'Learn Today', path: '/learn', icon: Compass },
+    { label: 'Today', path: '/learn', icon: Compass },
+    { label: 'Practice', path: '/practice', icon: Dumbbell },
+    { label: 'Projects', path: '/projects', icon: Hammer },
     { label: 'Resources', path: '/resources', icon: BookOpen },
     { label: 'Progress', path: '/progress', icon: BarChart3 },
     { label: 'Saved', path: '/saved', icon: BookmarkCheck },

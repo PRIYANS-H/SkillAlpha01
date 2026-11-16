@@ -1,16 +1,16 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Map, Compass, BookOpen, BarChart3, BookmarkCheck } from 'lucide-react';
+import { Map, Compass, BarChart3, Dumbbell, Hammer } from 'lucide-react';
 
 const TABS = [
   { label: 'Roadmap', path: '/roadmap/active', match: '/roadmap', icon: Map },
   { label: 'Today', path: '/learn', match: '/learn', icon: Compass },
-  { label: 'Resources', path: '/resources', match: '/resources', icon: BookOpen },
+  { label: 'Practice', path: '/practice', match: '/practice', icon: Dumbbell },
+  { label: 'Projects', path: '/projects', match: '/projects', icon: Hammer },
   { label: 'Progress', path: '/progress', match: '/progress', icon: BarChart3 },
-  { label: 'Saved', path: '/saved', match: '/saved', icon: BookmarkCheck },
 ];
 
-/** Thumb-reachable primary navigation on phones (the header nav is desktop-only). */
+/** Thumb-reachable primary navigation on phones. Resources and Saved are in the header menu. */
 export const MobileTabBar: React.FC = () => {
   const { pathname } = useLocation();
   return (

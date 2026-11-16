@@ -120,6 +120,7 @@ class OnboardingRequest(BaseModel):
     diagnostic_results: List[DiagnosticResult] = []
     available_hours: int = 10
     duration_weeks: int = 12
+    study_days_per_week: int = Field(5, ge=1, le=7)  # the remaining days are rest days
     learning_preferences: List[str] = ["VIDEO", "DOCUMENTATION", "PROJECT"]
     github_username: Optional[str] = None
 
@@ -246,3 +247,27 @@ class ContentResponse(BaseModel):
 class ContentUpdateRequest(BaseModel):
     value: str
     scope: Optional[str] = "GLOBAL"
+
+
+# Day-by-day plan, breaks, practice, projects and milestone checks
+class TaskStepRequest(BaseModel):
+    index: int = Field(..., ge=0)
+    done: bool = True
+
+class BreakRequest(BaseModel):
+    days: int = Field(..., ge=1, le=30)
+
+class ProblemSubmitRequest(BaseModel):
+    answer: Any = None
+
+class ProblemMarkRequest(BaseModel):
+    solved: bool = True
+
+class ProjectSubmitRequest(BaseModel):
+    url: str = Field(..., min_length=8, max_length=500)
+    notes: Optional[str] = Field(None, max_length=2000)
+    checklist: List[bool] = []
+
+class MilestoneAttemptRequest(BaseModel):
+    answers: Dict[str, int] = {}
+    time_spent_minutes: int = 15

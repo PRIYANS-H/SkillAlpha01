@@ -152,6 +152,8 @@ class Roadmap(Base):
     completed_tasks = Column(Integer, default=0)
     progress_percent = Column(Float, default=0.0)
     route_reasoning = Column(Text, nullable=True) # "Why your route looks like this" explanation
+    study_days_per_week = Column(Integer, default=5, nullable=True)  # the other days are rest days
+    break_until = Column(Date, nullable=True)  # set by POST /roadmaps/{id}/break
     is_active = Column(Boolean, default=True)
     created_at = Column(DateTime, default=utc_now)
     updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
@@ -188,10 +190,15 @@ class RoadmapTask(Base):
     status = Column(String(50), default="NOT_STARTED") # NOT_STARTED, IN_PROGRESS, COMPLETED, SKIPPED
     reason_why_next = Column(Text, nullable=True)
     due_date = Column(Date, nullable=True)  # scheduled study day; shifted by POST /roadmaps/{id}/repace
+    kind = Column(String(30), default="SKILL", nullable=True)  # SKILL, PROJECT, MILESTONE_CHECK (NULL = SKILL)
+    ref_id = Column(String(100), nullable=True)  # project id (PROJECT) or phase number (MILESTONE_CHECK)
+    plan_json = Column(Text, nullable=True)  # JSON: {"days": [...]} study plan, or milestone-check config
+    steps_done = Column(Text, nullable=True)  # JSON list of the plan day indexes the learner has ticked off
     created_at = Column(DateTime, default=utc_now)
     updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
 
     milestone = relationship("RoadmapMilestone", back_populates="tasks")
+    skill = relationship("Skill")
     task_resources = relationship("TaskResource", back_populates="task", cascade="all, delete-orphan")
     progress_entries = relationship("TaskProgress", back_populates="task")
 
@@ -337,3 +344,33 @@ class ResourceMatchCache(Base):
     payload_json = Column(Text, nullable=False)
     expires_at = Column(DateTime, nullable=False)
     created_at = Column(DateTime, default=utc_now)
+
+
+class ProblemAttempt(Base):
+    """One row per (user, practice problem). Problems themselves live in services/problem_bank.py."""
+    __tablename__ = "problem_attempts"
+
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    user_id = Column(String(36), ForeignKey("users.id"), nullable=False, index=True)
+    problem_id = Column(String(60), nullable=False, index=True)
+    attempts = Column(Integer, default=0)
+    solved = Column(Boolean, default=False)
+    self_reported = Column(Boolean, default=False)  # outside problems are marked solved by the learner
+    points = Column(Integer, default=0)
+    solved_at = Column(DateTime, nullable=True)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)
+
+
+class ProjectSubmission(Base):
+    """A learner's latest submission for a project in services/project_bank.py."""
+    __tablename__ = "project_submissions"
+
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    user_id = Column(String(36), ForeignKey("users.id"), nullable=False, index=True)
+    project_id = Column(String(60), nullable=False, index=True)
+    url = Column(Text, nullable=False)
+    notes = Column(Text, nullable=True)
+    checklist_json = Column(Text, nullable=False)  # JSON list of booleans, one per rubric item
+    score = Column(Float, default=0.0)  # share of rubric items met, 0.0 to 1.0
+    submitted_at = Column(DateTime, default=utc_now)
+    updated_at = Column(DateTime, default=utc_now, onupdate=utc_now)

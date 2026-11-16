@@ -78,7 +78,88 @@ export interface RoadmapTask {
   status: 'NOT_STARTED' | 'IN_PROGRESS' | 'COMPLETED' | 'SKIPPED';
   reason_why_next?: string;
   due_date?: string | null;
+  kind?: 'SKILL' | 'PROJECT' | 'MILESTONE_CHECK';
+  ref_id?: string | null;
+  skill_name?: string | null;
+  day_count?: number;
+  days?: PlanDay[];
+  project?: { id: string; title: string; level: string; dataset: string; estimated_hours: number } | null;
+  milestone_check?: { phase?: string; skills: string[]; pass_percent: number };
   resources: RoadmapTaskResource[];
+}
+
+/** One study day inside a task's day-by-day plan. */
+export interface PlanDay {
+  index: number;
+  kind: 'LEARN' | 'PRACTICE' | 'BUILD' | 'REVIEW';
+  title: string;
+  steps: string[];
+  check?: string | null;
+  date?: string | null;
+  done: boolean;
+}
+
+export interface RoadmapSchedule {
+  study_days_per_week: number;
+  rest_days_per_week: number;
+  minutes_per_day: number;
+  total_study_days: number;
+  study_days_left: number;
+  weeks_needed: number;
+  target_weeks: number;
+  fits_target: boolean;
+  projected_finish?: string | null;
+  break_until?: string | null;
+  note: string;
+}
+
+export interface PracticeProblem {
+  id: string;
+  skill_name: string;
+  type: 'MCQ' | 'NUMERIC' | 'EXTERNAL';
+  difficulty: 'EASY' | 'MEDIUM' | 'HARD';
+  points: number;
+  title: string;
+  prompt: string;
+  options?: string[];
+  platform?: string;
+  url?: string;
+  solved: boolean;
+  attempts: number;
+  points_earned: number;
+}
+
+export interface PracticeStats {
+  solved: number;
+  total: number;
+  points: number;
+  streak_days: number;
+  by_difficulty: Record<'EASY' | 'MEDIUM' | 'HARD', { solved: number; total: number }>;
+}
+
+export interface ProjectSubmissionInfo {
+  url: string;
+  notes?: string | null;
+  checklist: boolean[];
+  score: number;
+  passed: boolean;
+  submitted_at?: string | null;
+}
+
+export interface Project {
+  id: string;
+  family: string;
+  family_label: string;
+  level: 'BEGINNER' | 'INTERMEDIATE' | 'ADVANCED';
+  title: string;
+  summary: string;
+  dataset: string;
+  dataset_url: string;
+  estimated_hours: number;
+  brief: string[];
+  rubric: string[];
+  pass_items: number;
+  submission: ProjectSubmissionInfo | null;
 }
 
 export interface RoadmapMilestone {
@@ -104,6 +185,8 @@ export interface Roadmap {
   route_reasoning?: string;
   is_active: boolean;
   created_at?: string;
+  goal_family?: string;
+  schedule?: RoadmapSchedule;
   milestones: RoadmapMilestone[];
 }
 

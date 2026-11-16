@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { 
   Play, Pause, CheckCircle2, Clock, Sparkles, ExternalLink, 
-  ThumbsUp, ThumbsDown, Award, HelpCircle, ArrowRight, BookOpen, RefreshCw 
+  ThumbsUp, ThumbsDown, Award, HelpCircle, ArrowRight, BookOpen, RefreshCw,
+  Dumbbell, Hammer, Flag, Circle, Database
 } from 'lucide-react';
 import { apiClient } from '../api/client';
 import { TodayLearning } from '../types';
@@ -37,6 +38,13 @@ export const TodayPage: React.FC = () => {
   const [completeError, setCompleteError] = useState<string | null>(null);
   const [adaptation, setAdaptation] = useState<any | null>(null);
 
+  // Day-by-day plan and phase milestone check
+  const [stepBusy, setStepBusy] = useState<number | null>(null);
+  const [check, setCheck] = useState<any | null>(null);
+  const [checkAnswers, setCheckAnswers] = useState<Record<string, number>>({});
+  const [checkResult, setCheckResult] = useState<any | null>(null);
+  const [checkSubmitting, setCheckSubmitting] = useState(false);
+
   const fetchSkillAssessment = async (skillId: string) => {
     try {
       const res: any = await apiClient.get(`/assessments/by-skill/${skillId}`);
@@ -57,11 +65,19 @@ export const TodayPage: React.FC = () => {
       const url = effectiveId ? `/recommendations/today?task_id=${effectiveId}` : '/recommendations/today';
       const res: any = await apiClient.get(url);
       setTodayData(res);
-      if (res?.task?.skill_id) {
+      setCheck(null);
+      setCheckAnswers({});
+      setCheckResult(null);
+      if (res?.task?.kind === 'MILESTONE_CHECK') {
+        setAssessment(null);
+        setCheck(await apiClient.get(`/milestone-checks/${res.task.id}`));
+      } else if (res?.task?.skill_id) {
         fetchSkillAssessment(res.task.skill_id);
+      } else {
+        setAssessment(null);
       }
-    } catch (err) {
-      console.error(err);
+    } catch (err: any) {
+      toast.error(err.message || "Could not load today's task.");
     } finally {
       setLoading(false);
     }
@@ -91,13 +107,47 @@ export const TodayPage: React.FC = () => {
       setSessionId(res.session_id);
       setSessionActive(true);
     } catch (err) {
-      console.error(err);
       setSessionActive(true);
     }
   };
 
   const handlePauseSession = () => {
     setSessionActive(false);
+  };
+
+  const handleToggleDay = async (index: number, done: boolean) => {
+    if (!todayData?.task) return;
+    setStepBusy(index);
+    try {
+      const updated: any = await apiClient.post(`/tasks/${todayData.task.id}/steps`, { index, done });
+      setTodayData({ ...todayData, task: updated });
+    } catch (err: any) {
+      toast.error(err.message || 'Could not save that study day.');
+    } finally {
+      setStepBusy(null);
+    }
+  };
+
+  const handleSubmitCheck = async () => {
+    if (!check || checkSubmitting) return;
+    setCheckSubmitting(true);
+    try {
+      const res: any = await apiClient.post(`/milestone-checks/${check.task_id}/attempt`, {
+        answers: checkAnswers,
+        time_spent_minutes: Math.max(1, Math.round(secondsElapsed / 60))
+      });
+      setCheckResult(res);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } catch (err: any) {
+      toast.error(err.message || 'Could not submit the milestone check.');
+    } finally {
+      setCheckSubmitting(false);
+    }
+  };
+
+  const handleRetakeCheck = () => {
+    setCheckAnswers({});
+    setCheckResult(null);
   };
 
   const quizReview: Record<string, { is_correct: boolean; correct_option_index: number; explanation?: string }> =
@@ -272,6 +322,14 @@ export const TodayPage: React.FC = () => {
   const quizQuestions: any[] = assessment?.questions || [];
   const allQuestionsAnswered = quizQuestions.every((q) => quizAnswers[q.id] !== undefined);
 
+  const kind = task.kind || 'SKILL';
+  const planDays = task.days || [];
+  const currentDayIndex = planDays.findIndex((d) => !d.done);
+  const checkQuestions: any[] = check?.questions || [];
+  const checkReview: Record<string, any> = Object.fromEntries(((checkResult?.review as any[]) || []).map((r: any) => [r.question_id, r]));
+  const allCheckAnswered = checkQuestions.length > 0 && checkQuestions.every((q) => checkAnswers[q.id] !== undefined);
+  const DAY_LABEL: Record<string, string> = { LEARN: 'Learn', PRACTICE: 'Practice', BUILD: 'Build', REVIEW: 'Review' };
+
   return (
     <div className="w-full pt-20 pb-16 bg-surface min-h-screen">
       <div className="max-w-4xl mx-auto px-4 sm:px-6">
@@ -326,12 +384,202 @@ export const TodayPage: React.FC = () => {
             {todayData.reason_why_today || task.reason_why_next}
           </div>
 
-          {/* Curated Resources List */}
-          <h2 className="text-xs uppercase tracking-wider font-bold text-on-surface-variant mb-3">
-            Recommended Resource Stack ({task.resources?.length || 0})
-          </h2>
+          {/* Day-by-day plan */}
+          {planDays.length > 0 && (
+            <div className="mb-8">
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                <h2 className="text-xs uppercase tracking-wider font-bold text-on-surface-variant">
+                  Your {planDays.length}-day plan for this skill
+                </h2>
+                <span className="text-[11px] font-semibold text-on-surface-variant">
+                  {planDays.filter((d) => d.done).length}/{planDays.length} days done
+                </span>
+              </div>
+              <ol className="space-y-3">
+                {planDays.map((day) => {
+                  const isCurrent = day.index === currentDayIndex;
+                  return (
+                    <li
+                      key={day.index}
+                      className={`rounded-xl border p-4 ${
+                        day.done
+                          ? 'bg-surface-container-low/60 border-outline-variant/40'
+                          : isCurrent
+                          ? 'bg-secondary-fixed/20 border-secondary-container'
+                          : 'bg-surface-container-lowest border-outline-variant/60'
+                      }`}
+                    >
+                      <div className="flex flex-wrap items-center gap-2 mb-2">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-surface-container text-on-surface-variant">
+                          Day {day.index + 1} · {DAY_LABEL[day.kind] || day.kind}
+                        </span>
+                        <span className={`text-sm font-bold text-on-surface ${day.done ? 'line-through opacity-70' : ''}`}>{day.title}</span>
+                        {day.date && <span className="text-[11px] text-on-surface-variant">{formatDueDate(day.date)}</span>}
+                        {isCurrent && <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase bg-secondary-container text-on-primary">Do this next</span>}
+                        <button
+                          type="button"
+                          onClick={() => handleToggleDay(day.index, !day.done)}
+                          disabled={stepBusy === day.index || task.status === 'COMPLETED' || task.status === 'SKIPPED'}
+                          aria-pressed={day.done}
+                          className={`ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-colors disabled:opacity-60 ${
+                            day.done ? 'bg-primary text-on-primary' : 'bg-surface-container text-on-surface hover:bg-surface-container-high'
+                          }`}
+                        >
+                          {day.done ? <CheckCircle2 className="w-3.5 h-3.5" /> : <Circle className="w-3.5 h-3.5" />}
+                          {day.done ? 'Done' : 'Mark day done'}
+                        </button>
+                      </div>
+                      <ol className="list-decimal pl-5 space-y-1 text-xs text-on-surface leading-relaxed">
+                        {day.steps.map((step, i) => <li key={i}>{step}</li>)}
+                      </ol>
+                      {day.kind === 'PRACTICE' && task.skill_name && (
+                        <Link
+                          to={`/practice?skill=${encodeURIComponent(task.skill_name)}`}
+                          className="mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-on-primary text-xs font-bold hover:bg-primary-container"
+                        >
+                          <Dumbbell className="w-3.5 h-3.5" /> Open practice problems
+                        </Link>
+                      )}
+                      {day.check && (
+                        <p className="mt-3 text-xs text-on-surface-variant">
+                          <strong className="text-primary">Check yourself:</strong> {day.check}
+                        </p>
+                      )}
+                    </li>
+                  );
+                })}
+              </ol>
+            </div>
+          )}
 
-          <div className="space-y-4 mb-8">
+          {/* Phase project */}
+          {kind === 'PROJECT' && (
+            <div className="mb-8 p-5 rounded-xl bg-surface-container-low border border-outline-variant/40">
+              <h2 className="text-xs uppercase tracking-wider font-bold text-primary flex items-center gap-1.5 mb-2">
+                <Hammer className="w-4 h-4" /> Phase project
+              </h2>
+              {task.project && (
+                <p className="text-xs text-on-surface flex items-start gap-2 mb-1.5">
+                  <Database className="w-4 h-4 text-primary flex-shrink-0" />
+                  <span>{task.project.dataset} · about {task.project.estimated_hours} hours over {task.day_count} study days</span>
+                </p>
+              )}
+              <p className="text-xs text-on-surface-variant leading-relaxed mb-4">
+                Open the brief, build it, then submit a link to your code and tick the checklist. Passing the checklist completes this task.
+              </p>
+              <Link
+                to={`/projects?project=${task.ref_id || ''}`}
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-secondary-container text-on-primary font-bold text-xs hover:brightness-105"
+              >
+                Open project brief <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
+          )}
+
+          {/* Phase milestone check */}
+          {kind === 'MILESTONE_CHECK' && check && (
+            <div className="mb-6">
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                <h2 className="text-xs uppercase tracking-wider font-bold text-primary flex items-center gap-1.5">
+                  <Flag className="w-4 h-4" /> Milestone check · pass at {check.pass_percent}%
+                </h2>
+                <span className="text-[10px] text-on-surface-variant font-semibold">
+                  {checkResult
+                    ? `${checkResult.score}/${checkResult.max_score} correct`
+                    : `${checkQuestions.filter((q) => checkAnswers[q.id] !== undefined).length}/${checkQuestions.length} answered`}
+                </span>
+              </div>
+
+              {checkResult && (
+                <div className={`mb-4 p-4 rounded-xl text-xs leading-relaxed ${checkResult.passed ? 'bg-primary-fixed/40 text-on-surface' : 'bg-error-container text-on-error-container'}`} role="status">
+                  <strong className="block text-sm mb-0.5">{checkResult.passed ? `Passed with ${checkResult.percent}%` : `${checkResult.percent}% — not passed yet`}</strong>
+                  {checkResult.feedback}
+                  {checkResult.adaptation?.route_reasoning && <p className="mt-1">{checkResult.adaptation.route_reasoning}</p>}
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    {checkResult.passed || task.status === 'COMPLETED' ? (
+                      <button type="button" onClick={handleNextTask} className="px-4 py-2 rounded-lg bg-secondary-container text-on-primary font-bold">
+                        Go to my next task
+                      </button>
+                    ) : (
+                      <>
+                        <button type="button" onClick={handleRetakeCheck} className="px-4 py-2 rounded-lg bg-surface-container-lowest text-on-surface font-bold">
+                          Take it again
+                        </button>
+                        <Link to="/practice" className="px-4 py-2 rounded-lg bg-surface-container-lowest text-on-surface font-bold">
+                          Practice first
+                        </Link>
+                      </>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {checkQuestions.map((question, qIdx) => {
+                const r = checkReview[question.id];
+                return (
+                  <div key={question.id} className="p-4 rounded-xl bg-surface-container-low border border-outline-variant/40 mb-3">
+                    <div className="text-[10px] font-bold uppercase text-on-surface-variant mb-1">{question.skill_name}</div>
+                    <div className="text-sm font-semibold text-on-surface mb-3">{qIdx + 1}. {question.question_text}</div>
+                    <div className="space-y-2">
+                      {question.options.map((opt: string, idx: number) => (
+                        <label
+                          key={idx}
+                          className={`flex items-center gap-2 p-2.5 rounded-lg border text-xs cursor-pointer transition-colors ${
+                            checkAnswers[question.id] === idx
+                              ? 'border-primary bg-primary-fixed/20'
+                              : 'border-outline-variant/40 bg-surface-container-lowest hover:border-outline'
+                          }`}
+                        >
+                          <input
+                            type="radio"
+                            name={`check_${question.id}`}
+                            checked={checkAnswers[question.id] === idx}
+                            onChange={() => setCheckAnswers({ ...checkAnswers, [question.id]: idx })}
+                            disabled={!!checkResult}
+                            className="accent-primary"
+                          />
+                          <span className="text-on-surface">{opt}</span>
+                        </label>
+                      ))}
+                    </div>
+                    {r && (
+                      <div className="mt-3 text-xs leading-relaxed">
+                        <span className={`font-bold ${r.is_correct ? 'text-primary' : 'text-on-error-container'}`}>
+                          {r.is_correct ? '✓ Correct' : `✗ Correct answer: ${question.options[r.correct_option_index]}`}
+                        </span>
+                        {r.explanation && <p className="text-on-surface-variant mt-1">{r.explanation}</p>}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+
+              {!checkResult && (
+                <>
+                  <button
+                    type="button"
+                    onClick={handleSubmitCheck}
+                    disabled={!allCheckAnswered || checkSubmitting}
+                    className="w-full py-3.5 rounded-xl bg-secondary-container text-on-primary font-bold text-sm hover:brightness-105 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {checkSubmitting ? 'Grading…' : 'Submit milestone check'}
+                  </button>
+                  {!allCheckAnswered && (
+                    <p className="text-[11px] text-on-surface-variant text-center mt-2">Answer every question to submit.</p>
+                  )}
+                </>
+              )}
+            </div>
+          )}
+
+          {/* Curated Resources List */}
+          {(task.resources?.length || 0) > 0 && (
+          <h2 className="text-xs uppercase tracking-wider font-bold text-on-surface-variant mb-3">
+            Resources for this task ({task.resources?.length || 0}) · start with the first
+          </h2>
+          )}
+
+          <div className={`space-y-4 ${(task.resources?.length || 0) > 0 ? 'mb-8' : ''}`}>
             {task.resources?.map((res, index) => (
               <ResourceCard
                 key={res.resource_id}
@@ -439,7 +687,7 @@ export const TodayPage: React.FC = () => {
                 Go to my next task <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
-          ) : (
+          ) : kind !== 'SKILL' ? null : (
           <>
           {/* Reflection Checkpoint */}
           <div className="pt-6 border-t border-outline-variant/40">

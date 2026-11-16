@@ -11,6 +11,8 @@ import { RoadmapPage } from './pages/RoadmapPage';
 import { TodayPage } from './pages/TodayPage';
 import { ResourcesPage } from './pages/ResourcesPage';
 import { ProgressPage } from './pages/ProgressPage';
+import { PracticePage } from './pages/PracticePage';
+import { ProjectsPage } from './pages/ProjectsPage';
 import { SavedPage } from './pages/SavedPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { AdminPage } from './pages/AdminPage';
@@ -181,6 +183,8 @@ export const App: React.FC = () => {
               <Route path="/learn/:taskId" element={<RequireAuth user={user} loading={loading}><TodayPage /></RequireAuth>} />
               <Route path="/resources" element={<ResourcesPage />} />
               <Route path="/resources/:id" element={<ResourcesPage />} />
+              <Route path="/practice" element={<RequireAuth user={user} loading={loading}><PracticePage /></RequireAuth>} />
+              <Route path="/projects" element={<RequireAuth user={user} loading={loading}><ProjectsPage /></RequireAuth>} />
               <Route path="/progress" element={<RequireAuth user={user} loading={loading}><ProgressPage /></RequireAuth>} />
               <Route path="/saved" element={<RequireAuth user={user} loading={loading}><SavedPage /></RequireAuth>} />
               <Route path="/profile" element={<RequireAuth user={user} loading={loading}><ProfilePage /></RequireAuth>} />

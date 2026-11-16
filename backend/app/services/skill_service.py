@@ -87,6 +87,21 @@ GOAL_SKILL_GRAPHS: Dict[str, List[Tuple[str, str, str]]] = {
         ("REST & GraphQL Integration", "Mobile", "INTERMEDIATE"),
         ("Native Device Access & Security", "Mobile", "ADVANCED")
     ],
+    "quant_finance": [
+        ("Python for Quant Finance", "Quant Finance", "BEGINNER"),
+        ("Probability & Statistics for Trading", "Quant Finance", "BEGINNER"),
+        ("Financial Markets & Instruments", "Quant Finance", "BEGINNER"),
+        ("Backtesting & Performance Metrics", "Quant Finance", "INTERMEDIATE"),
+        ("Time Series Analysis & Stationarity", "Quant Finance", "INTERMEDIATE"),
+        ("Mean Reversion & Pairs Trading", "Quant Finance", "INTERMEDIATE"),
+        ("Momentum & Technical Signals", "Quant Finance", "INTERMEDIATE"),
+        ("Machine Learning for Trading", "Quant Finance", "ADVANCED"),
+        ("Risk Management & Portfolio Construction", "Quant Finance", "ADVANCED"),
+        ("Live Trading & Broker APIs", "Quant Finance", "ADVANCED"),
+        ("Options Pricing & Greeks", "Quant Finance", "ADVANCED"),
+        ("Alpha Research & Factor Models", "Quant Finance", "EXPERT"),
+        ("Quant Interview Problem Solving", "Quant Finance", "EXPERT"),
+    ],
     "general": [
         ("Python Architecture", "General", "BEGINNER"),
         ("SQL & Analytical Queries", "General", "BEGINNER"),
@@ -99,6 +114,9 @@ GOAL_SKILL_GRAPHS: Dict[str, List[Tuple[str, str, str]]] = {
 # Goal keyword rules, checked in order. Terms are matched as whole words/phrases so that
 # short terms like "ml" do not match inside "html".
 GOAL_RULES: List[Tuple[str, Tuple[str, ...]]] = [
+    # Checked first so "machine learning for trading" or "quant developer" land on the quant track
+    ("quant_finance", ("quant", "quants", "quantitative", "algo trading", "algorithmic trading", "algo trader",
+                       "trading", "trader", "hedge fund", "derivatives", "stock market")),
     ("machine_learning", ("machine learning", "ml", "mlops", "deep learning", "ai engineer")),
     ("data_science", ("data scientist", "data science", "data analyst", "analytics")),
     ("backend", ("backend", "back end", "back-end", "fastapi", "django", "python dev", "python developer", "api developer")),

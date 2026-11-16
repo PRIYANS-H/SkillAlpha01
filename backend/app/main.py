@@ -19,6 +19,9 @@ from app.api.assessment_router import router as assessment_router
 from app.api.feedback_router import router as feedback_router
 from app.api.admin_router import router as admin_router
 from app.api.content_router import router as content_router
+from app.api.practice_router import router as practice_router
+from app.api.project_router import router as project_router
+from app.api.milestone_router import router as milestone_router
 
 from app.models.db import Base, engine, SessionLocal
 from app.models.models import Skill
@@ -30,19 +33,33 @@ logger = logging.getLogger("skillalpha")
 Base.metadata.create_all(bind=engine)
 
 
+# Columns added after their table first shipped: table -> [(column, SQL type)]
+SCHEMA_UPGRADES = {
+    "roadmap_tasks": [
+        ("due_date", "DATE"), ("kind", "VARCHAR(30)"), ("ref_id", "VARCHAR(100)"),
+        ("plan_json", "TEXT"), ("steps_done", "TEXT"),
+    ],
+    "roadmaps": [("study_days_per_week", "INTEGER"), ("break_until", "DATE")],
+}
+
+
 def ensure_schema_upgrades() -> None:
     """
     Adds columns introduced after a table was first created, for databases not managed by
     Alembic (local SQLite, or a Postgres deploy before `alembic upgrade head` ran).
-    Mirrors alembic/versions/7c1e2a9b4f10_*.py.
+    Mirrors alembic/versions/7c1e2a9b4f10_*.py and 9d3f5b7a2c41_*.py.
     """
     inspector = inspect(engine)
-    if "roadmap_tasks" in inspector.get_table_names():
-        columns = {c["name"] for c in inspector.get_columns("roadmap_tasks")}
-        if "due_date" not in columns:
-            with engine.begin() as conn:
-                conn.execute(text("ALTER TABLE roadmap_tasks ADD COLUMN due_date DATE"))
-            logger.info("Added roadmap_tasks.due_date column")
+    tables = inspector.get_table_names()
+    for table, wanted in SCHEMA_UPGRADES.items():
+        if table not in tables:
+            continue
+        columns = {c["name"] for c in inspector.get_columns(table)}
+        for name, sql_type in wanted:
+            if name not in columns:
+                with engine.begin() as conn:
+                    conn.execute(text(f"ALTER TABLE {table} ADD COLUMN {name} {sql_type}"))
+                logger.info(f"Added {table}.{name} column")
 
 
 try:
@@ -59,6 +76,17 @@ try:
     db.close()
 except Exception as e:
     logger.error(f"Auto-seed check failed: {e}")
+
+# Keep the curated resource library in step with the code (idempotent upsert by URL)
+try:
+    from app.services.resource_library import sync_resource_library
+    db = SessionLocal()
+    added = sync_resource_library(db)
+    db.close()
+    if added:
+        logger.info(f"Resource library: added {added} curated resources")
+except Exception as e:
+    logger.error(f"Resource library sync failed: {e}")
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -117,6 +145,9 @@ app.include_router(assessment_router, prefix=settings.API_V1_STR)
 app.include_router(feedback_router, prefix=settings.API_V1_STR)
 app.include_router(admin_router, prefix=settings.API_V1_STR)
 app.include_router(content_router, prefix=settings.API_V1_STR)
+app.include_router(practice_router, prefix=settings.API_V1_STR)
+app.include_router(project_router, prefix=settings.API_V1_STR)
+app.include_router(milestone_router, prefix=settings.API_V1_STR)
 
 @app.get("/")
 def root():

@@ -8,6 +8,15 @@ import { apiClient } from '../api/client';
 import { supabase } from '../api/supabase';
 
 const GOAL_PRESETS = [
+  {
+    title: "Become a Quant Researcher / Algo Trader",
+    domain: "Quant Finance",
+    desc: "Python for markets, statistics, backtesting, pairs and momentum strategies, ML signals, risk, options and interview prep.",
+    defaultSkills: [
+      { skill_name: "Python for Quant Finance", self_reported_level: "Familiar" },
+      { skill_name: "Probability & Statistics for Trading", self_reported_level: "Beginner" }
+    ]
+  },
   { 
     title: "Become a Machine Learning Engineer", 
     domain: "Machine Learning", 
@@ -93,6 +102,7 @@ export const OnboardingPage: React.FC = () => {
   const [customSkillName, setCustomSkillName] = useState("");
   const [hoursPerWeek, setHoursPerWeek] = useState<number>(10);
   const [durationWeeks, setDurationWeeks] = useState<number>(12);
+  const [studyDays, setStudyDays] = useState<number>(5);
   const [preferences, setPreferences] = useState<string[]>(["VIDEO", "DOCUMENTATION", "PRACTICE"]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -167,6 +177,7 @@ export const OnboardingPage: React.FC = () => {
       diagnostic_answers: quizAnswers,
       available_hours: hoursPerWeek,
       duration_weeks: durationWeeks,
+      study_days_per_week: studyDays,
       learning_preferences: preferences
     };
     try {
@@ -446,7 +457,27 @@ export const OnboardingPage: React.FC = () => {
                   <span className="text-sm font-bold text-primary min-w-[70px]">{hoursPerWeek} hrs/wk</span>
                 </div>
                 <span className="text-[11px] text-on-surface-variant mt-1 block">
-                  Daily Allocation: ~{(hoursPerWeek / 5.0).toFixed(1)} hrs/day (5 study days/wk)
+                  About {Math.round((hoursPerWeek * 60) / studyDays)} min on each study day
+                </span>
+              </div>
+
+              <div>
+                <label htmlFor="study-days" className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">
+                  Study days per week
+                </label>
+                <select
+                  id="study-days"
+                  value={studyDays}
+                  onChange={(e) => setStudyDays(Number(e.target.value))}
+                  className="w-full h-11 px-3 rounded-lg border border-outline-variant/60 text-sm text-on-surface bg-surface-container-lowest"
+                >
+                  <option value={3}>3 days (4 rest days)</option>
+                  <option value={4}>4 days (3 rest days)</option>
+                  <option value={5}>5 days (2 rest days)</option>
+                  <option value={6}>6 days (1 rest day)</option>
+                </select>
+                <span className="text-[11px] text-on-surface-variant mt-1 block">
+                  Rest days are built into your plan. You can also pause it any time.
                 </span>
               </div>
 

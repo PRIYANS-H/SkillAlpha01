@@ -6,6 +6,7 @@ from app.models.db import get_db
 from app.models.models import RoadmapTask, RoadmapMilestone, Roadmap, LearningSession, User
 from app.schemas.schemas import APIResponse, LearningSessionUpdateRequest
 from app.security.auth import get_current_user
+from app.api.roadmap_router import serialize_task
 
 router = APIRouter(tags=["Learning & Recommendations"])
 
@@ -60,34 +61,7 @@ def get_today_learning(
             "reason_why_today": "Congratulations! You have completed all tasks in your roadmap."
         })
 
-    resources_data = []
-    for tr in sorted(next_task.task_resources, key=lambda x: x.sequence_order):
-        r = tr.resource
-        if r:
-            resources_data.append({
-                "resource_id": r.id,
-                "title": r.title,
-                "url": r.url,
-                "provider": r.provider,
-                "resource_type": r.resource_type,
-                "duration_minutes": r.duration_minutes,
-                "recommendation_match_score": tr.recommendation_match_score,
-                "recommendation_reason": tr.recommendation_reason
-            })
-
-    task_data = {
-        "id": next_task.id,
-        "milestone_id": next_task.milestone_id,
-        "skill_id": next_task.skill_id,
-        "title": next_task.title,
-        "description": next_task.description,
-        "estimated_minutes": next_task.estimated_minutes,
-        "sequence_order": next_task.sequence_order,
-        "status": next_task.status,
-        "reason_why_next": next_task.reason_why_next,
-        "due_date": next_task.due_date.isoformat() if next_task.due_date else None,
-        "resources": resources_data
-    }
+    task_data = serialize_task(next_task)
 
     return APIResponse(data={
         "task": task_data,
